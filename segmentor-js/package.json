@@ -1,0 +1,8 @@
+{
+  "_moduleAliases": {
+    "@libs": "./"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.2"
+  }
+}

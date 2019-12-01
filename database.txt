@@ -1,0 +1,18 @@
+[
+	{
+		"scope": "boards:write boards:read",
+		"account_id": "3074457347050109242",
+		"user_id": "3074457347050112784",
+		"team_id": "3074457347050109242",
+		"access_token": "5628eea4-5e59-4584-b8d6-d23610176b8b",
+		"token_type": "Bearer"
+	},
+	{
+		"scope": "boards:write boards:read",
+		"account_id": "3074457347047582582",
+		"user_id": "3074457347047653498",
+		"team_id": "3074457347047582582",
+		"token_type": "Bearer",
+		"access_token": "99178c3b-1058-4870-a373-41efab302de3"
+	}
+]
