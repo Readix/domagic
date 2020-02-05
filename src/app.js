@@ -10,6 +10,8 @@ const config = require('./config')
 
 const segmentor = require('../segmentor-js/main')
 const scoring = require('../scoring')
+const layoutObject = require('../layoutObject')
+const aligner = require('../aligner/aligner.js')
 
 const app = express()
 const port = 3000
@@ -21,6 +23,88 @@ app.set('view engine', 'html')
 app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
+
+function maketToLayout (maket) {
+	if (maket.toString() != 'layout.Maket') {
+		throw new Error('Invalid maket type');
+	}
+	let widgets = [];
+	for (let i in maket.elements) {
+		let element = maket.elements[i];
+		let widget = new layoutObject.LayoutWidget(
+			element.content.type, element.x, element.y, 
+			element.content.meta.width,element.content.meta.height, 
+			element.content.id
+		);
+		widgets.push(widget);
+	}
+	let scoringLayout = new layoutObject.Layout(widgets, maket.size().width, maket.size().height);
+	return scoringLayout;
+}
+
+function queryElementToContent (element) {
+	try{
+		return new segmentor.content.Content(
+			segmentor.content.contentTypes[element.type],
+			new segmentor.content.Meta(
+				parseInt(element.width), 
+				parseInt(element.height)
+			),
+			element.id
+		);
+	}
+	catch(error) {
+		throw new Error('Create content from query error' + error);
+	}
+}
+
+function queryElementToLayoutWidget (element) {
+	try{
+		return new layoutObject.LayoutWidget(
+			element.type, element.x, element.y, 
+			element.width, element.height, 
+			element.id
+		);
+	}
+	catch(error) {
+		throw new Error('Create layout widget from query error: ' + error);
+	}
+}
+
+function getElementsAreaSize (elements) {
+	if (elements.length == 0) {
+		throw new Error('Empty elements array');
+	}
+	let left = elements[0].x, 
+		top = elements[0].y, 
+		right = elements[0].x + elements[0].width, 
+		bottom = elements[0].y + + elements[0].height;
+	elements.forEach(element => {
+		if (element.x < left) left = element.x;
+		if (element.y < top) top = element.y;
+		if (element.x + element.width > right) right = element.x + element.width;
+		if (element.x + element.height > bottom) bottom = element.x + element.height;
+	});
+	return {
+		'width': right - left,
+		'height': bottom - top
+	};
+}
+
+function centeringElements (elements, areaMeta) {
+	objectsWidth =
+      Math.max(...elements.map(o => o.x + o.content.meta.width)) -
+      Math.min(...elements.map(o => o.x));
+	objectsHeight = 
+      Math.max(...elements.map(o => o.y + o.content.meta.height)) -
+      Math.min(...elements.map(o => o.y));
+    dx = (areaMeta.width - objectsWidth) / 2;
+    dy = (areaMeta.height - objectsHeight) / 2;
+    elements.forEach(element => {
+		element.x += dx;
+		element.y += dy;
+    });
+}
 
 app.get('/', (req, res) => {
 	res.render('index', {
@@ -70,57 +154,99 @@ app.post('/events', (req, res) => {
 
 app.get('/test1', async (req, res) => {
 	try{
+		let proc = new scoring.ScoringProccessor();
+		
+		req.query.board.width = parseFloat(req.query.board.width);
+		req.query.board.height = parseFloat(req.query.board.height);
+		req.query.elems = req.query.elems.map( elem => {
+			elem.x = parseFloat(elem.x);
+			elem.y = parseFloat(elem.y);
+			elem.width = parseFloat(elem.width);
+			elem.height = parseFloat(elem.height);
+			return elem;
+		});
+		console.log(req.query);
+		/* Скоринг исходного макета */
+		let areaSize = getElementsAreaSize(req.query.elems);
+		let widgets = []
+		req.query.elems.forEach(element => {
+			widgets.push(queryElementToLayoutWidget(element));
+		})
+		let scoringLayout = new layoutObject.Layout(widgets, req.query.board.width, req.query.board.height);
+		let srcScore = proc.getBestLayoutVariant([scoringLayout]);
+
+		source = {
+			'width':req.query.board.width,
+			'height':req.query.board.height,
+			'widgets': widgets
+		};
+
+		/* Расстановка объектов */
 		let contents = [];
 		for (let i = 0; i < req.query.elems.length; i++) {
-			contents.push(new segmentor.content.Content(
-				segmentor.content.contentTypes.IMAGE,
-				new segmentor.content.Meta(
-					parseInt(req.query.elems[i].width), 
-					parseInt(req.query.elems[i].height)
-				),
-				req.query.elems[i].id
-			));
+			if (req.query.elems[i].type in segmentor.content.contentTypes) {
+				contents.push(queryElementToContent(req.query.elems[i]));
+			}
 		}
 		
-		let ctr = new segmentor.cutter.Cutter(
-			contents
-		);
+		let ctr = new segmentor.cutter.Cutter(contents);
 
 		ctr.segmente(new segmentor.layout.Area(
-				new segmentor.layout.Meta(
+			new segmentor.layout.Meta(
 					0, 0,
 					parseInt(req.query.board.width), 
 					parseInt(req.query.board.height)
 				)
-			), 
-			10
+			), 0
 		);
-		
+
 		let makets = ctr.uniqueMakets();
 		console.log('makets count:', makets.length);
-		
-		let lays = [];
-		for (i in makets) {
-			let widgets = [];
-			for (j in makets[i].elements){
-				let element = makets[i].elements[j];
-				let widget = new scoring.LayoutWidget(
-					2, element.x, element.y, 
-					element.content.meta.width,element.content.meta.height, 
-					element.content.id
-				);
-				widgets.push(widget);
-			}
-			let lay = new scoring.Layout(widgets, makets[i].size().width, makets[i].size().height);
-			lays.push(lay);
+		if (makets.length == 0) {
+			res.send({
+				'error': true,
+				'message': '0 makets'
+			});
+			return;
 		}
-
-		let proc = new scoring.ScoringProccessor();
-		let bestlay = proc.getBestLayoutVariant(lays);
-		let f = bestlay.sourseLayout.fitTo(bestlay.template);
-		res.send(bestlay.sourseLayout.widgets);
+		maketsCount = makets.length;
+		if(req.query.isPrevFrame == 'true'){
+			makets = [makets[(parseInt(req.query.countCallWithSameFrame) - 1) % makets.length]]
+		}
+		// makets = [makets[8]];
+		/* Центрирование объектов по середине */
+		makets.forEach(maket => {
+			centeringElements(
+				maket.elements, {
+					'width': req.query.board.width,
+					'height': req.query.board.height
+				}
+			);
+		});
+		
+		/* Скоринг макетов */
+		let scoringLayouts = [];
+		makets.forEach(maket => {
+			scoringLayouts.push(maketToLayout(maket));
+		});
+		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
+		// let bestlay = proc.getAllScoresOfTemplatesForLayout(scoringLayouts);
+		
+		res.send({
+			'widgets': bestlay.sourseLayout.widgets,
+			'score': bestlay.score,
+			'sourceScore': srcScore.score,
+			'sourseTemplate': srcScore.template,
+			'template': bestlay.template,
+			'source': source,
+			'maketsCount': maketsCount,
+			'error': false
+		});
+		// aligner.init(req.query.elems, 50);
+		// aligner.transform();
+		// res.send(aligner.elements);
 	} catch (error) {
-		res.send(error);
+		res.send('server error: ' + error, ', line: ' + error.lineNumber);
 		return;
 	}
 })

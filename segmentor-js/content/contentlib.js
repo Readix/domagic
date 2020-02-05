@@ -5,10 +5,12 @@ var content = {}
  * Массив уникальных типов контента
  */
 content.contentTypes = {
+    TEXT: 'TEXT',
+    STICKER: 'STICKER',
+    SHAPE: 'SHAPE',
     IMAGE: 'IMAGE',
-    ONESTRTEXT: 'ONESTRTEXT',
-    TEXTBLOCK: 'TEXTBLOCK'
-}
+    MOCKUP: 'MOCKUP'
+};
 
 /**
  * Класс мета-информации контента

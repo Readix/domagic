@@ -1,4 +1,5 @@
 var fs = require('fs');
+var layoutObject = require('./layoutObject');
 
 var pathToTemplates = "templates-json";
 
@@ -10,10 +11,10 @@ class ScoringProccessor{
 		for (let i=0; i < files.length; i++) {
 	    	let data = fs.readFileSync(pathToTemplates + "/" + files[i]);
 	    	let layout = JSON.parse(data);
-		    this.templates.push( new Layout( layout.objects.map((item) => {
-		    	return new LayoutWidget(item.type, item.leftTop.x - item.shape.width/2, item.leftTop.y - item.shape.height/2, 
+		    this.templates.push( new layoutObject.Layout( layout.objects.map((item) => {
+		    	return new layoutObject.LayoutWidget(item.type, item.leftTop.x, item.leftTop.y, 
 		    		item.shape.width, item.shape.height);
-		    }), layout.width, layout.height));
+		    }), layout.width, layout.height, files[i]));
 		}
 	}
 	_resize(sourseLayout, requireWidth, requireHeight) {
@@ -23,38 +24,78 @@ class ScoringProccessor{
 			sourseLayout.widgets.forEach((item) => {
 				item.width *= shrinkWidth;
 				item.height *= shrinkHeight;
-				item.leftTop.x *= shrinkWidth;
-				item.leftTop.y *= shrinkHeight;
-				item.rightBottom.x *= shrinkWidth;
-				item.rightBottom.y *= shrinkHeight;
+				item.area.leftTop.x *= shrinkWidth;
+				item.area.leftTop.y *= shrinkHeight;
+				item.area.rightBottom.x *= shrinkWidth;
+				item.area.rightBottom.y *= shrinkHeight;
 			});
 			sourseLayout.width = requireWidth;
 			sourseLayout.height = requireHeight;
 		}
 		return sourseLayout;
 	}
+	//интегральный скоринг без учета кейса когда объект сгенеррованного слайда больше и польностью перекрывает объект шаблона
+	// _scoreLayoutByTemplate(sourseLayout, templateLayout) {
+	// 	let totalEqualPixels = 0;
+	// 	let totalTemplateWidgetPixels = 0;
+	// 	templateLayout.widgets.forEach((templateWidget) => {
+	// 		let lengthToCenter = Math.max(templateWidget.width, templateWidget.height);
+	// 		let widgetBorders = templateWidget.area.leftTop.copy().subtract(templateWidget.area.rightBottom).devide(2)
+	// 		totalTemplateWidgetPixels += Math.integral(lengthToCenter, -widgetBorders.x, widgetBorders.x, -widgetBorders.y, widgetBorders.y);
+	// 		sourseLayout.widgets.forEach((sourseWidget) => {
+	// 			let area = templateWidget.crossingAreaWith(sourseWidget);
+	// 			let widgetCenter = templateWidget.area.getCenter();
+	// 			let leftAreaBorder = area.leftTop.copy().subtract(widgetCenter);
+	// 			let rightAreaBorder = area.rightBottom.copy().subtract(widgetCenter);
+	// 			totalEqualPixels += Math.integral(lengthToCenter, leftAreaBorder.x, rightAreaBorder.x, leftAreaBorder.y, rightAreaBorder.y);
+	// 		});
+	// 	});
+	// 	return totalEqualPixels * 100/totalTemplateWidgetPixels;
+	// }
 	_scoreLayoutByTemplate(sourseLayout, templateLayout) {
-		let totalEqualPixels = 0;
-		let totalTemplateWidgetPixels = 0;
-		templateLayout.widgets.forEach((templateWidget) => {
-			totalTemplateWidgetPixels += templateWidget.width * templateWidget.height;
-			sourseLayout.widgets.forEach((sourseWidget) => {
-				let area = templateWidget.crossingAreaWith(sourseWidget);
-				totalEqualPixels += area.square();
+		let score = 0;
+		let totalSquare = 0;
+		console.log(templateLayout.name);
+		sourseLayout.widgets.forEach((sourseWidget) => {
+			let subScores = [];
+			let badCrossCount = 1;
+			console.log('widgetId: ' + sourseWidget.id);
+			let per = 0;
+			templateLayout.widgets.forEach((templateWidget) => {
+				let templateCenter = templateWidget.area.rightBottom.copy().sum(templateWidget.area.leftTop).devide(2);
+				let sourseCenter = sourseWidget.area.rightBottom.copy().sum(sourseWidget.area.leftTop).devide(2);
+				let templateSquare = templateWidget.area.square();
+				let areaSquare = templateWidget.crossingAreaWith(sourseWidget).square();
+				let sourseSquare = sourseWidget.area.square();
+				let multiplier;
+				if(templateWidget.type != sourseWidget.type){
+					multiplier = 0.05;
+					badCrossCount++;
+				}else
+					multiplier = 1;
+				subScores.push(multiplier * areaSquare / sourseSquare);
+				if (areaSquare == 0) return;
+				per++;
+				// score += (multiplier * ((templateSquare - areaSquare) + (sourseSquare - areaSquare))/(templateSquare + sourseSquare) /*+ templateCenter.subtract(sourseCenter).length()/Math.sqrt(Math.pow(templateLayout.height, 2) + Math.pow(templateLayout.width, 2))*/);
 			});
+			let sum = 0;
+			subScores.forEach(e => sum +=e);
+			if (per == 0) return;
+			score += sum * Math.pow(0.7, per - 1) / per;
+			console.log('score: ' + (sum * Math.pow(0.7, per - 1) / per));
+			// score += Math.max(...subScores) / badCrossCount;
 		});
-		return totalEqualPixels * 100/totalTemplateWidgetPixels;
+		return score/sourseLayout.widgets.length;
+		//return score * Math.pow(0.9, sourseLayout.widgets.length - 1);
+		// return score/(templateLayout.widgets.length*sourseLayout.widgets.length*2);
 	}
 	getBestLayoutVariant(arrayLayouts){
 		let arrResults = [];
 		for(let i=0; i<arrayLayouts.length; i++){
-			arrResults = arrResults.concat(this.getAllScoresOfTemplatesForLayout(arrayLayouts[i]));
+			let result = this.getMostEqualTemplateAndScore(arrayLayouts[i]);
+			result["sourseLayout"] = arrayLayouts[i];
+			arrResults.push(result);
 		}
-		arrResults = arrResults.filter((item) => {
-			if(item.sourseLayout.widgets.length != item.template.widgets.length)
-				return false;
-			return true;
-		})
 		arrResults = arrResults.sort((x, y) => {
 			if(x.score > y.score)
 				return -1;
@@ -62,20 +103,24 @@ class ScoringProccessor{
 				return 1;
 			return 0;
 		});
+		console.log(arrResults);
 		return arrResults[0];
 	}
 	getMostEqualTemplateAndScore(sourseLayout){
-		let maxScore = -1;
+		let maxScore = 0;
 		let maxScoreNum;
 		for (let i = 0; i < this.templates.length; i++) {
-			let resizedSourseLayout = this._resize(sourseLayout, this.templates[i].width, this.templates[i].height);
-			let currentScore = this._scoreLayoutByTemplate(resizedSourseLayout, this.templates[i]);
+			// let resizedSourseLayout = this._resize(sourseLayout.copy(), this.templates[i].width, this.templates[i].height);
+			// console.log('template name: ' + this.templates[i].name);
+			// console.log(resizedSourseLayout);
+			let currentScore = this._scoreLayoutByTemplate(sourseLayout.copy(), this.templates[i]);
+			// let currentScore = this._scoreLayoutByTemplate(resizedSourseLayout, this.templates[i]);
 			if(currentScore > maxScore){
 				maxScore = currentScore;
 				maxScoreNum = i;
 			}
 		}
-		return {"template": this.templates[maxScoreNum], "score": maxScore, "sourseLayout" : sourseLayout};
+		return {"template": this.templates[maxScoreNum], "score": maxScore};
 	}
 	getAllScoresOfTemplatesForLayout(sourseLayout){
 		let arr = [];
@@ -88,112 +133,8 @@ class ScoringProccessor{
 	}
 }
 
-class Layout{
-	constructor(widgets, width, height){
-		this.widgets = widgets;
-		this.width = width;
-		this.height = height;
-	}
-	//must have same count widgets
-	fitTo(layout){
-		if(this.widgets.length != layout.widgets.length)
-			return false;
-
-		let arrayOfCrosses = new Array(this.widgets.length);
-		for(let i=0; i<arrayOfCrosses.length; i++)
-			arrayOfCrosses[i] = new Array(layout.widgets.length);
-		for(let i=0; i<this.widgets.length; i++)
-			for(let j=0; j<layout.widgets.length; j++){
-				let area = layout.widgets[j].crossingAreaWith(this.widgets[i], true);
-				let scoring = this.widgets[i].type == layout.widgets[j].type ? 1 : 0.5;
-				arrayOfCrosses[i][j] = area.square() * scoring;
-			}
-		let getMax = (array) =>{
-			let ii = 0, jj = 0;
-			for(let i=0; i<array.length; i++){
-				for(let j=0; j<array[i].length; j++){
-					if(array[i][j] > array[ii][jj]){
-						ii = i;
-						jj = j;
-					}
-				}
-			}
-			return {"i": ii, "j": jj};
-		}
-		for(let i=0; i<arrayOfCrosses.length; i++){
-			let max = getMax(arrayOfCrosses);
-			this.widgets[max.i].fitTo(layout.widgets[max.j]);
-		}
-		return true;
-	}
-}
-//Widget on layout
-class LayoutWidget{
-	constructor(type, x_left, y_top, width, height, id = -1){
-		this.type = type;
-		this.leftTop = new Point(x_left, y_top);
-		this.width = width;
-		this.height = height;
-		this.rightBottom = new Point(x_left + width, y_top + height);
-		this.id = id;
-	}
-	crossingAreaWith(widget, enableCrossingOfDifferentWidgetsType = false){
-		if( ( enableCrossingOfDifferentWidgetsType || this.type == widget.type )
-			&& !(this.leftTop.x > widget.rightBottom.x 
-				|| this.rightBottom.x < widget.leftTop.x 
-				|| this.rightBottom.y < widget.leftTop.y 
-				|| this.leftTop.y > widget.rightBottom.y)){
-			let areaLeftTop = new Point(this.leftTop.x > widget.leftTop.x ? this.leftTop.x : widget.leftTop.x,
-      		this.leftTop.y > widget.leftTop.y ? this.leftTop.y : widget.leftTop.y);
-      		let areaRightBottom = new Point(this.rightBottom.x < widget.rightBottom.x ? this.rightBottom.x : widget.rightBottom.x,
-      		this.rightBottom.y < widget.rightBottom.y ? this.rightBottom.y : widget.rightBottom.y);
-      		return new Area(areaLeftTop, areaRightBottom);
-      	}else{
-      		return new Area(new Point(0,0), new Point(0,0));
-      	}
-	}
-	fitTo(widget){
-		this.leftTop.x = widget.leftTop.x;
-		this.leftTop.y = widget.leftTop.y;
-		this.rightBottom.x = widget.rightBottom.x;
-		this.rightBottom.y = widget.rightBottom.y
-		this.width = widget.width;
-		this.height = widget.height;
-	}
+Math.integral = function(c, x1, x2, y1, y2) {
+	return c*(x2-x1)*(y2-y1)-(y2-y1)*(x2*x2*Math.sign(x2)/2-x1*x1*Math.sign(x1)/2)-(x2-x1)*(y2*y2*Math.sign(y2)/2-y1*y1*Math.sign(y1)/2)
 }
 
-class Area{
-	constructor(leftTop, rightBottom){
-		this.leftTop = leftTop;
-		this.rightBottom = rightBottom;
-	}
-	square(){
-		return (this.rightBottom.x - this.leftTop.x) * (this.rightBottom.y - this.leftTop.y);
-	}
-}
-
-class Point{
-	constructor(x, y){
-		this.x = x;
-		this.y = y;
-	}
-	between(f, s){
-		if(this.x.between(f.x, s.x, true) || this.y.between(f.y, s.y, true))
-			return true;
-		else
-			return false;
-	}
-}
-
-module.exports.Point = Point;
-module.exports.Layout = Layout;
-module.exports.LayoutWidget = LayoutWidget;
-module.exports.Area = Area;
 module.exports.ScoringProccessor = ScoringProccessor;
-
-// let sourseLayout = JSON.parse('{"objects":[{"type":1,"leftTop":{"x":17,"y":29},"shape":{"height":31,"width":158}},{"type":1,"leftTop":{"x":146,"y":76},"shape":{"height":27,"width":231}},{"type":2,"leftTop":{"x":22,"y":141},"shape":{"height":309,"width":354}},{"type":1,"leftTop":{"x":16,"y":489},"shape":{"height":16,"width":223}},{"type":1,"leftTop":{"x":166,"y":537},"shape":{"height":33,"width":213}}],"width":400,"height":600}');
-// let proccessor = new ScoringProccessor();
-// let result = proccessor.getMostEqualTemplateAndScore(new Layout(sourseLayout.objects.map((item)=>{
-// 	return new LayoutWidget(item.type, item.leftTop.x - item.shape.width/2, item.leftTop.y - item.shape.height/2, item.shape.width, item.shape.height);
-// }), sourseLayout.width, sourseLayout.height));
-// console.log(result);

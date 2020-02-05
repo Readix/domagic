@@ -54,6 +54,19 @@ layout.Area = class {
      * Возващает имя типа
      */
     toString () { return 'layout.Area'; }
+    /**
+     * Создает копию
+     */
+    static copy (area) {
+        if (area.toString() != 'layout.Area') {
+            throw new Error('Invalid type for copy Area');
+        }
+        let a = new layout.Area(new layout.Meta(
+            area.meta.x, area.meta.y,
+            area.meta.width, area.meta.height
+        ))
+        return a;
+    }
 }
 
 /**
@@ -91,12 +104,21 @@ layout.Element = class {
      * @returns true, если элементы равны, false - в противном случае 
      */
     static equal (element1, element2) {
-        if (element1.content.id != element2.content.id) {
+        if (element1.content.type != element2.content.type) {
             return false;
         }
+        // if (element1.content.id != element2.content.id) {
+        //     return false;
+        // }
         if (element1.x != element2.x || element1.y != element2.y) {
             return false;
         }
+        let inSpace = (val1, val2, dx) => {
+            return val1 - dx < val2 < val1 + dx;
+        }
+        // if (inSpace(element1.x, element2.x, 1) && inSpace(element1.y, element2.y, 1)){
+        //     return true;
+        // }
         return true;
     }
 
@@ -197,7 +219,7 @@ layout.Maket = class {
     }
     size () {
         let xmin = 0, ymin = 0, xmax = 0, ymax = 0;
-        for (i in this.elements) {
+        for (let i in this.elements) {
             xmin = Math.max(this.elements[i].x, xmin);
             ymin = Math.max(this.elements[i].y, ymin);
             xmax = Math.max(this.elements[i].x + this.elements[i].content.meta.width, xmax);

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./src/app.js -e js,html",
+    "start": "node ./src/app.js -e js,html",
     "ngrok": "ngrok http 3000"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "http-errors": "~1.6.2",
+    "module-alias": "^2.2.2",
     "mustache-express": "^1.2.8",
     "nodemon": "^1.18.9",
     "request": "^2.88.0",

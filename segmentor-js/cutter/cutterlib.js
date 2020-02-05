@@ -43,6 +43,28 @@ cutter.Calculator = {
             cutter.valid(content1, 'content.Content');
             cutter.valid(content2, 'content.Content');
             return content1.meta.height < content2.meta.height;
+        },
+        /** Сравнение по длине */
+        custom: (content1, content2) => {
+            cutter.valid(content1, 'content.Content');
+            cutter.valid(content2, 'content.Content');
+            // return content1.meta.width < content2.meta.width;
+            if (content1.type == 'TEXT') return false;
+            else return true;
+        },
+        byType: (content1, content2) => {
+            cutter.valid(content1, 'content.Content');
+            cutter.valid(content2, 'content.Content');
+            let isType = (cont, type) => {
+                return cont.type == content.contentTypes[type];
+            }
+            if (isType(content1, 'TEXT') && isType(content2, 'TEXT')) {
+                return content1.meta.height > content2.meta.height;
+            }
+            if (!isType(content1, 'TEXT') && !isType(content2, 'TEXT')) {
+                return content1.meta.width < content2.meta.width;
+            }
+            return isType(content2, 'TEXT');
         }
     },
     /**
@@ -116,7 +138,7 @@ cutter.Cutter = class {
                 this.segment = undefined;
             }
         };
-        this.contents = cutter.Calculator.sortContents(contents, 'width');
+        this.contents = cutter.Calculator.sortContents(contents, 'byType');
         this.makets = [];
     }
     /**
@@ -124,7 +146,7 @@ cutter.Cutter = class {
      * @param {layout.area} area Исходная область
      * @param {number} align Отступ вокруг элементов
      */
-    segmente (area, align) {
+    segmente (area, align = 0) {
         cutter.valid(area, 'layout.Area');
         cutter.valid(align, 'number');
         this.align = align;
@@ -147,14 +169,16 @@ cutter.Cutter = class {
      */
     pasteIteration () {
         let batch = this.toPaste.pop();
-        
+
         for (let i_area in batch.areas) {
             let area = batch.areas[i_area];
+            let choose = false; 
             for (let i_cont in this.contents) {
                 let cont = this.contents[i_cont];
                 if (!this.relevant(batch.maket, area, cont)) {
                     continue;
                 }
+                choose = true;
                 let newBatch = new this.Batch();
                 newBatch.maket = layout.Maket.copy(batch.maket);
                 for (let i in batch.areas) {
@@ -167,8 +191,9 @@ cutter.Cutter = class {
                 pair.batch = newBatch;
                 pair.segment = segment;
                 this.toSplit.push(pair);
-                break;
+                // break;
             }
+            if (choose) return;
         }
     }
     /**
@@ -207,10 +232,10 @@ cutter.Cutter = class {
         let areaRightMeta = new layout.Meta();
         let areaBottomMeta = new layout.Meta();
 
-        // this.cut('MODE_V', areaMeta, contentMeta, areaRightMeta, areaBottomMeta);
-        // this.updateBatches(batch, areaRightMeta, areaBottomMeta);
-
         this.cut('MODE_H', areaMeta, contentMeta, areaRightMeta, areaBottomMeta);
+        this.updateBatches(batch, areaRightMeta, areaBottomMeta);
+
+        this.cut('MODE_V', areaMeta, contentMeta, areaRightMeta, areaBottomMeta);
         this.updateBatches(batch, areaRightMeta, areaBottomMeta);
     }
     /**
@@ -240,7 +265,8 @@ cutter.Cutter = class {
             areaBottomMeta.y =      areaMeta.y + this.align * 2 + contentMeta.height;
             areaBottomMeta.width =  this.align * 2 + contentMeta.width;
             areaBottomMeta.height = areaMeta.height - this.align * 2 - contentMeta.height;
-        } else if (mode == 'MODE_H') {
+        } 
+        else if (mode == 'MODE_H') {
             areaRightMeta.x =       areaMeta.x + this.align * 2 + contentMeta.width;
             areaRightMeta.y =       areaMeta.y;
             areaRightMeta.width =   areaMeta.width - this.align * 2 - contentMeta.width;
@@ -250,7 +276,8 @@ cutter.Cutter = class {
             areaBottomMeta.y =      areaMeta.y + this.align * 2 + contentMeta.height;
             areaBottomMeta.width =  areaMeta.width;
             areaBottomMeta.height = areaMeta.height - this.align * 2 - contentMeta.height;
-        } else {
+        } 
+        else {
             throw new Error(`Invalid cut mode ${mode}`);
         }
     }
@@ -272,7 +299,8 @@ cutter.Cutter = class {
         let newBatch = new this.Batch();
         newBatch.maket = layout.Maket.copy(batch.maket);
         for (let i in batch.areas) {
-            newBatch.areas.push(batch.areas[i]);
+            newBatch.areas.push(layout.Area.copy(batch.areas[i])); 
+            // newBatch.areas.push(batch.areas[i]);
         }
         newBatch.areas.push(areaRight);
         newBatch.areas.push(areaBottom);
