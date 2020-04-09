@@ -26,5 +26,9 @@
     "@babel/preset-env": "^7.7.4",
     "@types/node": "^12.12.14",
     "ngrok": "^3.1.0"
+  },
+  "_moduleAliases": {
+    "@root"      : "./",
+    "@libs"      : "./segmentor-js/"
   }
 }

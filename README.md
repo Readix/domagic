@@ -1,9 +1,10 @@
-# Sample rtb app
-Handy playground for playing with Miro Board API and Webhooks.
+# Smart layout app
+App for automatically placing items on the Miro board
 
-
+`git clone https://github.com/Readix/smart-layout.git`
+`cd smart-layout`
 ### How to use
-1) Run `npm install`
+1) Run `./npm_init.sh` (install npm and load all necessary dependencies)
 2) Run `npm run start`
 3) Run `npm run ngrok` in another terminal 
 4) Edit `src/config.js`:
