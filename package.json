@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "init": "node ./init.js",
     "start": "node ./src/app.js -e js,html",
     "ngrok": "ngrok http 3000"
   },
@@ -28,7 +29,8 @@
     "ngrok": "^3.1.0"
   },
   "_moduleAliases": {
-    "@root"      : "./",
-    "@libs"      : "./segmentor-js/"
+    "@root"       : "./",
+    "@libs"       : "./segmentor-js/",
+    "@src"        : "./src/"
   }
 }

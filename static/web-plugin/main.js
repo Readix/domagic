@@ -5,6 +5,11 @@ let prevFrame = {
 };
 let countCallWithSameFrame = 0;
 
+var config = {};
+$
+  .get('config.json', json => {config = json})
+  .fail(() => {console.log('Error: couldn\'t load config')})
+
 rtb.onReady(() => {
 
   rtb.initialize({
@@ -105,7 +110,7 @@ rtb.onReady(() => {
           console.log('sended info:', data);
 
           $.ajax({
-            url: 'https://e45a38b7.ngrok.io/test1',
+            url: config.host + '/test1', // https://e45a38b7.ngrok.io
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
