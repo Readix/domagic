@@ -11,7 +11,7 @@ $.get('config.json', json => {config = json}).fail(() => {console.log('Error: co
 miro.onReady(() => {
   miro.initialize({
     extensionPoints: {
-      getWidgetMenuItems: (widgets) => { // target widgets
+      getWidgetMenuItems: (widgets) => {
         if (widgets.length != 1 || widgets[0].type.toLowerCase() != 'frame') {
           return Promise.resolve([{}])
         }
@@ -28,10 +28,9 @@ miro.onReady(() => {
 
 var run = async (frameId) => {
   let frame = await miro.board.widgets.get({id: frameId})
-  if(frame.length > 1){
-    // SLE#003 а может ли тут быть не один фрейм ?
-    alert('Please choose only one frame!');
-    return;
+  if ((frame[0].childrenIds || []).length > 7) {
+    miro.showErrorNotification("Too many objects (must be smaller than 8)")
+    return
   }
   console.log('frame: ', frame);
   let data = {
@@ -126,10 +125,9 @@ var run = async (frameId) => {
     data: data,
     success: res => {
       console.log('res:', res);
-      if (res.error) { // здесь надо принимать номер ошибки
-        alert('Уменьшите размер объектов');
-        // SLE002 miro.showErrorNotification("...")
-        return;
+      if (res.error) { // TODO: обработка всех оишбок
+        miro.showErrorNotification("Objects are to big") // пока что заглушка
+        return
       }
 
       res.widgets.forEach(element => {
