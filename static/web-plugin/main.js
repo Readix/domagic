@@ -28,10 +28,6 @@ miro.onReady(() => {
 
 var run = async (frameId) => {
   let frame = await miro.board.widgets.get({id: frameId})
-  if ((frame[0].childrenIds || []).length > 7) {
-    miro.showErrorNotification("Too many objects (must be smaller than 8)")
-    return
-  }
   console.log('frame: ', frame);
   let data = {
     'board': {
@@ -125,21 +121,30 @@ var run = async (frameId) => {
     data: data,
     success: res => {
       console.log('res:', res);
-      if (res.error) { // TODO: обработка всех оишбок
-        miro.showErrorNotification("Objects are to big") // пока что заглушка
-        return
+      switch (parseInt(res.code / 100)) {
+        case 1:
+          miro.showNotification(res.message)
+          break
+        case 2:
+          miro.showErrorNotification(res.message)
+          return
+        case 3:
+          miro.showErrorNotification('server error')
+          return
       }
 
+      objectsToUpdate = []
       res.widgets.forEach(element => {
         object = sourceObjects.find(object => object.id == element.id);
         object.x = element.area.leftTop.x + frame[0].bounds.left + element.width/2;
         object.y = element.area.leftTop.y + frame[0].bounds.top + element.height/2;
+        objectsToUpdate.push(object)
       });
 
       console.log("sourseScore: " + res.sourceScore);
       console.log("score: " + res.score);
       console.log("score > sourceScore = " + (res.score > res.sourceScore));
-      miro.board.widgets.update(sourceObjects);
+      miro.board.widgets.update(objectsToUpdate);
     }
   });
 }

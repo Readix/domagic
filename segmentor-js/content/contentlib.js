@@ -8,8 +8,7 @@ content.contentTypes = {
     TEXT: 'TEXT',
     STICKER: 'STICKER',
     SHAPE: 'SHAPE',
-    IMAGE: 'IMAGE',
-    MOCKUP: 'MOCKUP'
+    IMAGE: 'IMAGE'
 };
 
 /**

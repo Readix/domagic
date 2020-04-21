@@ -16,6 +16,9 @@ const aligner = require('../aligner/aligner.js')
 const app = express()
 const port = 3000
 
+const log = require('./logger')
+const objectsQuantityLimit = 7
+
 app.engine('html', mustacheExpress())
 app.use(cors())
 app.use('/static', express.static('static'))
@@ -54,7 +57,7 @@ function queryElementToContent (element) {
 		);
 	}
 	catch(error) {
-		throw new Error('Create content from query error' + error);
+		throw new Error('Create content from query error\n' + error.stack);
 	}
 }
 
@@ -67,7 +70,7 @@ function queryElementToLayoutWidget (element) {
 		);
 	}
 	catch(error) {
-		throw new Error('Create layout widget from query error: ' + error);
+		throw new Error('Create layout widget from query error\n' + error.stack);
 	}
 }
 
@@ -152,8 +155,55 @@ app.post('/events', (req, res) => {
 	}
 })
 
+send = (data, info, response) => {
+	response.send(Object.assign(data, info))
+}
+
 app.get('/test1', async (req, res) => {
 	try{
+		info = { 'code': 0, 'message': '' }
+		// Empty checking {
+		if (req.query.elems == undefined || req.query.elems == []) {
+			info.code = 203 // <==============
+			info.message = 'Not found any objects'
+			send({}, info, res)
+			return
+		}
+		// Types checking {
+		suitableQuanity = req.query.elems.reduce((acc, e) =>
+			acc + ((e.type in segmentor.content.contentTypes) ? 1: 0), 0)
+
+		if (suitableQuanity != req.query.elems.length) {
+			notSuitableType = 'unknown'
+			for (let i = 0; i < req.query.elems.length; ++i) {
+				if (!(req.query.elems[i].type in segmentor.content.contentTypes)) {
+					notSuitableType = req.query.elems[i].type
+					break
+				}
+			}
+			info.code = suitableQuanity == 0 ? 202 : 102
+			info.message = `Not supported type: ${notSuitableType}`
+			if (suitableQuanity == 0) {
+				send({}, info, res)
+				return
+			}
+		}
+		// } types checking
+		// Filter
+		req.query.elems = req.query.elems.filter(e => e.type in segmentor.content.contentTypes)
+		// Quantity checking {
+		if (req.query.elems.length > objectsQuantityLimit) {
+			info.code = 201
+			info.message = `Too many objects (must be smaller than ${objectsQuantityLimit + 1})`
+			send({}, info, res)
+			return
+		}
+		// } quanity checking
+
+		// Stat
+		log.trace(`${req.query.elems.length} objects`)
+
+		// Main algorithm {
 		let proc = new scoring.ScoringProccessor();
 		
 		req.query.board.width = parseFloat(req.query.board.width);
@@ -165,12 +215,13 @@ app.get('/test1', async (req, res) => {
 			elem.height = parseFloat(elem.height);
 			return elem;
 		});
-		console.log(req.query);
-		/* Скоринг исходного макета */
+		// console.log(req.query);
+		/* Scoring source maket */
 		let areaSize = getElementsAreaSize(req.query.elems);
 		let widgets = []
 		req.query.elems.forEach(element => {
-			widgets.push(queryElementToLayoutWidget(element));
+			if (element.type in segmentor.content.contentTypes)
+				widgets.push(queryElementToLayoutWidget(element))
 		})
 		let scoringLayout = new layoutObject.Layout(widgets, req.query.board.width, req.query.board.height);
 		let srcScore = proc.getBestLayoutVariant([scoringLayout]);
@@ -181,7 +232,7 @@ app.get('/test1', async (req, res) => {
 			'widgets': widgets
 		};
 
-		/* Расстановка объектов */
+		/* Objects placement */
 		let contents = [];
 		for (let i = 0; i < req.query.elems.length; i++) {
 			if (req.query.elems[i].type in segmentor.content.contentTypes) {
@@ -201,20 +252,18 @@ app.get('/test1', async (req, res) => {
 		);
 
 		let makets = ctr.uniqueMakets();
-		console.log('makets count:', makets.length);
+		// console.log('makets count:', makets.length);
 		if (makets.length == 0) {
-			res.send({
-				'error': true,
-				'message': '0 makets'
-			});
-			return;
+			info.code = 203
+			info.message = 'Objects are too big'
+			send({}, info, res)
+			return
 		}
 		maketsCount = makets.length;
 		if(req.query.isPrevFrame == 'true'){
 			makets = [makets[(parseInt(req.query.countCallWithSameFrame) - 1) % makets.length]]
 		}
-		// makets = [makets[8]];
-		/* Центрирование объектов по середине */
+		/* Objects сentering */
 		makets.forEach(maket => {
 			centeringElements(
 				maket.elements, {
@@ -224,15 +273,16 @@ app.get('/test1', async (req, res) => {
 			);
 		});
 		
-		/* Скоринг макетов */
+		/* Makets scoring */
 		let scoringLayouts = [];
 		makets.forEach(maket => {
 			scoringLayouts.push(maketToLayout(maket));
 		});
 		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
 		// let bestlay = proc.getAllScoresOfTemplatesForLayout(scoringLayouts);
-		
-		res.send({
+		// } main algorithm
+
+		send({
 			'widgets': bestlay.sourseLayout.widgets,
 			'score': bestlay.score,
 			'sourceScore': srcScore.score,
@@ -241,12 +291,13 @@ app.get('/test1', async (req, res) => {
 			'source': source,
 			'maketsCount': maketsCount,
 			'error': false
-		});
+		}, info, res)
 		// aligner.init(req.query.elems, 50);
 		// aligner.transform();
 		// res.send(aligner.elements);
 	} catch (error) {
-		res.send('server error: ' + error, ', line: ' + error.lineNumber);
-		return;
+		log.error(error.stack)
+		console.error(error.message)
+		send({}, {'code': 301, 'message': 'server error'}, res)
 	}
 })

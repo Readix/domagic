@@ -55,11 +55,11 @@ class ScoringProccessor{
 	_scoreLayoutByTemplate(sourseLayout, templateLayout) {
 		let score = 0;
 		let totalSquare = 0;
-		console.log(templateLayout.name);
+		// console.log(templateLayout.name);
 		sourseLayout.widgets.forEach((sourseWidget) => {
 			let subScores = [];
 			let badCrossCount = 1;
-			console.log('widgetId: ' + sourseWidget.id);
+			// console.log('widgetId: ' + sourseWidget.id);
 			let per = 0;
 			templateLayout.widgets.forEach((templateWidget) => {
 				let templateCenter = templateWidget.area.rightBottom.copy().sum(templateWidget.area.leftTop).devide(2);
@@ -82,7 +82,7 @@ class ScoringProccessor{
 			subScores.forEach(e => sum +=e);
 			if (per == 0) return;
 			score += sum * Math.pow(0.7, per - 1) / per;
-			console.log('score: ' + (sum * Math.pow(0.7, per - 1) / per));
+			// console.log('score: ' + (sum * Math.pow(0.7, per - 1) / per));
 			// score += Math.max(...subScores) / badCrossCount;
 		});
 		return score/sourseLayout.widgets.length;
@@ -103,7 +103,7 @@ class ScoringProccessor{
 				return 1;
 			return 0;
 		});
-		console.log(arrResults);
+		// console.log(arrResults);
 		return arrResults[0];
 	}
 	getMostEqualTemplateAndScore(sourseLayout){

@@ -54,7 +54,8 @@ class Layout{
 //Widget on layout
 class LayoutWidget{
 	constructor(type, x_left, y_top, width, height, id = -1){
-		if(typeof(type) == 'number')
+		this.type = type
+		/*if(typeof(type) == 'number')
 			this.type = type;
 		else
 			switch(type){
@@ -65,7 +66,7 @@ class LayoutWidget{
 				case "LINE"  :
 				case "IMAGE"  : this.type = 2; break;
 				default: throw Error("LayoutWidget dont understant type: " + type);
-			}
+			}*/
 		this.area = new Area(new Point(x_left, y_top), new Point(x_left + width, y_top + height))
 		this.width = width;
 		this.height = height;
