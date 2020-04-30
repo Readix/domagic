@@ -125,41 +125,16 @@ app.get('/oauth', async (req, res) => {
 	res.send('App has been installed, open <br>response: ' + JSON.stringify(response))
 })
 
-app.get('/boards-list/', async (req, res) => {
-	const auth = db.getAuthorizations()[0]
-	if (auth) {
-		api.boards.getAll(auth)
-			.then(data => {
-				res.send(JSON.stringify(data))
-			})
-			.catch(error => {
-				res.send(error)
-			})
-	} else {
-		res.send('You are not authorized yet')
-	}
-})
-
 app.listen(port, () => {
 	console.log(`App listening on port ${port}`)
 	db.init()
-})
-
-// Webhooks are coming soon
-app.post('/events', (req, res) => {
-	const verificationToken = req.get('X-RTB-Verification-Token')
-	if (verificationToken === config.WEBHOOKS_VERIFICATION_TOKEN) {
-		events.processEvent(req.body, res)
-	} else {
-		res.status(400).send('Incorrect verification token')
-	}
 })
 
 send = (data, info, response) => {
 	response.send(Object.assign(data, info))
 }
 
-app.get('/test1', async (req, res) => {
+app.get('/generate', async (req, res) => {
 	try{
 		info = { 'code': 0, 'message': '' }
 		// Empty checking {
@@ -215,7 +190,7 @@ app.get('/test1', async (req, res) => {
 			elem.height = parseFloat(elem.height);
 			return elem;
 		});
-		// console.log(req.query);
+
 		/* Scoring source maket */
 		let areaSize = getElementsAreaSize(req.query.elems);
 		let widgets = []
@@ -252,7 +227,7 @@ app.get('/test1', async (req, res) => {
 		);
 
 		let makets = ctr.uniqueMakets();
-		// console.log('makets count:', makets.length);
+
 		if (makets.length == 0) {
 			info.code = 203
 			info.message = 'Objects are too big'
@@ -279,7 +254,7 @@ app.get('/test1', async (req, res) => {
 			scoringLayouts.push(maketToLayout(maket));
 		});
 		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
-		// let bestlay = proc.getAllScoresOfTemplatesForLayout(scoringLayouts);
+
 		// } main algorithm
 
 		send({
@@ -292,9 +267,6 @@ app.get('/test1', async (req, res) => {
 			'maketsCount': maketsCount,
 			'error': false
 		}, info, res)
-		// aligner.init(req.query.elems, 50);
-		// aligner.transform();
-		// res.send(aligner.elements);
 	} catch (error) {
 		log.error(error.stack)
 		console.error(error.message)
