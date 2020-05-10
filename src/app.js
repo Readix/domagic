@@ -19,6 +19,12 @@ const port = 3000
 const log = require('./logger')
 const objectsQuantityLimit = 7
 
+const readline = require('readline')
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
 app.engine('html', mustacheExpress())
 app.use(cors())
 app.use('/static', express.static('static'))
@@ -110,9 +116,10 @@ function centeringElements (elements, areaMeta) {
 }
 
 app.get('/', (req, res) => {
+	props = db.getPluginProps()
 	res.render('index', {
 		baseUrl: config.BASE_URL,
-		oauthUrl: `https://miro.com/oauth/authorize?response_type=code&client_id=${config.CLIENT_ID}&redirect_uri=${config.BASE_URL}/oauth`
+		oauthUrl: `https://miro.com/oauth/authorize?response_type=code&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth`
 	})
 })
 
@@ -126,8 +133,17 @@ app.get('/oauth', async (req, res) => {
 })
 
 app.listen(port, () => {
+	let user = ''
+	let pass = ''
+	console.log('Need some information to start...')
+	rl.question('Enter username for database: ', (answer) => {
+		user = answer
+	})
+	rl.question('Enter password for database: ', (answer) => {
+		pass = answer
+	})
+	db.init(user, pass)
 	console.log(`App listening on port ${port}`)
-	db.init()
 })
 
 send = (data, info, response) => {
