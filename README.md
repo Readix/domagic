@@ -6,7 +6,7 @@ App for automatically placing items on presentation slide the Miro board
 `cd smart-layout`
 
 ### How to use
-1) Run `./npm_init.sh` (install npm and load all necessary dependencies)
+1) Run `npm install` (install npm and load all necessary dependencies)
 2) Run `npm run ngrok`
 3) Edit `src/config.js`:
     - Set BASE_URL from ngrok with https protocol extension
