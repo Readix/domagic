@@ -6,7 +6,7 @@ const mariadb = require('mariadb')
 let dbPool = []
 
 function initDB(user, password) {
-	dbPool = mariadb.createPool({host: 'localhost', user: user, password: password, connectionLimit: 10})
+	dbPool = mariadb.createPool({host: 'localhost', database: 'smart-layout', user: user, password: password, connectionLimit: 10})
 }
 function runQuery(query){
 	dbPool.getConnection()
