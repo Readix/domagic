@@ -27,8 +27,12 @@ miro.onReady(() => {
 
 
 var run = async (frameId) => {
+  let team_id = await miro.account.get()['id']
+  let user_id = await miro.currentUser.getId()
   let frame = await miro.board.widgets.get({id: frameId})
   let data = {
+    'user': user_id,
+    'team': team_id,
     'board': {
       'width': frame[0].bounds.width,
       'height': frame[0].bounds.height

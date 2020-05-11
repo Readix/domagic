@@ -30,6 +30,18 @@ module.exports = {
 		let query = `INSERT IGNORE INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${auth.scope}, ${auth.access_token}, ${auth.token_type})`
 		await runQuery(query)
 	},
+	addRequest(user, team, data, status) {
+		let query = `SELECT insert_request(${user}, ${team}, ${data}, ${status})`
+		await runQuery(query)
+	},
+	startSession(user, team) {
+		let query = `SELECT start_session(${user}, ${team})`
+		await runQuery(query)
+	},
+	endSession(user, team) {
+		let query = `SELECT end_session(${user}, ${team})`
+		await runQuery(query)
+	},
 	getPluginProps: async function() {
 		let query = 'SELECT * FROM Plugins LIMIT 1'
 		res = await runQuery(query)

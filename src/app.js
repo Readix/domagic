@@ -151,6 +151,7 @@ send = (data, info, response) => {
 }
 
 app.get('/generate', async (req, res) => {
+	let status = null
 	try{
 		info = { 'code': 0, 'message': '' }
 		// Empty checking {
@@ -181,9 +182,9 @@ app.get('/generate', async (req, res) => {
 		}
 		// } types checking
 		// Filter
-		req.query.elems = req.query.elems.filter(e => e.type in segmentor.content.contentTypes)
+		boardElems = req.query.elems.filter(e => e.type in segmentor.content.contentTypes)
 		// Quantity checking {
-		if (req.query.elems.length > objectsQuantityLimit) {
+		if (boardElems.length > objectsQuantityLimit) {
 			info.code = 201
 			info.message = `Too many objects (must be smaller than ${objectsQuantityLimit + 1})`
 			send({}, info, res)
@@ -192,14 +193,14 @@ app.get('/generate', async (req, res) => {
 		// } quanity checking
 
 		// Stat
-		log.trace(`${req.query.elems.length} objects`)
+		log.trace(`${boardElems.length} objects`)
 
 		// Main algorithm {
 		let proc = new scoring.ScoringProccessor();
 		
 		req.query.board.width = parseFloat(req.query.board.width);
 		req.query.board.height = parseFloat(req.query.board.height);
-		req.query.elems = req.query.elems.map( elem => {
+		boardElems = boardElems.map( elem => {
 			elem.x = parseFloat(elem.x);
 			elem.y = parseFloat(elem.y);
 			elem.width = parseFloat(elem.width);
@@ -208,9 +209,9 @@ app.get('/generate', async (req, res) => {
 		});
 
 		/* Scoring source maket */
-		let areaSize = getElementsAreaSize(req.query.elems);
+		let areaSize = getElementsAreaSize(boardElems);
 		let widgets = []
-		req.query.elems.forEach(element => {
+		boardElems.forEach(element => {
 			if (element.type in segmentor.content.contentTypes)
 				widgets.push(queryElementToLayoutWidget(element))
 		})
@@ -225,9 +226,9 @@ app.get('/generate', async (req, res) => {
 
 		/* Objects placement */
 		let contents = [];
-		for (let i = 0; i < req.query.elems.length; i++) {
-			if (req.query.elems[i].type in segmentor.content.contentTypes) {
-				contents.push(queryElementToContent(req.query.elems[i]));
+		for (let i = 0; i < boardElems.length; i++) {
+			if (boardElems[i].type in segmentor.content.contentTypes) {
+				contents.push(queryElementToContent(boardElems[i]));
 			}
 		}
 		
@@ -272,7 +273,7 @@ app.get('/generate', async (req, res) => {
 		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
 
 		// } main algorithm
-
+		status = 'complete'
 		send({
 			'widgets': bestlay.sourseLayout.widgets,
 			'score': bestlay.score,
@@ -284,8 +285,13 @@ app.get('/generate', async (req, res) => {
 			'error': false
 		}, info, res)
 	} catch (error) {
+		status = error.message
 		log.error(error.stack)
 		console.error(error.message)
 		send({}, {'code': 301, 'message': 'server error'}, res)
 	}
+	let data = {}
+	data.board = req.query.board
+	data.elems = req.query.elems
+	db.addRequest(req.query.user, req.query.team, data, status)
 })
