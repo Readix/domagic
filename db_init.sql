@@ -1,6 +1,12 @@
-DROP DATABASE IF EXISTS `smart-layout`;
-CREATE DATABASE `smart-layout`;
+CREATE DATABASE IF NOT EXISTS `smart-layout`;
 USE `smart-layout`;
+-- cleanup database
+DROP TABLE IF EXISTS `Requests`;
+DROP TABLE IF EXISTS `Configs`;
+DROP TABLE IF EXISTS `Plugins`;
+DROP TABLE IF EXISTS `UserSessions`;
+DROP TABLE IF EXISTS `Installations`;
+DROP TABLE IF EXISTS `Feedbacks`;
 -- creating tables
 -- table for storing all user`s feedback
 CREATE TABLE Feedbacks (
@@ -8,28 +14,16 @@ CREATE TABLE Feedbacks (
     data        JSON NOT NULL,
     created     DATETIME DEFAULT NOW()
 ) ENGINE=InnoDB;
--- table for storing user session timestamps
-CREATE TABLE UserSessions (
-    session_id INT AUTO_INCREMENT PRIMARY KEY,
-    install_id INT NOT NULL,
-    start_time DATETIME DEFAULT NOW(),
-    end_time   DATETIME NULL,
-    INDEX(install_id),
-    CONSTRAINT `fk_session_install` FOREIGN KEY 
-        (install_id) REFERENCES Installations (install_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB
 -- table for storing plugin api keys
 CREATE TABLE Plugins (
     client_id       INT NOT NULL PRIMARY KEY,
-    client_secret   VARCHAR(32) NOT NULL,
+    client_secret   VARCHAR(32) NOT NULL
 ) ENGINE=InnoDB;
 -- table for storing alghoritm configs
 CREATE TABLE Configs (
     config_id   INT AUTO_INCREMENT PRIMARY KEY,
     data        JSON NOT NULL CHECK(JSON_VALID(data)),
-    created     DATETIME DEFAULT (NOW()),
+    created     DATETIME DEFAULT (NOW())
 ) ENGINE=InnoDB;
 -- table for storing user installations
 CREATE TABLE Installations (
@@ -46,6 +40,18 @@ CREATE TABLE Installations (
     CONSTRAINT `fk_installation_feedback` FOREIGN KEY 
         (feedback_id) REFERENCES Feedbacks (feedback_id)
         ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+-- table for storing user session timestamps
+CREATE TABLE UserSessions (
+    session_id INT AUTO_INCREMENT PRIMARY KEY,
+    install_id INT NOT NULL,
+    start_time DATETIME DEFAULT NOW(),
+    end_time   DATETIME NULL,
+    INDEX(install_id),
+    CONSTRAINT `fk_session_install` FOREIGN KEY 
+        (install_id) REFERENCES Installations (install_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 -- table for storing user generation requests
@@ -70,7 +76,7 @@ CREATE TABLE Requests (
     CONSTRAINT `fk_request_feedback` FOREIGN KEY 
         (feedback_id) REFERENCES Feedbacks (feedback_id)
         ON DELETE RESTRICT
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
     CONSTRAINT `fk_request_session` FOREIGN KEY 
         (session_id) REFERENCES UserSessions (session_id)
         ON DELETE CASCADE
@@ -83,7 +89,8 @@ CREATE FUNCTION start_session(userId INT, teamId INT)
 RETURNS INT
 BEGIN
     SET @inst = (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    RETURN (INSERT INTO UserSessions (install_id) VALUES(@inst) RETURNING session_id);
+    SET @sess = (INSERT INTO UserSessions SET install_id = @inst RETURNING session_id);
+    RETURN @sess;
 END$$
 DELIMITER ;
 DELIMITER $$
