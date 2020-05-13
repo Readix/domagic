@@ -1,0 +1,4 @@
+{
+    "api_base": "https://api.miro.com/v1",
+    "base_url": "https://*.ngrok.io"
+}

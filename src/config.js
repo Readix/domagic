@@ -1,2 +1,9 @@
-module.exports.API_BASE = 'https://api.miro.com/v1'
-module.exports.BASE_URL = 'https://*.ngrok.io' // (https!) Must be replaced after each restart ngrok
+var fs = require('fs')
+
+let content = fs.readFileSync('config.json')
+content = JSON.parse(content)
+
+module.exports.API_BASE = content['api_base']
+module.exports.BASE_URL = content['base_url']
+module.exports.DB_USER  = content['db_user']
+module.exports.DB_PASS  = content['db_pass']

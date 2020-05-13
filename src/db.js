@@ -5,12 +5,12 @@ const { Pool, Client } = require('pg')
 
 let dbPool = undefined
 
-function initDB(user, password) {
+function initDB() {
 	dbPool = new Pool({
-		user: user,
+		user: config.DB_USER,
 		host: 'localhost',
 		database: 'smart-layout',
-		password: password
+		password: config.DB_PASS
 	})
 }
 
@@ -24,6 +24,11 @@ module.exports = {
 					log.trace(err.stack):
 					log.error(err.stack)
 			})
+	},
+	addPlugin: async function (client_id, client_secret) {
+		let query = `INSERT INTO Plugins(client_id, client_secret) VALUES(${client_id}, ${client_secret})`
+		dbPool.query(query)
+			.catch(err => log.error(err.stack))
 	},
 	addRequest: async (user, team, data, status) => {
 		let query = `SELECT insert_request(${user}, ${team}, ${data}, ${status})`

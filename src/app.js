@@ -19,12 +19,6 @@ const port = 3000
 const log = require('./logger')
 const objectsQuantityLimit = 7
 
-const readline = require('readline')
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
-
 app.engine('html', mustacheExpress())
 app.use(cors())
 app.use('/static', express.static('static'))
@@ -139,16 +133,7 @@ app.get('/oauth', async (req, res) => {
 })
 
 app.listen(port, () => {
-	let user = ''
-	let pass = ''
-	console.log('Need some information to start...')
-	rl.question('Enter username for database: ', (answer) => {
-		user = answer
-	})
-	rl.question('Enter password for database: ', (answer) => {
-		pass = answer
-	})
-	db.init(user, pass)
+	db.init()
 	console.log(`App listening on port ${port}`)
 })
 
