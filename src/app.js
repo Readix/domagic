@@ -116,18 +116,24 @@ function centeringElements (elements, areaMeta) {
 }
 
 app.get('/', (req, res) => {
-	props = db.getPluginProps()
-	res.render('index', {
-		baseUrl: config.BASE_URL,
-		oauthUrl: `https://miro.com/oauth/authorize?response_type=code&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth`
-	})
+	db.getPluginProps()
+		.then(props => {
+			res.render('index', {
+				baseUrl: config.BASE_URL,
+				oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
+					&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth`
+			})
+		})
+		.catch(_ => {
+			// render something else
+		})
 })
 
 app.get('/oauth', async (req, res) => {
 	const response = await api.oauth.getToken(req.query.code, req.query.client_id)
 	console.log('/oauth/ response = ', response)
 	if (response) {
-		db.addAuthorization(response)
+		await db.addAuthorization(response)
 	}
 	res.send('App has been installed, open <br>response: ' + JSON.stringify(response))
 })

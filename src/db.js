@@ -1,17 +1,22 @@
 const fs = require('fs')
+const log = require('./logger')
 const config = require('./config')
 const {QueryError, PoolError} = require('./errors')
-const mariadb = require('mariadb')
+const { Pool, Client } = require('pg')
 
-let dbPool = []
+let dbPool = undefined
 
 function initDB(user, password) {
-	dbPool = mariadb.createPool({host: 'localhost', database: 'smart-layout', user: user, password: password, connectionLimit: 10})
+	dbPool = new Pool({
+		user: user,
+		host: 'localhost',
+		database: 'smart-layout',
+		password: password
+	})
 }
-function runQuery(query){
-	dbPool.getConnection()
-	.then(conn => {
-		conn.query(query)
+async function runQuery(query){
+	return dbPool.query(query)
+	/*
 		.then(res => {
 			return res
 		})
@@ -21,30 +26,39 @@ function runQuery(query){
 	})
 	.catch( err => {
 		throw new PoolError(dbPool, err)
-	})
+	})*/
 }
 
 module.exports = {
 	init: initDB,
 	addAuthorization: async function (auth) {
-		let query = `INSERT IGNORE INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${auth.scope}, ${auth.access_token}, ${auth.token_type})`
-		await runQuery(query)
+		let query = `INSERT INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${auth.scope}, ${auth.access_token}, ${auth.token_type})`
+		return runQuery(query)
+			.catch(err => {
+				err.code == 23505 ?  // unique violation
+					log.trace(err.stack):
+					log.error(err.stack)
+			})
 	},
-	addRequest(user, team, data, status) {
+	addRequest: async (user, team, data, status) => {
 		let query = `SELECT insert_request(${user}, ${team}, ${data}, ${status})`
-		await runQuery(query)
+		runQuery(query)
+			.catch(err => log.error(err.stack))
 	},
-	startSession(user, team) {
+	startSession: async (user, team) => {
 		let query = `SELECT start_session(${user}, ${team})`
-		await runQuery(query)
+		runQuery(query)
+			.catch(err => log.error(err.stack))
 	},
-	endSession(user, team) {
+	endSession: async (user, team) => {
 		let query = `SELECT end_session(${user}, ${team})`
-		await runQuery(query)
+		runQuery(query)
+			.catch(err => log.error(err.stack))
 	},
 	getPluginProps: async function() {
 		let query = 'SELECT * FROM Plugins LIMIT 1'
-		res = await runQuery(query)
-		return res.rows[0]
+		return runQuery(query)
+			.then(res => res.rows[0])
+			.catch(err => log.error(err.stack))
 	}
 }
