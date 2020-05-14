@@ -53,7 +53,7 @@ CREATE TABLE UserSessions (
 CREATE INDEX i_us_install ON UserSessions(install_id);
 -- table for storing user generation requests
 CREATE TABLE Requests (
-    requiest_id BIGSERIAL PRIMARY KEY,
+    request_id BIGSERIAL PRIMARY KEY,
     data        JSON NOT NULL,
     status      VARCHAR(100),
     timestamp   TIMESTAMP default (NOW()),

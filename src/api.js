@@ -2,10 +2,9 @@ const rp = require('request-promise')
 const config = require('./config')
 
 const oAuth = {
-	getToken(code, clientId) {
-		const uri = `${config.API_BASE}/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${
-			config.CLIENT_SECRET
-		}&code=${code}&redirect_uri=${config.BASE_URL}/oauth`
+	getToken(code, clientId, clientSecret) {
+		const uri = `${config.API_BASE}/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${config.BASE_URL}/oauth`
+		console.log(uri)
 		const options = {method: 'POST', uri: uri}
 		return rp(options)
 			.then(res => JSON.parse(res))

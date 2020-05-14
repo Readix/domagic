@@ -16,7 +16,7 @@ miro.onReady(() => {
           return Promise.resolve([{}])
         }
         return Promise.resolve([{
-          tooltip: 'Optimize layout',
+          tooltip: 'Optimize layout dev',
           svgIcon: icon,
           onClick: () => run(widgets[0].id)
         }])
@@ -27,7 +27,7 @@ miro.onReady(() => {
 
 
 var run = async (frameId) => {
-  let team_id = await miro.account.get()['id']
+  let team_id = (await miro.account.get())['id']
   let user_id = await miro.currentUser.getId()
   let frame = await miro.board.widgets.get({id: frameId})
   let data = {

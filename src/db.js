@@ -17,7 +17,7 @@ function initDB() {
 module.exports = {
 	init: initDB,
 	addAuthorization: async function (auth) {
-		let query = `INSERT INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${auth.scope}, ${auth.access_token}, ${auth.token_type})`
+		let query = `INSERT INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, '${auth.scope}', '${auth.access_token}', '${auth.token_type}')`
 		return dbPool.query(query)
 			.catch(err => {
 				err.code == 23505 ?  // unique violation
@@ -26,17 +26,17 @@ module.exports = {
 			})
 	},
 	addPlugin: async function (name, client_id, client_secret) {
-		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES(${name}, ${client_id}, ${client_secret})`
+		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES('${name}', ${client_id}, '${client_secret}')`
 		dbPool.query(query)
 			.catch(err => log.error(err.stack))
 	},
 	addRequest: async (user, team, data, status) => {
-		let query = `SELECT insert_request(${user}, ${team}, ${data}, ${status})`
+		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
 		dbPool.query(query)
 			.catch(err => log.error(err.stack))
 	},
 	addConfig: async (data) => {
-		let query = `SELECT insert_config(${data})`
+		let query = `SELECT insert_config('${data}')`
 		dbPool.query(query)
 			.catch(err => log.error(err.stack))
 	},

@@ -14,7 +14,7 @@ const layoutObject = require('../layoutObject')
 const aligner = require('../aligner/aligner.js')
 
 const app = express()
-const port = 3000
+const port = 3321
 
 const log = require('./logger')
 const objectsQuantityLimit = 7
@@ -120,7 +120,8 @@ app.get('/', (req, res) => {
 })
 
 app.get('/oauth', async (req, res) => {
-	const response = await api.oauth.getToken(req.query.code, req.query.client_id)
+	console.log('start auth...')
+	const response = await api.oauth.getToken(req.query.code, req.query.client_id, pluginProps.client_secret)
 	console.log('/oauth/ response = ', response)
 	if (response) {
 		await db.addAuthorization(response)
@@ -136,11 +137,16 @@ app.listen(port, () => {
 	})
 })
 
-send = (data, info, response) => {
+send = (data, info, response, req) => {
+	let reqParams = {}
+	reqParams.board = req.query.board
+	reqParams.elems = req.query.elems
+	db.addRequest(req.query.user, req.query.team, JSON.stringify(reqParams), info.code)
 	response.send(Object.assign(data, info))
 }
 
 app.get('/generate', async (req, res) => {
+	console.log('start generate')
 	let status = null
 	try{
 		info = { 'code': 0, 'message': '' }
@@ -263,7 +269,6 @@ app.get('/generate', async (req, res) => {
 		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
 
 		// } main algorithm
-		status = 'complete'
 		send({
 			'widgets': bestlay.sourseLayout.widgets,
 			'score': bestlay.score,
@@ -273,15 +278,12 @@ app.get('/generate', async (req, res) => {
 			'source': source,
 			'maketsCount': maketsCount,
 			'error': false
-		}, info, res)
+		}, info, res, req)
 	} catch (error) {
-		status = error.message
 		log.error(error.stack)
 		console.error(error.message)
-		send({}, {'code': 301, 'message': 'server error'}, res)
+		info.code = 301
+		info.message = 'server error'
+		send({}, info, res, req)
 	}
-	let data = {}
-	data.board = req.query.board
-	data.elems = req.query.elems
-	db.addRequest(req.query.user, req.query.team, data, status)
 })

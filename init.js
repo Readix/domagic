@@ -10,7 +10,9 @@ var   keysToDB = {
 let config = fs.readFileSync('./src/config.json')
 config = JSON.parse(config)
 //read data
+console.log('print argvs')
 process.argv.forEach((val, idx, arr) => {
+    console.log(val)
     let name = val.split('=')[0]
     let value = val.split('=')[1]
     if(keysToConf.indexOf(name) != -1)
@@ -28,15 +30,14 @@ for (let value in Object.values(keysToDB))
     if(value != undefined)
         setPlugin = true
 if(setPlugin)
-    for (let [key, value] in Object.entries(keysToDB))
+    for (let [key, value] of Object.entries(keysToDB))
         if(value == undefined)
             throw new Error(`Missing argument: ${key}`)
 //save configs
 fs.writeFileSync('./src/config.json', JSON.stringify(config))
 fs.writeFileSync('./static/web-plugin/config.json', JSON.stringify({host: config['base_url']}))
 //save plugin info
-process.chdir('/src')
-var db = require('db')
+var db = require('./src/db')
 db.init()
 db.addPlugin(keysToDB.plugin_name, keysToDB.client_id, keysToDB.client_secret).then(()=>{
     console.log("App is initiallized");

@@ -1,6 +1,6 @@
 var fs = require('fs')
 
-let content = fs.readFileSync('config.json')
+let content = fs.readFileSync('./src/config.json')
 content = JSON.parse(content)
 
 module.exports.API_BASE     = content['api_base']
