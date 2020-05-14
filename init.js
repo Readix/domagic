@@ -32,7 +32,7 @@ if(setPlugin)
         if(value == undefined)
             throw new Error(`Missing argument: ${key}`)
 //save configs
-fs.writeFileSync('.src/config.json', JSON.stringify(config))
+fs.writeFileSync('./src/config.json', JSON.stringify(config))
 fs.writeFileSync('./static/web-plugin/config.json', JSON.stringify({host: config['base_url']}))
 //save plugin info
 process.chdir('/src')
