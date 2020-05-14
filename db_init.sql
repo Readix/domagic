@@ -15,7 +15,8 @@ CREATE TABLE Feedbacks (
 -- table for storing plugin api keys
 CREATE TABLE Plugins (
     client_id       BIGINT NOT NULL PRIMARY KEY,
-    client_secret   VARCHAR(32) NOT NULL
+    client_secret   VARCHAR(32) NOT NULL,
+    name            VARCHAR(100) NOT NULL
 );
 -- table for storing alghoritm configs
 CREATE TABLE Configs (

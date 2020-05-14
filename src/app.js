@@ -27,6 +27,8 @@ app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
+var pluginProps = undefined
+
 function maketToLayout (maket) {
 	if (maket.toString() != 'layout.Maket') {
 		throw new Error('Invalid maket type');
@@ -110,17 +112,11 @@ function centeringElements (elements, areaMeta) {
 }
 
 app.get('/', (req, res) => {
-	db.getPluginProps()
-		.then(props => {
-			res.render('index', {
-				baseUrl: config.BASE_URL,
-				oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
-					&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth`
-			})
-		})
-		.catch(_ => {
-			// render something else
-		})
+	res.render('index', {
+		baseUrl: config.BASE_URL,
+		oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
+			&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth`
+	})
 })
 
 app.get('/oauth', async (req, res) => {
@@ -134,7 +130,10 @@ app.get('/oauth', async (req, res) => {
 
 app.listen(port, () => {
 	db.init()
-	console.log(`App listening on port ${port}`)
+	db.getPluginProps(config.PLUGIN_NAME).then((props) => {
+		pluginProps = props
+		console.log(`App listening on port ${port}`)
+	})
 })
 
 send = (data, info, response) => {

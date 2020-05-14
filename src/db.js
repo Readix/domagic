@@ -25,8 +25,8 @@ module.exports = {
 					log.error(err.stack)
 			})
 	},
-	addPlugin: async function (client_id, client_secret) {
-		let query = `INSERT INTO Plugins(client_id, client_secret) VALUES(${client_id}, ${client_secret})`
+	addPlugin: async function (name, client_id, client_secret) {
+		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES(${name}, ${client_id}, ${client_secret})`
 		dbPool.query(query)
 			.catch(err => log.error(err.stack))
 	},
@@ -50,8 +50,8 @@ module.exports = {
 		dbPool.query(query)
 			.catch(err => log.error(err.stack))
 	},
-	getPluginProps: async function() {
-		let query = 'SELECT * FROM Plugins LIMIT 1'
+	getPluginProps: async function(name) {
+		let query = `SELECT * FROM Plugins WHERE name = '${name}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => log.error(err.stack))
