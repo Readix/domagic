@@ -14,7 +14,7 @@ const layoutObject = require('../layoutObject')
 const aligner = require('../aligner/aligner.js')
 
 const app = express()
-const port = 3321
+const port = 3000
 
 const log = require('./logger')
 const objectsQuantityLimit = 7
