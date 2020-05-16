@@ -15,6 +15,8 @@ $.get('config.json', json => {config = json})
 	.fail(() => {console.log('Error: couldn\'t load config')})
 
 miro.onReady(() => {
+	miro.currentUser.getId().then(user_id =>
+		gtag('set', {'user_id': user_id}))
 	miro.initialize({
 		extensionPoints: {
 			getWidgetMenuItems: (widgets) => {
@@ -76,6 +78,11 @@ var run = async (frameId) => {
 			'id': item[0].id
 		});
 	}
+	gtag('event', 'Кол-во элементов', {
+		'event_category': 'Генерация',
+		'event_label': `${data.elems.length}`,
+		'value': 10
+	});
 
 	$.ajax({
 	url: config.host + '/generate',
@@ -85,6 +92,11 @@ var run = async (frameId) => {
 	},
 	data: data,
 	success: res => {
+		gtag('event', 'Код ошибки', {
+			'event_category': 'Генерация',
+			'event_label': `${res.code}`,
+			'value': 10
+		});
 		switch (parseInt(res.code / 100)) {
 			case 1:
 				miro.showNotification(res.message)
