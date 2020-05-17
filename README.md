@@ -8,13 +8,17 @@ App for automatically placing items on presentation slide the Miro board
 ### How to use
 1) Run `npm install` (install npm and load all necessary dependencies)
 2) Run `npm run ngrok`
-3) Edit `src/config.js`:
-    - Set BASE_URL from ngrok with https protocol extension
-    - Set CLIENT_ID from the App settings
-    - Set CLIENT_SECRET from the App settings
+3) Edit `src/config.json`:
+    - Set the username and password for database access:
+        - db_user
+        - db_pass
+    - Set the app url from ngrok with https protocol extension
+        - base_url 
 4) Run in another terminal:
 
-`npm run init`
+`npm run init -- plugin_name=sliderman client_id=CLIENT_ID client_secret=CLIENT_SECRET`
+
+where CLIENT_ID and CLIENT_SECRET from the app settings
 
 `npm run start`
 
@@ -27,6 +31,8 @@ App for automatically placing items on presentation slide the Miro board
 `app.js` is the entry point
 
 `api.js` contains methods for work with API
+
+`db.js` contains methods for work with database
 
 `config.js` contains configs, edit this file before usage
 
