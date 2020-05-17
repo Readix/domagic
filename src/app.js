@@ -152,9 +152,9 @@ app.get('/generate', async (req, res) => {
 		info = { 'code': 0, 'message': '' }
 		// Empty checking {
 		if (req.query.elems == undefined || req.query.elems == []) {
-			info.code = 203 // <==============
+			info.code = 204
 			info.message = 'Not found any objects'
-			send({}, info, res)
+			send({}, info, res, req)
 			return
 		}
 		// Types checking {
@@ -172,7 +172,7 @@ app.get('/generate', async (req, res) => {
 			info.code = suitableQuanity == 0 ? 202 : 102
 			info.message = `Not supported type: ${notSuitableType}`
 			if (suitableQuanity == 0) {
-				send({}, info, res)
+				send({}, info, res, req)
 				return
 			}
 		}
@@ -183,7 +183,7 @@ app.get('/generate', async (req, res) => {
 		if (boardElems.length > objectsQuantityLimit) {
 			info.code = 201
 			info.message = `Too many objects (must be smaller than ${objectsQuantityLimit + 1})`
-			send({}, info, res)
+			send({}, info, res, req)
 			return
 		}
 		// } quanity checking
@@ -244,7 +244,7 @@ app.get('/generate', async (req, res) => {
 		if (makets.length == 0) {
 			info.code = 203
 			info.message = 'Objects are too big'
-			send({}, info, res)
+			send({}, info, res, req)
 			return
 		}
 		maketsCount = makets.length;
