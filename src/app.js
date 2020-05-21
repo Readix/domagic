@@ -124,9 +124,19 @@ app.get('/oauth', async (req, res) => {
 	const response = await api.oauth.getToken(req.query.code, req.query.client_id, pluginProps.client_secret)
 	console.log('/oauth/ response = ', response)
 	if (response) {
-		await db.addAuthorization(response)
+		await db.addAuthorization(response, req.query.client_id)
 	}
 	res.send('App has been installed, open <br>response: ' + JSON.stringify(response))
+})
+
+app.get('/startSession', async (req, res) => {
+	await db.startSession(req.query.user_id, req.query.tqem_id)
+	res.send('Session started successfully')
+})
+
+app.get('/endSession', async (req, res) => {
+	await db.endSession(req.query.user_id, req.query.team_id)
+	res.send('Session ended successfully')
 })
 
 app.listen(port, () => {

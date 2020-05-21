@@ -31,12 +31,44 @@ miro.onReady(() => {
 			}
 		}
 	})
+  	Object.defineProperty(window, 'team_id', {
+    	value: await miro.account.get()['id'],
+    	configurable: false,
+    	writable: false
+  	})
+  	Object.defineProperty(window, 'user_id', {
+    	value: await miro.currentUser.getId(),
+    	configurable: false,
+    	writable: false
+  	})
+  	$.ajax({
+    	url: config.host + '/startSession',
+    	method: 'GET',
+    	headers: {
+        	'Content-Type': 'application/json'
+    	},
+    	data: {
+      		user_id: user_id,
+      		team_id: team_id
+    	}
+  	})
 })
 
+window.addEventListener("beforeunload", async function (e) {
+  await $.ajax({
+    url: config.host + '/endSession',
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    data: {
+      user_id: user_id,
+      team_id: team_id
+    }
+  })
+});
 
 var run = async (frameId) => {
-	let team_id = (await miro.account.get())['id']
-	let user_id = await miro.currentUser.getId()
 	let frame = await miro.board.widgets.get({id: frameId})
 	let data = {
 		'user': user_id,

@@ -34,6 +34,10 @@ CREATE TABLE Installations (
     token_type      VARCHAR(30) NOT NULL,
     registration    TIMESTAMP DEFAULT NOW(),
     deletion        TIMESTAMP NULL,
+    client_id       BIGINT NOT NULL
+        REFERENCES Plugins(client_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     feedback_id     BIGINT NULL 
         REFERENCES Feedbacks(feedback_id)
         ON DELETE RESTRICT
