@@ -130,7 +130,7 @@ app.get('/oauth', async (req, res) => {
 })
 
 app.get('/startSession', async (req, res) => {
-	await db.startSession(req.query.user_id, req.query.tqem_id)
+	await db.startSession(req.query.user_id, req.query.team_id)
 	res.send('Session started successfully')
 })
 
@@ -154,6 +154,11 @@ send = (data, info, response, req) => {
 	db.addRequest(req.query.user, req.query.team, JSON.stringify(reqParams), info.code)
 	response.send(Object.assign(data, info))
 }
+
+app.get('/stickerComposer', async (req, res) => {
+	// #todo: do sticks composing
+	setTimeout(()=>res.send('Returned'), 3000)
+})
 
 app.get('/generate', async (req, res) => {
 	console.log('start generate')

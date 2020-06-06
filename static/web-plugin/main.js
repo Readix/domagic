@@ -4,59 +4,62 @@ let icon = `<g id="slidermanico-layer">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M1 1H11V7.23318L8.61035 8.90643L10.7765 12H1V1ZM4 5H5V6H4V5ZM6 6H5V7H4V8H5V7H6V8H7V7H6V6ZM6 6V5H7V6H6Z" fill="#37335F"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8771 15H1V23H16V19.4599L12.8771 15ZM8 18H9V19H8V18ZM10 19H9V20H8V21H9V20H10V21H11V20H10V19ZM10 19V18H11V19H10Z" fill="#37335F"/>
 </g>`
-
 let prevFrame = {
-  'id': '',
-  'widgetsId': []
+    'id': '',
+    'widgetsId': []
 };
 let countCallWithSameFrame = 0;
-var config = {};
-$.get('config.json', json => {config = json})
-	.fail(() => {console.log('Error: couldn\'t load config')})
 
-miro.onReady(() => {
+miro.onReady(async () => {
 	miro.currentUser.getId().then(user_id =>
 		gtag('set', {'user_id': user_id}))
 	miro.initialize({
 		extensionPoints: {
 			getWidgetMenuItems: (widgets) => {
-				if (widgets.length != 1 || widgets[0].type.toLowerCase() != 'frame') {
-					return Promise.resolve([{}])
+				if (widgets.length == 1 && widgets[0].type.toLowerCase() == 'frame') {
+					return Promise.resolve([{
+						tooltip: 'Make slide better (egor dev)',
+						svgIcon: icon,
+						onClick: () => proccessSlide(widgets[0].id)
+					}])
 				}
-				return Promise.resolve([{
-					tooltip: 'Make slide better',
-					svgIcon: icon,
-					onClick: () => run(widgets[0].id)
-				}])
+				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker') == false){
+					return Promise.resolve([{
+						tooltip: 'Compare stickers (egor dev)',
+						svgIcon: icon,
+						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':270})
+                    }])
+				}
+				return Promise.resolve([{}])
 			}
 		}
 	})
   	Object.defineProperty(window, 'team_id', {
-    	value: await miro.account.get()['id'],
-    	configurable: false,
-    	writable: false
+        value: (await miro.account.get())['id'],
+        configurable: false,
+        writable: false
   	})
   	Object.defineProperty(window, 'user_id', {
-    	value: await miro.currentUser.getId(),
-    	configurable: false,
-    	writable: false
+        value: await miro.currentUser.getId(),
+        configurable: false,
+        writable: false
   	})
   	$.ajax({
-    	url: config.host + '/startSession',
-    	method: 'GET',
-    	headers: {
-        	'Content-Type': 'application/json'
-    	},
-    	data: {
-      		user_id: user_id,
-      		team_id: team_id
-    	}
+        url: '/startSession',
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: {
+            user_id: user_id,
+            team_id: team_id
+        }
   	})
 })
 
 window.addEventListener("beforeunload", async function (e) {
   await $.ajax({
-    url: config.host + '/endSession',
+    url: '/endSession',
     method: 'GET',
     headers: {
         'Content-Type': 'application/json'
@@ -68,7 +71,7 @@ window.addEventListener("beforeunload", async function (e) {
   })
 });
 
-var run = async (frameId) => {
+var proccessSlide = async (frameId) => {
 	let frame = await miro.board.widgets.get({id: frameId})
 	let data = {
 		'user': user_id,
@@ -117,7 +120,7 @@ var run = async (frameId) => {
 	});
 
 	$.ajax({
-	url: config.host + '/generate',
+	url: '/generate',
 	method: 'GET',
 	headers: {
 		'Content-Type': 'application/json'
