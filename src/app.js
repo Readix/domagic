@@ -13,6 +13,9 @@ const scoring = require('../scoring')
 const layoutObject = require('../layoutObject')
 const aligner = require('../aligner/aligner.js')
 
+const MiroWidget = require('../stickerman/miroWidget')
+const Stickerman = require('../stickerman/stickerman')
+
 const app = express()
 const port = 3000
 
@@ -161,7 +164,7 @@ app.get('/stickerComposer', async (req, res) => {
 		let skins = req.query.stickers.map(widget => new MiroWidget(widget))
 		let sm = new Stickerman()
 		sm.run(skins, {
-			clustering: req.query.criterion.toLowerCase(),
+			clustering: [req.query.criterion.toLowerCase()],
 			order: {values: ['width', 'width'], desc: true},
 			compose: [
 				req.query.composition.toLowerCase(),

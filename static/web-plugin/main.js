@@ -18,14 +18,14 @@ miro.onReady(async () => {
 			getWidgetMenuItems: (widgets) => {
 				if (widgets.length == 1 && widgets[0].type.toLowerCase() == 'frame') {
 					return Promise.resolve([{
-						tooltip: 'Make slide better (egor dev)',
+						tooltip: 'Make slide better',
 						svgIcon: icon,
 						onClick: () => proccessSlide(widgets[0].id)
 					}])
 				}
 				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker') == false){
 					return Promise.resolve([{
-						tooltip: 'Compare stickers (egor dev)',
+						tooltip: 'Compare stickers',
 						svgIcon: icon,
 						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':270})
                     }])

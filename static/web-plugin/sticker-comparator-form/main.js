@@ -30,8 +30,9 @@ $(document).ready(()=>{
 			},
 			success: (res) => {
 				if (Number(res.code) == 1) {
-					showErrorNotification('server error')
+					miro.showErrorNotification('server error')
 					console.log(res.message)
+					miro.board.ui.closeModal()
 					return
 				}
 				let left = Math.min(...stickers.map(s => s.x))
