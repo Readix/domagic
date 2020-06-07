@@ -156,8 +156,31 @@ send = (data, info, response, req) => {
 }
 
 app.get('/stickerComposer', async (req, res) => {
-	// #todo: do sticks composing
-	setTimeout(()=>res.send('Returned'), 3000)
+	try {
+		console.log('compose')
+		let skins = req.query.stickers.map(widget => new MiroWidget(widget))
+		let sm = new Stickerman()
+		sm.run(skins, {
+			clustering: req.query.criterion.toLowerCase(),
+			order: {values: ['width', 'width'], desc: true},
+			compose: [
+				req.query.composition.toLowerCase(),
+				req.query.composition.toLowerCase() == 'horizontal' ?
+					'vertical': 'horizontal'
+			]
+		})
+		res.send({
+			widgets: req.query.stickers,
+			code: 0,
+			message: 'success',
+		})
+	}
+	catch (error) {
+		res.send({
+			code: 1,
+			message: error.message,
+		})
+	}
 })
 
 app.get('/generate', async (req, res) => {

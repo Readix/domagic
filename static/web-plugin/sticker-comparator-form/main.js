@@ -16,7 +16,8 @@ $(document).ready(()=>{
 				team: window.team_id,
 				criterion: $('input[name=criterion]:checked').val(),
 				composition: $('input[name=composition]:checked').val(),
-				stickers: stickers.map((stick) => {
+				stickers: stickers
+				/*.map((stick) => {
 					return {
 						id: stick.id,
 						width: stick.bounds.width,
@@ -25,34 +26,21 @@ $(document).ready(()=>{
 						top: stick.bounds.top,
 						color: stick.style.stickerBackgroundColor
 					}
-				})
+				})*/
 			},
 			success: (res) => {
-				// #todo: placing sticks code (example is below)
-				// gtag('event', 'Код ошибки', {
-				// 	'event_category': 'Генерация',
-				// 	'event_label': `${res.code}`,
-				// 	'value': 10
-				// });
-				// switch (parseInt(res.code / 100)) {
-				// 	case 1:
-				// 		miro.showNotification(res.message)
-				// 		break
-				// 	case 2:
-				// 		miro.showErrorNotification(res.message)
-				// 		return
-				// 	case 3:
-				// 		miro.showErrorNotification('server error')
-				// 		return
-				// }
-				// objectsToUpdate = []
-				// res.stickers.forEach(element => {
-				// object = stickers.find(object => object.id == element.id);
-				// object.x = element.area.leftTop.x + frame[0].bounds.left + element.width/2;
-				// object.y = element.area.leftTop.y + frame[0].bounds.top + element.height/2;
-				// objectsToUpdate.push(object)
-				// });
-				// miro.board.widgets.update(objectsToUpdate);
+				if (Number(res.code) == 1) {
+					showErrorNotification('server error')
+					console.log(res.message)
+					return
+				}
+				let left = Math.min(...stickers.map(s => s.x))
+				let top = Math.min(...stickers.map(s => s.y))
+				res.widgets.forEach(widget => {
+					widget.x += left;
+					widget.y += top
+				})
+				miro.board.widgets.update(res.widgets);
 				miro.board.ui.closeModal()
 			},
 			error: () => {
