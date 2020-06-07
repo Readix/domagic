@@ -56,19 +56,18 @@ cutter.Calculator = {
             cutter.valid(content1, 'content.Content');
             cutter.valid(content2, 'content.Content');
             let isType = (cont, type) => {
-+               return cont.type.toLowerCase() == content.contentTypes[type].toLowerCase();
+				return cont.type.toLowerCase() == content.contentTypes[type].toLowerCase();
             }
             if (isType(content1, 'TEXT') && isType(content2, 'TEXT')) {
-+               return content1.meta.height - content2.meta.height;
+				return content1.meta.height - content2.meta.height;
             }
             if (!isType(content1, 'TEXT') && !isType(content2, 'TEXT')) {
-+               return content1.meta.width - content2.meta.width;
+				return content1.meta.width - content2.meta.width;
             }
--           return isType(content2, 'TEXT');
-+           if (isType(content1, 'TEXT')) {
-+               return -1;
-+           }
-+           return 1;
+			if (isType(content1, 'TEXT')) {
+				return -1;
+			}
+			return 1;
         }
     },
     /**
