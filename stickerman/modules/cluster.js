@@ -1,5 +1,7 @@
 const BaseComponent = require('./bases/baseComponent');
 const compose = require('./compose');
+const splitter = require('./splitter')
+
 
 class Cluster extends BaseComponent {
     constructor(widgets) {
@@ -32,15 +34,10 @@ class Cluster extends BaseComponent {
             })
         }
     }
-    split(crit) {
+    async split(crit) {
         // crit - пока что только свойство виджета
-        this.subs = Object
-            .values(
-                this.subs.reduce((groups, widget) => {
-                    let value = widget.get(crit)
-                    groups[value] = groups[value] ? [widget, ...groups[value]] : [widget]
-                    return groups
-                }, {}))
+        let method = crit == 'text' ? 'text' : 'property'
+        this.subs = (await splitter[method](this.subs, crit))
             .map(group  => new Cluster(group));
     }
     lineUp(crit, desc = false) {

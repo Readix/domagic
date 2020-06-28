@@ -14,10 +14,18 @@ class BaseComponent {
         }
     }
     get(propname, ...args) {
-        return this.getter[propname](...args)  // catch
+        try {
+            return this.getter[propname](...args)  // catch
+        } catch (error) {
+            console.error('property "' + propname + '" not found in getter')
+        }
     }
     set(propname, ...args) {
-        this.setter[propname](...args)  // catch
+        try {
+            this.setter[propname](...args)  // catch
+        } catch (error) {
+            console.error('property "' + propname + '" not found in setter')
+        }
     }
 }
 

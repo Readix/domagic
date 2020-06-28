@@ -6,14 +6,18 @@ class MiroWidget extends BaseWidget  {
         super(widget)
     }
     getters() {
+        this.getter['id'] = () => this.widget.id
+        this.getter['text'] = () => this.widget.text
         this.getter['color'] = () => this.widget.style.stickerBackgroundColor
         this.getter['x'] = () => Number(this.widget.x - this.widget.bounds.width / 2)
         this.getter['y'] = () => Number(this.widget.y - this.widget.bounds.height / 2)
         this.getter['width'] = () => Number(this.widget.bounds.width)
         this.getter['height'] = () => Number(this.widget.bounds.height)
-        this.getter['tag'] = () => this.widget.tags[0]
+        //this.getter['tag'] = () => this.widget.tags[0]
     }
     setters() {
+        //this.getter['id'] = id => this.widget.id
+        //this.getter['text'] = text => this.widget.text = text
         this.setter['color'] = c => this.widget.style.stickerBackgroundColor = c
         this.setter['x'] = x => this.widget.x = Number(x) + this.widget.bounds.width / 2
         this.setter['y'] = y => this.widget.y = Number(y) + this.widget.bounds.height / 2

@@ -15,25 +15,30 @@ class Stickerman {
     constructor() {
         this.levels = []
     }
-    run(widgets, criteria) {
+    async run(widgets, criteria) {
         // criteria = {clustering: ['color'], order: ['sizeUp'], compose: ['horizontal', ...]}
         let root = new Cluster(widgets)
         this.levels.push([root])
-        criteria.clustering.forEach((crit, i) => {
+        /*criteria.clustering.forEach((crit, i) => {
             this.levels[i + 1] = []
             this.levels[i].forEach(cluster => {
                 cluster.split(crit)
                 this.levels[i + 1].push(...cluster.subs)
             })
-        })
+        }) */
+
+        for (let i = 0; i < criteria.clustering.length; ++i) {
+            this.levels[i + 1] = []
+            for(let cluster of this.levels[i]) {
+                await cluster.split(criteria.clustering[i])
+                this.levels[i + 1].push(...cluster.subs)
+            }
+        }
+
         this.levels.reverse()
         this.levels.forEach((level, i) => {
             level.forEach(cluster => {
                 cluster.lineUp(criteria.order.values[i], criteria.order.desc)
-            })
-        })
-        this.levels.forEach((level, i) => {
-            level.forEach(cluster => {
                 cluster.compose(criteria.compose[i])
             })
         })

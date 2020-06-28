@@ -14,6 +14,7 @@ const layoutObject = require('../layoutObject')
 const aligner = require('../aligner/aligner.js')
 
 const MiroWidget = require('../stickerman/miroWidget')
+const CustomWidget = require('../stickerman/customWidget')
 const Stickerman = require('../stickerman/stickerman')
 
 const app = express()
@@ -145,6 +146,7 @@ app.get('/endSession', async (req, res) => {
 app.listen(port, () => {
 	db.init()
 	db.getPluginProps(config.PLUGIN_NAME).then((props) => {
+		console.log(props)
 		pluginProps = props
 		console.log(`App listening on port ${port}`)
 	})
@@ -158,20 +160,88 @@ send = (data, info, response, req) => {
 	response.send(Object.assign(data, info))
 }
 
+let settings = {
+	horizontal: {
+		order: { values: ['height', 'width'], desc: true },
+		compose: ['horizontal', 'vertical']
+	},
+	vertical: {
+		order: { values: ['width', 'height'], desc: true },
+		compose: ['vertical', 'horizontal']
+	},
+	blocky: {
+		order: { values: ['width', 'width'], desc: true},
+		compose: ['blocky', 'horizontal']
+	}
+}
+
+let terms = [
+	{// criteria
+		c: 'color',
+		s: 'size',
+		t: 'text',
+		w: 'width',
+		w: 'height',
+	},
+	{// order
+		w: 'width',
+		h: 'height',
+	},
+	{// compose
+		h: 'horizontal',
+		v: 'vertical',
+		b: 'blocky',
+	}
+]
+
+let parseParams = paramsString => {
+	let desc = false
+	let params = paramsString
+		.split(';')
+		.map((sector, i) =>
+			Array.from(sector)
+			.map(letter => {
+				if (letter == '-') desc = true
+				if (!(letter in terms[i])) 
+					throw TypeError('Unknown letter "' + letter + '"')
+				return terms[i][letter]
+			})
+		)
+	return {
+		clustering: params[0],
+		order: { values: params[1], desc: desc},
+		compose: params[2]
+	}
+}
+
+let validOverparams = paramsString => {
+	if(typeof paramsString == 'undefined') return false
+	paramsString = paramsString.replace(' ', '')
+	let sectors = paramsString.split(';')
+		.map(sector => sector.replace('-', ''))
+	return sectors.length == 3 &&
+	sectors[1].length == sectors[0].length + 1 && 
+	sectors[1].length == sectors[2].length
+}
+
 app.get('/stickerComposer', async (req, res) => {
 	try {
 		console.log('compose')
-		let skins = req.query.stickers.map(widget => new MiroWidget(widget))
+		console.log('overparams: ', req.query.overparams)
+		req.query.stickers = Object.values(req.query.stickers)
+		let skins = req.query.stickers.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
-		sm.run(skins, {
-			clustering: [req.query.criterion.toLowerCase()],
-			order: {values: ['width', 'width'], desc: true},
-			compose: [
-				req.query.composition.toLowerCase(),
-				req.query.composition.toLowerCase() == 'horizontal' ?
-					'vertical': 'horizontal'
-			]
-		})
+		
+		let isValid = validOverparams(req.query.overparams)
+		console.log(isValid)
+		let setts = isValid ?
+			parseParams(req.query.overparams) :
+			Object.assign(
+				{ clustering: [req.query.criterion.toLowerCase()] },
+				settings[req.query.composition.toLocaleLowerCase()]
+			)
+		console.log(setts);
+		await sm.run(skins, setts)
 		res.send({
 			widgets: req.query.stickers,
 			code: 0,
@@ -181,7 +251,7 @@ app.get('/stickerComposer', async (req, res) => {
 	catch (error) {
 		res.send({
 			code: 1,
-			message: error.message,
+			message: error.stack,
 		})
 	}
 })
