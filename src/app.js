@@ -224,26 +224,26 @@ let validOverparams = paramsString => {
 	sectors[1].length == sectors[2].length
 }
 
-app.get('/stickerComposer', async (req, res) => {
+app.post('/stickerComposer', async (req, res) => {
 	try {
 		console.log('compose')
-		console.log('overparams: ', req.query.overparams)
-		req.query.stickers = Object.values(req.query.stickers)
-		let skins = req.query.stickers.map(widget => new CustomWidget(widget))
+		console.log('overparams: ', req.body.overparams)
+		req.body.stickers = Object.values(req.body.stickers)
+		let skins = req.body.stickers.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
 		
-		let isValid = validOverparams(req.query.overparams)
+		let isValid = validOverparams(req.body.overparams)
 		console.log(isValid)
 		let setts = isValid ?
-			parseParams(req.query.overparams) :
+			parseParams(req.body.overparams) :
 			Object.assign(
-				{ clustering: [req.query.criterion.toLowerCase()] },
-				settings[req.query.composition.toLocaleLowerCase()]
+				{ clustering: [req.body.criterion.toLowerCase()] },
+				settings[req.body.composition.toLocaleLowerCase()]
 			)
 		console.log(setts);
 		await sm.run(skins, setts)
 		res.send({
-			widgets: req.query.stickers,
+			widgets: req.body.stickers,
 			code: 0,
 			message: 'success',
 		})

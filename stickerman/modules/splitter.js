@@ -1,7 +1,7 @@
 const rp = require('request-promise')
 const Cluster = require('./cluster')
 
-const textmanUrl = 'http://135.181.27.4:8000'
+const textmanUrl = 'http://159.69.37.26:9000'
 
 module.exports = {
     'text': async subs => {
