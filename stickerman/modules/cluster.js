@@ -45,10 +45,6 @@ class Cluster extends BaseComponent {
         this.subs.sort((sub1, sub2) => {
             return ((-1) ** desc) * (sub1.get(crit) - sub2.get(crit))
         })
-        // this.subs.reduce((i, sub) => 
-        //     {sub.rank = i; return i + 1}, 0)
-        // this.subs.sort((sub1, sub2) => 
-        //     ((-1) ** desc) * Number(sub1.rank) - Number(sub2.rank) || sub1 - sub2)
     }
     compose(crit) {
         compose[crit](this.subs)

@@ -12,8 +12,8 @@ $(document).ready(()=>{
 				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify({
-				user: window.user_id,
-				team: window.team_id,
+				user: (await miro.account.get())['id'],
+				team: await miro.currentUser.getId(),
 				criterion: $('input[name=criterion]:checked').val(),
 				overparams: $('input[type=text]').val(),
 				composition: $('input[name=composition]:checked').val(),

@@ -152,12 +152,9 @@ app.listen(port, () => {
 	})
 })
 
-send = (data, info, response, req) => {
-	let reqParams = {}
-	reqParams.board = req.query.board
-	reqParams.elems = req.query.elems
-	db.addRequest(req.query.user, req.query.team, JSON.stringify(reqParams), info.code)
-	response.send(Object.assign(data, info))
+send = (user, team, response, info, sendData, reqData) => {
+	db.addRequest(user, team, JSON.stringify(reqData), info.code)
+	response.send(Object.assign(sendData, info))
 }
 
 let settings = {
@@ -242,17 +239,20 @@ app.post('/stickerComposer', async (req, res) => {
 			)
 		console.log(setts);
 		await sm.run(skins, setts)
-		res.send({
-			widgets: req.body.stickers,
+		send(req.body.user, req.body.team, res, {
 			code: 0,
 			message: 'success',
-		})
+		},{
+			widgets: req.body.stickers,
+		}, req.body)
 	}
 	catch (error) {
-		res.send({
+		log.error(error.stack)
+		console.error(error.message)
+		send(req.body.user, req.body.team, res, {
 			code: 1,
-			message: error.stack,
-		})
+			message: error.stack
+		}, {}, req.body)
 	}
 })
 
@@ -379,8 +379,7 @@ app.get('/generate', async (req, res) => {
 		});
 		let bestlay = proc.getBestLayoutVariant(scoringLayouts);
 
-		// } main algorithm
-		send({
+		send(req.query.user, req.query.team, res, info, {
 			'widgets': bestlay.sourseLayout.widgets,
 			'score': bestlay.score,
 			'sourceScore': srcScore.score,
@@ -389,12 +388,12 @@ app.get('/generate', async (req, res) => {
 			'source': source,
 			'maketsCount': maketsCount,
 			'error': false
-		}, info, res, req)
+		}, req.query)
 	} catch (error) {
 		log.error(error.stack)
 		console.error(error.message)
 		info.code = 301
 		info.message = 'server error'
-		send({}, info, res, req)
+		send(req.query.user, req.query.team, res, info, {}, req.query)
 	}
 })

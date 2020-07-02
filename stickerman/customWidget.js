@@ -14,11 +14,9 @@ class CustomWidget extends BaseWidget  {
         this.getter['width'] = () => Number(this.widget.width)
         this.getter['height'] = () => Number(this.widget.height)
         this.getter['type'] = () => this.widget.type
-        this.getter['size'] = () => this.widget.size
+        this.getter['size'] = () => (this.height*this.width)
     }
     setters() {
-        //this.getter['id'] = id => this.widget.id
-        //this.getter['text'] = text => this.widget.text = text
         this.setter['color'] = c => this.widget.color = c
         this.setter['x'] = x => this.widget.x = Number(x) + this.widget.width / 2
         this.setter['y'] = y => this.widget.y = Number(y) + this.widget.height / 2
