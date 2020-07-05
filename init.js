@@ -32,9 +32,8 @@ Object.keys(keysToDB).forEach(key => {
         process.exit()
     }
 })
-//save configs
+//save config
 fs.writeFileSync('./src/config.json', JSON.stringify(config, null, '\t'))
-fs.writeFileSync('./static/web-plugin/config.json', JSON.stringify({host: config['base_url']}))
 //save plugin info
 var db = require('./src/db')
 db.init()

@@ -8,17 +8,15 @@ App for automatically placing items on presentation slide the Miro board
 ### How to use
 1) Run `npm install` (install npm and load all necessary dependencies)
 2) Run `npm run ngrok`
-3) Edit `src/config.json`:
-    - Set the username and password for database access:
-        - db_user
-        - db_pass
-    - Set the app url from ngrok with https protocol extension
-        - base_url 
-4) Run in another terminal:
+3) Install PostgreSQL (12.2 or newest)
+4) Create `smart-layout` database
+5) Run db_init.sql script in `smart-layout` DB for initiate PostgreSQL
+6) Run in another terminal:
 
-`npm run init -- plugin_name=sliderman client_id=CLIENT_ID client_secret=CLIENT_SECRET`
+`npm run init -- base_url=NGROK_URL db_user=USER db_pass=PASS plugin_name=sliderman client_id=CLIENT_ID client_secret=CLIENT_SECRET`
 
 where CLIENT_ID and CLIENT_SECRET from the app settings
+plugin_name may be anything name
 
 `npm run start`
 
@@ -34,7 +32,7 @@ where CLIENT_ID and CLIENT_SECRET from the app settings
 
 `db.js` contains methods for work with database
 
-`config.js` contains configs, edit this file before usage
+`config.js` contains configs, edit this file before usage or use `npm run init ...` for configure
 
 `events.js` process webhook events
  

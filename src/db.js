@@ -18,8 +18,8 @@ function initDB() {
 
 module.exports = {
 	init: initDB,
-	addAuthorization: async function (auth) {
-		let query = `INSERT INTO Installations(user_id, team_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, '${auth.scope}', '${auth.access_token}', '${auth.token_type}')`
+	addAuthorization: async function (auth, client_id) {
+		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${client_id}, ${auth.scope}, ${auth.access_token}, ${auth.token_type})`
 		return dbPool.query(query)
 			.catch(err => {
 				let errString = dbErrorFormat('addAuthorization', query, err.stack)
