@@ -1,10 +1,21 @@
 $(document).ready(()=>{
+	let markTag = (cat, event, label, val = 10) => {
+		gtag('event', event, {
+			'event_category': cat,
+			'event_label': label,
+			'value': val
+		});
+	}
+
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
 
 		let stickers = await miro.board.selection.get()
+		markTag('Компановка', 'Кол-во стикеров', stickers.length)
+		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
+		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
 		$.ajax({
 			url: '/stickerComposer',
 			method: 'POST',
@@ -32,6 +43,7 @@ $(document).ready(()=>{
 			}),
 			success: (res) => {
 				console.log(res)
+				//markTag('Компановка', 'Кол-во групп', ...)
 				if (Number(res.code) == 1) {
 					miro.showErrorNotification('server error')
 					console.log(res.message)
@@ -46,7 +58,7 @@ $(document).ready(()=>{
 					curState = stickers.find((elem) => {
 						return elem.id == widget.id
 					})
-					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.left, widget.y - curState.bounds.top)
+					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
 				})
 				miro.board.ui.closeModal()
 			},
