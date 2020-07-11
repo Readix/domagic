@@ -36,8 +36,7 @@ class Cluster extends BaseComponent {
     }
     async split(crit) {
         // crit - пока что только свойство виджета
-        let method = crit == 'text' ? 'text' : 'property'
-        this.subs = (await splitter[method](this.subs, crit))
+        this.subs = (await splitter[crit](this.subs, crit))
             .map(group  => new Cluster(group));
     }
     lineUp(crit, desc = false) {

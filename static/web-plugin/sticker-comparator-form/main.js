@@ -9,12 +9,16 @@ $(document).ready(()=>{
 
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
+		if($('input[value=text]').is(':checked'))
+			crit = 'text' + prompt('enter algorithm number (1-3)', '1')
+		else
+			crit = $('input[name=criterion]:checked').val()
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
 
 		let stickers = await miro.board.selection.get()
 		markTag('Компановка', 'Кол-во стикеров', stickers.length)
-		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
+		markTag('Компановка', 'Критерий', crit)
 		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
 		$.ajax({
 			url: '/stickerComposer',
@@ -25,7 +29,7 @@ $(document).ready(()=>{
 			data: JSON.stringify({
 				user: (await miro.account.get())['id'],
 				team: await miro.currentUser.getId(),
-				criterion: $('input[name=criterion]:checked').val(),
+				criterion: crit,
 				overparams: $('input[type=text]').val(),
 				composition: $('input[name=composition]:checked').val(),
 				stickers: stickers

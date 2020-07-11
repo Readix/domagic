@@ -25,9 +25,9 @@ miro.onReady(async () => {
 				}
 				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker') == false){
 					return Promise.resolve([{
-						tooltip: 'Compare stickers',
+						tooltip: 'Compare stickers (egor)',
 						svgIcon: icon,
-						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':300})
+						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':330})
                     }])
 				}
 				return Promise.resolve([{}])
