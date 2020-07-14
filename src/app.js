@@ -221,12 +221,12 @@ let validOverparams = paramsString => {
 	sectors[1].length == sectors[2].length
 }
 
-app.post('/stickerComposer', async (req, res) => {
+app.post('/widgetComposer', async (req, res) => {
 	try {
 		console.log('compose')
 		console.log('overparams: ', req.body.overparams)
-		req.body.stickers = Object.values(req.body.stickers)
-		let skins = req.body.stickers.map(widget => new CustomWidget(widget))
+		req.body.widgets = Object.values(req.body.widgets)
+		let skins = req.body.widgets.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
 		
 		let isValid = validOverparams(req.body.overparams)
@@ -243,7 +243,7 @@ app.post('/stickerComposer', async (req, res) => {
 			code: 0,
 			message: 'success',
 		},{
-			widgets: req.body.stickers,
+			widgets: req.body.widgets,
 		}, req.body)
 	}
 	catch (error) {

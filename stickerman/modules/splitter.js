@@ -6,14 +6,21 @@ const textmanUrl = 'http://159.69.37.26:9000'
 let dist = (a, b) => Math.abs(a - b)
 
 function choose_text_method(meth) {
-    return async function(subs) {
+    return async function(subs, crit) {
+        if(crit.search('-') != -1)
+            countGroups = parseInt(crit.split('-')[1])
+        else
+            countGroups = undefined
         let inners = subs.map(sub => {
             return {id: sub.get('id'), text: sub.get('text')}})
         console.log(inners)
         let options = {
             method: 'POST',
             uri: textmanUrl + meth,
-            body: JSON.stringify(inners)
+            body: JSON.stringify({
+                widgets: inners,
+                count_groups: countGroups
+            })
         }
         return rp(options)
         .then(groupsOfId => {
