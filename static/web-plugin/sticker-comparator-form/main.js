@@ -1,4 +1,7 @@
 $(document).ready(()=>{
+miro.onReady(async () => {
+    miro.currentUser.getId().then(user_id =>
+        gtag('set', {'user_id': user_id}))
 	let markTag = (cat, event, label, val = 10) => {
 		gtag('event', event, {
 			'event_category': cat,
@@ -6,7 +9,6 @@ $(document).ready(()=>{
 			'value': val
 		});
 	}
-
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
 		if($('input[value=text]').is(':checked'))
@@ -77,4 +79,5 @@ $(document).ready(()=>{
 			}
 		})
 	})
+})
 })
