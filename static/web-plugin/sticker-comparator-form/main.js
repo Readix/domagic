@@ -16,7 +16,7 @@ miro.onReady(async () => {
 
 		let widgets = await miro.board.selection.get()
 		markTag('Компановка', 'Кол-во виджетов', widgets.length)
-		markTag('Компановка', 'Критерий', crit)
+		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
 		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
 		$.ajax({
 			url: '/widgetComposer',
