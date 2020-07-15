@@ -1,4 +1,7 @@
 $(document).ready(()=>{
+miro.onReady(async () => {
+    miro.currentUser.getId().then(user_id =>
+        gtag('set', {'user_id': user_id}))
 	let markTag = (cat, event, label, val = 10) => {
 		gtag('event', event, {
 			'event_category': cat,
@@ -6,18 +9,17 @@ $(document).ready(()=>{
 			'value': val
 		});
 	}
-
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
 
-		let stickers = await miro.board.selection.get()
-		markTag('Компановка', 'Кол-во стикеров', stickers.length)
-		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
+		let widgets = await miro.board.selection.get()
+		markTag('Компановка', 'Кол-во виджетов', widgets.length)
+		markTag('Компановка', 'Критерий', crit)
 		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
 		$.ajax({
-			url: '/stickerComposer',
+			url: '/widgetComposer',
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -28,16 +30,16 @@ $(document).ready(()=>{
 				criterion: $('input[name=criterion]:checked').val(),
 				overparams: $('input[type=text]').val(),
 				composition: $('input[name=composition]:checked').val(),
-				stickers: stickers
-				.map((stick) => {
+				widgets: widgets
+				.map((widget) => {
 					return {
-						id: stick.id,
-						width: stick.bounds.width,
-						height: stick.bounds.height,
-						left: stick.bounds.left,
-						top: stick.bounds.top,
-						color: stick.style.stickerBackgroundColor,
-						text: stick.plainText
+						id: widget.id,
+						width: widget.bounds.width,
+						height: widget.bounds.height,
+						left: widget.bounds.left,
+						top: widget.bounds.top,
+						color: widget.type.toLowerCase() == 'sticker' ? widget.style.stickerBackgroundColor : widget.style.backgroundColor,
+						text: widget.plainText
 					}
 				})
 			}),
@@ -50,12 +52,12 @@ $(document).ready(()=>{
 					miro.board.ui.closeModal()
 					return
 				}
-				let left = Math.min(...stickers.map(s => s.x))
-				let top = Math.min(...stickers.map(s => s.y))
+				let left = Math.min(...widgets.map(s => s.x))
+				let top = Math.min(...widgets.map(s => s.y))
 				res.widgets.forEach(widget => {
 					widget.x += left
 					widget.y += top
-					curState = stickers.find((elem) => {
+					curState = widgets.find((elem) => {
 						return elem.id == widget.id
 					})
 					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
@@ -70,4 +72,5 @@ $(document).ready(()=>{
 			}
 		})
 	})
+})
 })
