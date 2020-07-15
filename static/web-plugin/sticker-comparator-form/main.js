@@ -11,12 +11,12 @@ miro.onReady(async () => {
 	}
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
-		if($('input[value=text]').is(':checked'))
+		if($('input[value=text]').is(':checked')){
 			crit = 'text' + prompt('enter algorithm number (1-3)', '1')
 			countGroups = prompt('enter count groups (if you need auto mode - press "ok")')
 			if(isNaN(countGroups) == false)
 				crit += '-' + countGroups
-		else
+		}else
 			crit = $('input[name=criterion]:checked').val()
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
