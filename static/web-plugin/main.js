@@ -5,45 +5,83 @@ let icon = `<g id="slidermanico-layer">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8771 15H1V23H16V19.4599L12.8771 15ZM8 18H9V19H8V18ZM10 19H9V20H8V21H9V20H10V21H11V20H10V19ZM10 19V18H11V19H10Z" fill="#37335F"/>
 </g>`
 
+const app_id = "3074457348265940649"
+
 miro.onReady(async () => {
 	miro.currentUser.getId().then(user_id =>
-		gtag('set', {'user_id': user_id}))
+    gtag('set', {'user_id': user_id}))
+  Object.defineProperty(window, 'team_id', {
+    value: (await miro.account.get())['id'],
+    configurable: false,
+    writable: false
+  })
+  Object.defineProperty(window, 'user_id', {
+    value: await miro.currentUser.getId(),
+    configurable: false,
+    writable: false
+  })
 	miro.initialize({
 		extensionPoints: {
-			getWidgetMenuItems: (widgets) => {
-				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker' && widget.type.toLowerCase() != 'shape') == false){
-					return Promise.resolve([{
-						tooltip: 'Compare stickers',
-						svgIcon: icon,
-						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':300})
-                    }])
-				}
-				return Promise.resolve([{}])
+			getWidgetMenuItems: function(widgets) {
+        return Promise.resolve([{
+          tooltip: 'Hide widgets',
+          svgIcon: icon,
+          onClick: function() {
+            widgets = widgets.map(function(widget) {
+              if (widget.metadata[app_id])
+                if (widget.metadata[app_id]['HiddenBy'])
+                  widget.metadata[app_id] = {}
+                else
+                  widget.metadata[app_id]['HiddenBy'] = window.user_id
+              else {
+                widget.metadata[app_id] = {}
+                widget.metadata[app_id]['HiddenBy'] = window.user_id
+              }
+              return widget
+            })
+            miro.board.widgets.update(widgets)
+          }
+        }])
 			}
 		}
 	})
-  	Object.defineProperty(window, 'team_id', {
-        value: (await miro.account.get())['id'],
-        configurable: false,
-        writable: false
-  	})
-  	Object.defineProperty(window, 'user_id', {
-        value: await miro.currentUser.getId(),
-        configurable: false,
-        writable: false
-  	})
-  	$.ajax({
-        url: '/startSession',
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: {
-            user_id: user_id,
-            team_id: team_id
-        }
-  	})
+  $.ajax({
+      url: '/startSession',
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      data: {
+          user_id: user_id,
+          team_id: team_id
+      }
+  })
+  // test()
+  // miro.addListener('METADATA_CHANGED', async (e) => {
+  //   console.log(e.data)
+  //   curId = await miro.currentUser.getId()
+  //   changedWidgets = e.data
+  //   changedWidgets.forEach(function(widget) {
+  //     if (widget.metadata[app_id] && widget.metadata[app_id]['HiddenBy'] && curId != widget.metadata[app_id]['HiddenBy'])
+  //       miro.board.widgets.update({id: widget.id, clientVisible: false})
+  //     else
+  //       miro.board.widgets.update({id: widget.id, clientVisible: true})
+  //   })
+  // })
 })
+
+async function test() {
+  curId = await miro.currentUser.getId()
+  widgets = await miro.board.widgets.get()
+  widgets.forEach((widget) => {
+    if (widget.metadata[app_id] && widget.metadata[app_id]['HiddenBy'] && curId != widget.metadata[app_id]['HiddenBy']) {
+      // console.log('hide on start widget: ' + widget.id)
+      miro.board.widgets.update({id: widget.id, clientVisible: false})
+    }else
+      miro.board.widgets.update({id: widget.id, clientVisible: true})
+  })
+  setTimeout(test, 1000)
+}
 
 window.addEventListener("beforeunload", async function (e) {
   await $.ajax({
