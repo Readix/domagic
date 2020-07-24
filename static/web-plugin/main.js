@@ -10,6 +10,104 @@ const app_id = "3074457348265940649"
 miro.onReady(async () => {
 	miro.currentUser.getId().then(user_id =>
     gtag('set', {'user_id': user_id}))
+	miro.initialize({
+		extensionPoints: {
+			getWidgetMenuItems: function(widgets) {
+        return Promise.resolve([{
+          tooltip: 'Hide widgets',
+          svgIcon: icon,
+          onClick: async function() {
+            widgets = await miro.board.selection.get()
+            widgets.forEach((widget) => {
+              switch(widget.type){
+                case 'SHAPE':
+                  if (typeof(widget.metadata[app_id]) == 'object'){
+                    widget.style.backgroundColor = widget.metadata[app_id].style.backgroundColor
+                    widget.style.backgroundOpacity = widget.metadata[app_id].style.backgroundOpacity
+                    widget.style.bold = widget.metadata[app_id].style.bold
+                    widget.style.borderColor = widget.metadata[app_id].style.borderColor
+                    widget.style.borderOpacity = widget.metadata[app_id].style.borderOpacity
+                    widget.style.fontFamily = widget.metadata[app_id].style.fontFamily
+                    widget.style.highlighting = widget.metadata[app_id].style.highlighting
+                    widget.style.italic = widget.metadata[app_id].style.italic
+                    widget.style.strike = widget.metadata[app_id].style.strike
+                    widget.style.textAlign = widget.metadata[app_id].style.textAlign
+                    widget.style.textAlignVertical = widget.metadata[app_id].style.textAlignVertical
+                    widget.style.textColor = widget.metadata[app_id].style.textColor
+                    widget.style.underline = widget.metadata[app_id].style.underline
+                    widget.text = widget.metadata[app_id].text
+                    widget.capabilities.editable = true
+                    widget.metadata[app_id] = undefined
+                  }else{
+                    widget.metadata[app_id] = {
+                      text: widget.text,
+                      style: {
+                        backgroundColor: widget.style.backgroundColor,
+                        backgroundOpacity: widget.style.backgroundOpacity,
+                        bold: widget.style.bold,
+                        borderColor: widget.style.borderColor,
+                        borderOpacity: widget.style.borderOpacity,
+                        fontFamily: widget.style.fontFamily,
+                        highlighting: widget.style.highlighting,
+                        italic: widget.style.italic,
+                        strike: widget.style.strike,
+                        textAlign: widget.style.textAlign,
+                        textAlignVertical: widget.style.textAlignVertical,
+                        textColor: widget.style.textColor,
+                        underline: widget.style.underline
+                      }
+                    }
+                    widget.style.backgroundColor = '#aba18f'
+                    widget.style.backgroundOpacity = 1
+                    widget.style.bold = 0
+                    widget.style.borderColor = "transparent"
+                    widget.style.borderOpacity = 1
+                    widget.style.fontFamily = 10
+                    widget.style.highlighting = 0
+                    widget.style.italic = 0
+                    widget.style.strike = 0
+                    widget.style.textAlign = 'c'
+                    widget.style.textAlignVertical = 'm'
+                    widget.style.textColor = "#000000"
+                    widget.style.underline = 0
+                    widget.text = '<p>Content hidden</p>'
+                    widget.capabilities.editable = false
+                  }
+                  break;
+                case 'STICKER':
+                  if (typeof(widget.metadata[app_id]) == 'object'){
+                    widget.style.stickerBackgroundColor = widget.metadata[app_id].style.stickerBackgroundColor
+                    widget.text = widget.metadata[app_id].text
+                    widget.capabilities.editable = true
+                    widget.style.textAlign = widget.metadata[app_id].style.textAlign
+                    widget.style.textAlignVertical = widget.metadata[app_id].style.textAlignVertical
+                    widget.metadata[app_id] = undefined
+                  }else{
+                    widget.metadata[app_id] = {
+                      text: widget.text,
+                      style: {
+                        stickerBackgroundColor: widget.style.stickerBackgroundColor,
+                        textAlign: widget.style.textAlign,
+                        textAlignVertical: widget.style.textAlignVertical
+                      }
+                    }
+                    widget.style.stickerBackgroundColor = '#aba18f'
+                    widget.text = '<p>Content hidden</p>'
+                    widget.capabilities.editable = false
+                    widget.style.textAlign = 'c'
+                    widget.style.textAlignVertical = 'm'
+                  }
+                  break;
+                default:
+                  break;
+              }
+            })
+            miro.board.widgets.update(widgets)
+          }
+        }])
+			}
+		}
+  })
   Object.defineProperty(window, 'team_id', {
     value: (await miro.account.get())['id'],
     configurable: false,
@@ -20,31 +118,6 @@ miro.onReady(async () => {
     configurable: false,
     writable: false
   })
-	miro.initialize({
-		extensionPoints: {
-			getWidgetMenuItems: function(widgets) {
-        return Promise.resolve([{
-          tooltip: 'Hide widgets',
-          svgIcon: icon,
-          onClick: function() {
-            widgets = widgets.map(function(widget) {
-              if (widget.metadata[app_id])
-                if (widget.metadata[app_id]['HiddenBy'])
-                  widget.metadata[app_id] = {}
-                else
-                  widget.metadata[app_id]['HiddenBy'] = window.user_id
-              else {
-                widget.metadata[app_id] = {}
-                widget.metadata[app_id]['HiddenBy'] = window.user_id
-              }
-              return widget
-            })
-            miro.board.widgets.update(widgets)
-          }
-        }])
-			}
-		}
-	})
   $.ajax({
       url: '/startSession',
       method: 'GET',
@@ -56,32 +129,7 @@ miro.onReady(async () => {
           team_id: team_id
       }
   })
-  // test()
-  // miro.addListener('METADATA_CHANGED', async (e) => {
-  //   console.log(e.data)
-  //   curId = await miro.currentUser.getId()
-  //   changedWidgets = e.data
-  //   changedWidgets.forEach(function(widget) {
-  //     if (widget.metadata[app_id] && widget.metadata[app_id]['HiddenBy'] && curId != widget.metadata[app_id]['HiddenBy'])
-  //       miro.board.widgets.update({id: widget.id, clientVisible: false})
-  //     else
-  //       miro.board.widgets.update({id: widget.id, clientVisible: true})
-  //   })
-  // })
 })
-
-async function test() {
-  curId = await miro.currentUser.getId()
-  widgets = await miro.board.widgets.get()
-  widgets.forEach((widget) => {
-    if (widget.metadata[app_id] && widget.metadata[app_id]['HiddenBy'] && curId != widget.metadata[app_id]['HiddenBy']) {
-      // console.log('hide on start widget: ' + widget.id)
-      miro.board.widgets.update({id: widget.id, clientVisible: false})
-    }else
-      miro.board.widgets.update({id: widget.id, clientVisible: true})
-  })
-  setTimeout(test, 1000)
-}
 
 window.addEventListener("beforeunload", async function (e) {
   await $.ajax({
