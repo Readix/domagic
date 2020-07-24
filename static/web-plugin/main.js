@@ -10,9 +10,33 @@ const app_id = "3074457348265940649"
 miro.onReady(async () => {
 	miro.currentUser.getId().then(user_id =>
     gtag('set', {'user_id': user_id}))
+  Object.defineProperty(window, 'team_id', {
+    value: (await miro.account.get())['id'],
+    configurable: false,
+    writable: false
+  })
+  Object.defineProperty(window, 'user_id', {
+    value: await miro.currentUser.getId(),
+    configurable: false,
+    writable: false
+  })
+  $.ajax({
+      url: '/startSession',
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      data: {
+          user_id: user_id,
+          team_id: team_id
+      }
+  })
 	miro.initialize({
 		extensionPoints: {
-			getWidgetMenuItems: function(widgets) {
+			getWidgetMenuItems: async (widgets) => {
+        curUserId = await miro.currentUser.getId()
+        if (widgets.every((widget) => widget.createdUserId != window.user_id))
+          return Promise.resolve([])
         return Promise.resolve([{
           tooltip: 'Hide widgets',
           svgIcon: icon,
@@ -107,27 +131,6 @@ miro.onReady(async () => {
         }])
 			}
 		}
-  })
-  Object.defineProperty(window, 'team_id', {
-    value: (await miro.account.get())['id'],
-    configurable: false,
-    writable: false
-  })
-  Object.defineProperty(window, 'user_id', {
-    value: await miro.currentUser.getId(),
-    configurable: false,
-    writable: false
-  })
-  $.ajax({
-      url: '/startSession',
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      data: {
-          user_id: user_id,
-          team_id: team_id
-      }
   })
 })
 
