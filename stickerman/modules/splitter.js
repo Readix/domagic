@@ -1,7 +1,71 @@
 const rp = require('request-promise')
 const Cluster = require('./cluster')
 
+const textmanUrl = 'http://159.69.37.26:9000'
+const textTonalityUrl = 'http://localhost:8000'
+
 let dist = (a, b) => Math.abs(a - b)
+
+function score_tonality(subs, _) {
+    let inners = subs.map(sub => {
+        return {id: sub.get('id'), text: sub.get('text')}
+    })
+    console.log(inners)
+    let options = {
+        method: 'POST',
+        uri: textTonalityUrl + '/binary_ton',
+        body: JSON.stringify(inners)
+    }
+    return rp(options)
+    .then(groupsOfId => {
+        groupsOfId = JSON.parse(groupsOfId)
+        console.log('from textTonality:', groupsOfId)
+        return groupsOfId.map(group =>
+            group.map(id =>
+                subs.find(sub => sub.get('id') == id)
+            )
+        )
+    })
+    .catch((error) => {
+        console.error(error);
+        // TODO: log
+    })
+}
+
+function choose_text_method(meth) {
+    return async function(subs, crit) {
+        if(crit.search('-') != -1)
+            countGroups = parseInt(crit.split('-')[1])
+        else
+            countGroups = undefined
+        let inners = subs.map(sub => {
+            return {id: sub.get('id'), text: sub.get('text')}
+        })
+        console.log(inners)
+        let options = {
+            method: 'POST',
+            uri: textmanUrl + meth,
+            body: JSON.stringify({
+                widgets: inners,
+                count_groups: countGroups
+            })
+        }
+        return rp(options)
+        .then(groupsOfId => {
+            groupsOfId = JSON.parse(groupsOfId)
+            console.log('from textman:', groupsOfId)
+            return groupsOfId.map(group =>
+                group.map(id =>
+                    subs.find(sub => sub.get('id') == id)
+                )
+            )
+        })
+        .catch((error) => {
+            console.error(error);
+            // TODO: log
+        })
+    }
+}
 
 async function by_property(subs, crit) {
     if(crit == 'size'){
@@ -38,6 +102,10 @@ async function by_property(subs, crit) {
 }
 
 module.exports = {
+    'text1': choose_text_method('/split_dbscum'),
+    'text2': choose_text_method('/split_birch'),
+    'text3': choose_text_method('/split_kmeans'),
+    'tonality': score_tonality,
     'size': by_property,
     'color': by_property
 }
