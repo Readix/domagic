@@ -36,10 +36,7 @@ class Cluster extends BaseComponent {
     }
     async split(crit) {
         // crit - пока что только свойство виджета
-        if(crit.startsWith('text'))
-            key = crit.split('-')[0]
-        else
-            key = crit
+        key = crit.startsWith('text') ? crit.split('-')[0] : crit
         this.subs = (await splitter[key](this.subs, crit))
             .map(group  => new Cluster(group));
     }

@@ -2,7 +2,6 @@ const rp = require('request-promise')
 const Cluster = require('./cluster')
 
 const textmanUrl = 'http://159.69.37.26:9000'
-const textTonalityUrl = 'http://localhost:8000'
 
 let dist = (a, b) => Math.abs(a - b)
 
@@ -13,18 +12,23 @@ function score_tonality(subs, _) {
     console.log(inners)
     let options = {
         method: 'POST',
-        uri: textTonalityUrl + '/binary_ton',
+        uri: textmanUrl + '/fake_binary_ton',
         body: JSON.stringify(inners)
     }
     return rp(options)
     .then(groupsOfId => {
         groupsOfId = JSON.parse(groupsOfId)
         console.log('from textTonality:', groupsOfId)
-        return groupsOfId.map(group =>
-            group.map(id => 
+        search_sub = function(group) {
+            return group.map(id => 
                 subs.find(sub => sub.get('id') == id)
             )
-        )
+        }
+        return [
+            search_sub(groupsOfId['positive']).map(sub => sub.set('color', '#91fd5e')),
+            search_sub(groupsOfId['negative']).map(sub => sub.set('color', '#fd404a')),
+            search_sub(groupsOfId['indefinite']).map(sub => sub.set('color', '#c1d3fd'))
+        ]
     })
     .catch((error) => {
         console.error(error);
