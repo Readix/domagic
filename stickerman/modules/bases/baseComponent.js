@@ -23,6 +23,7 @@ class BaseComponent {
     set(propname, ...args) {
         try {
             this.setter[propname](...args)  // catch
+            return this
         } catch (error) {
             console.error('property "' + propname + '" not found in setter')
         }
