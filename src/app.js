@@ -8,7 +8,7 @@ const db = require('./db')
 const config = require('./config')
 
 const app = express()
-const port = 3000
+const port = 3390
 
 const log = require('./logger')
 
