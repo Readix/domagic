@@ -79,7 +79,7 @@ let settings = {
 	},
 	blocky: {
 		order: { values: ['width', 'width'], desc: true},
-		compose: ['blocky', 'horizontal']
+		compose: ['blocky', 'blocky']
 	}
 }
 
