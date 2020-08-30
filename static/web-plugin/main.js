@@ -13,9 +13,9 @@ miro.onReady(async () => {
 			getWidgetMenuItems: (widgets) => {
 				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker' && widget.type.toLowerCase() != 'shape') == false){
 					return Promise.resolve([{
-						tooltip: 'Compare stickers (textman dev)',
+						tooltip: 'Compare stickers (textman egor)',
 						svgIcon: icon,
-						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':220, 'height':360})
+						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':220, 'height':330})
                     }])
 				}
 				return Promise.resolve([{}])

@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const mustacheExpress = require('mustache-express')
+const { RequestError } = require('request-promise/errors')
 
 const api = require('./api')
 const db = require('./db')

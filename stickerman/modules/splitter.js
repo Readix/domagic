@@ -1,5 +1,8 @@
 const rp = require('request-promise')
 const Cluster = require('./cluster')
+const logger = require('../../src/logger')
+const { InternalServerError } = require('http-errors')
+const { RequestError } = require('request-promise/errors')
 
 const textmanUrl = 'http://159.69.37.26:9000'
 
@@ -16,8 +19,12 @@ function score_tonality(subs, _) {
         body: JSON.stringify(inners)
     }
     return rp(options)
-    .then(groupsOfId => {
-        groupsOfId = JSON.parse(groupsOfId)
+    .then(options => {
+        if (options.error){
+            logger.error(options.data)
+            throw RequestError()
+        }
+        groupsOfId = JSON.parse(options.data)
         console.log('from textTonality:', groupsOfId)
         search_sub = function(group) {
             return group.map(id => 
@@ -29,10 +36,6 @@ function score_tonality(subs, _) {
             search_sub(groupsOfId['negative']).map(sub => sub.set('color', '#fd404a')),
             search_sub(groupsOfId['indefinite']).map(sub => sub.set('color', '#c1d3fd'))
         ]
-    })
-    .catch((error) => {
-        console.error(error);
-        // TODO: log
     })
 }
 
@@ -55,18 +58,18 @@ function choose_text_method(meth) {
             })
         }
         return rp(options)
-        .then(groupsOfId => {
-            groupsOfId = JSON.parse(groupsOfId)
+        .then(options => {
+            if (options.error){
+                logger.error(options.data)
+                throw RequestError()
+            }
+            groupsOfId = JSON.parse(options.data)
             console.log('from textman:', groupsOfId)
             return groupsOfId.map(group =>
                 group.map(id => 
                     subs.find(sub => sub.get('id') == id)
                 )
             )
-        })
-        .catch((error) => {
-            console.error(error);
-            // TODO: log
         })
     }
 }
