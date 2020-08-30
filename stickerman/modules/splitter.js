@@ -4,7 +4,7 @@ const logger = require('../../src/logger')
 const { InternalServerError } = require('http-errors')
 const { RequestError } = require('request-promise/errors')
 
-const textmanUrl = 'http://159.69.37.26:9000'
+const textmanUrl = 'http://localhost:8000'
 
 let dist = (a, b) => Math.abs(a - b)
 
@@ -15,7 +15,7 @@ function score_tonality(subs, _) {
     console.log(inners)
     let options = {
         method: 'POST',
-        uri: textmanUrl + '/fake_binary_ton',
+        uri: textmanUrl + '/binary_ton',
         body: JSON.stringify(inners)
     }
     return rp(options)
@@ -48,7 +48,7 @@ function choose_text_method(meth) {
         let inners = subs.map(sub => {
             return {id: sub.get('id'), text: sub.get('text')}
         })
-        console.log(inners)
+        console.log(inners, 'groups:', countGroups)
         let options = {
             method: 'POST',
             uri: textmanUrl + meth,
