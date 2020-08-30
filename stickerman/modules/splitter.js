@@ -20,21 +20,21 @@ function score_tonality(subs, _) {
     }
     return rp(options)
     .then(options => {
+        options = JSON.parse(options)
         if (options.error){
             logger.error(options.data)
             throw RequestError()
         }
-        groupsOfId = JSON.parse(options.data)
-        console.log('from textTonality:', groupsOfId)
+        console.log('from textTonality:', options.data)
         search_sub = function(group) {
             return group.map(id =>
                 subs.find(sub => sub.get('id') == id)
             )
         }
         return [
-            search_sub(groupsOfId['positive']).map(sub => sub.set('color', '#91fd5e')),
-            search_sub(groupsOfId['negative']).map(sub => sub.set('color', '#fd404a')),
-            search_sub(groupsOfId['indefinite']).map(sub => sub.set('color', '#c1d3fd'))
+            search_sub(options.data['positive']).map(sub => sub.set('color', '#91fd5e')),
+            search_sub(options.data['negative']).map(sub => sub.set('color', '#fd404a')),
+            search_sub(options.data['indefinite']).map(sub => sub.set('color', '#c1d3fd'))
         ]
     })
 }
