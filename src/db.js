@@ -33,6 +33,15 @@ const initDB = async () => {
 
 module.exports = {
 	init: initDB,
+	request: async function (query){
+		return dbPool.query(query)
+			.catch(err => log.error(dbErrorFormat('request', query, err.stack)))
+	},
+	getInstallation: async function (user_id, team_id, client_id) {
+		let query = `SELECT * FROM Installations WHERE user_id=${user_id} and team_id=${team_id} client_id=${client_id}`
+		return dbPool.query(query)
+			.catch(err => log.error(dbErrorFormat('addPlugin', query, err.stack)))
+	},
 	addAuthorization: async function (auth, client_id) {
 		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) 
 								 VALUES('${auth.user_id}', '${auth.team_id}', '${client_id}', '${auth.scope}', '${auth.access_token}', '${auth.token_type}')
