@@ -4,7 +4,7 @@ const logger = require('../../src/logger')
 const { InternalServerError } = require('http-errors')
 const { RequestError } = require('request-promise/errors')
 
-const textmanUrl = 'http://localhost:8000'
+const textmanUrl = 'http://localhost:8001'
 
 let dist = (a, b) => Math.abs(a - b)
 
