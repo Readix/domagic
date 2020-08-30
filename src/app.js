@@ -40,7 +40,7 @@ app.get('/oauth', async (req, res) => {
 	const response = await api.oauth.getToken(req.query.code, req.query.client_id, pluginProps.client_secret)
 	console.log('/oauth/ response = ', response)
 	if (response) {
-		let result = db.getInstallation(response.user_id, response.team_id, req.query.client_id)
+		let result = await db.getInstallation(response.user_id, response.team_id, req.query.client_id)
 		if (!result)
 			await db.addAuthorization(response, req.query.client_id)
 	}
