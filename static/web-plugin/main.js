@@ -15,7 +15,7 @@ miro.onReady(async () => {
 					return Promise.resolve([{
 						tooltip: 'Compare stickers',
 						svgIcon: icon,
-						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':300})
+						onClick: () => miro.board.ui.openModal('/static/web-plugin/sticker-comparator-form', {'width':200, 'height':306})
                     }])
 				}
 				return Promise.resolve([{}])
