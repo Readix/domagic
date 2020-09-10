@@ -1,23 +1,8 @@
-const pasteIcon = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" viewBox="0 0 640 640" width="640" height="640"><defs><path d="M551.45 76.61C558.04 76.61 563.39 81.96 563.39 88.55C563.39 183.52 563.39 456.48 563.39 551.45C563.39 558.04 558.04 563.39 551.45 563.39C456.48 563.39 183.52 563.39 88.55 563.39C81.96 563.39 76.61 558.04 76.61 551.45C76.61 456.48 76.61 183.52 76.61 88.55C76.61 81.96 81.96 76.61 88.55 76.61C183.52 76.61 456.48 76.61 551.45 76.61Z" id="g6H4LGxhB"></path><mask id="maska3pgC8soar" x="-27.39" y="-27.39" width="694.78" height="694.78" maskUnits="userSpaceOnUse"><rect x="-27.39" y="-27.39" width="694.78" height="694.78" fill="white"></rect><use xlink:href="#g6H4LGxhB" opacity="1" fill="black"></use></mask><path d="M385.51 308.29C385.51 345.05 355.66 374.9 318.9 374.9C282.14 374.9 252.29 345.05 252.29 308.29C252.29 271.53 282.14 241.68 318.9 241.68C355.66 241.68 385.51 271.53 385.51 308.29Z" id="aDHxKg5Fz"></path></defs><g><g><g><g mask="url(#maska3pgC8soar)"><use xlink:href="#g6H4LGxhB" opacity="1" fill-opacity="0" stroke="#000000" stroke-width="104" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#aDHxKg5Fz" opacity="1" fill-opacity="0" stroke="#000000" stroke-width="52" stroke-opacity="1"></use></g></g></g></g></svg>`
+const toolbarIcon = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" viewBox="0 0 65 65" width="65" height="65"><defs><path d="M19.19 49.15L32.11 18.7" id="b2ppkTWgqu"></path><path d="M17.27 12.86C18.28 10.46 19.99 9.77 22.39 10.79C30.68 14.31 35.29 16.27 36.21 16.66C38.6 17.68 39.29 19.38 38.28 21.78C30.54 40 26.25 50.12 25.39 52.14C24.37 54.54 22.67 55.23 20.27 54.21C11.98 50.69 7.37 48.73 6.45 48.34C4.05 47.32 3.36 45.62 4.38 43.22C12.11 25 16.41 14.88 17.27 12.86Z" id="a1S96GLwMR"></path><path d="M36.92 15.32C38.97 13.71 40.8 13.94 42.4 15.99C47.95 23.09 51.03 27.03 51.65 27.82C53.25 29.87 53.02 31.7 50.97 33.3C35.38 45.49 26.71 52.25 24.98 53.61C22.93 55.21 21.1 54.99 19.5 52.94C13.95 45.84 10.87 41.89 10.26 41.1C8.65 39.05 8.88 37.22 10.93 35.62C26.52 23.44 35.19 16.67 36.92 15.32Z" id="m77QZZ1sfB"></path><path d="M21.01 47.99L47.07 27.63" id="d183X3cOVJ"></path><path d="M57.17 31.84C59.77 31.84 61.08 33.14 61.08 35.74C61.08 44.75 61.08 49.76 61.08 50.76C61.08 53.36 59.77 54.66 57.17 54.66C37.38 54.66 26.39 54.66 24.19 54.66C21.59 54.66 20.28 53.36 20.28 50.76C20.28 41.75 20.28 36.74 20.28 35.74C20.28 33.14 21.59 31.84 24.19 31.84C43.98 31.84 54.97 31.84 57.17 31.84Z" id="b3f2zhu1R"></path><path d="M56.92 38.28C56.92 39.95 55.56 41.31 53.89 41.31C52.22 41.31 50.86 39.95 50.86 38.28C50.86 36.6 52.22 35.24 53.89 35.24C55.56 35.24 56.92 36.6 56.92 38.28Z" id="a2izy2SnT7"></path><path d="M24.52 47.79L57.59 47.79" id="a25CPUvXmM"></path><path d="M40.69 20.54C41.72 21.86 41.48 23.77 40.16 24.8C38.84 25.83 36.94 25.6 35.91 24.28C34.88 22.96 35.11 21.05 36.43 20.02C37.75 18.99 39.66 19.22 40.69 20.54Z" id="f119ebPdv5"></path><path d="M23.1 15.61C24.64 16.26 25.36 18.04 24.7 19.58C24.05 21.12 22.27 21.84 20.73 21.19C19.18 20.53 18.46 18.75 19.12 17.21C19.77 15.67 21.55 14.95 23.1 15.61Z" id="b48Oe97t6"></path></defs><g><g><g><use xlink:href="#b2ppkTWgqu" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#b2ppkTWgqu" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#a1S96GLwMR" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#a1S96GLwMR" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#m77QZZ1sfB" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#m77QZZ1sfB" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#d183X3cOVJ" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#d183X3cOVJ" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#b3f2zhu1R" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#b3f2zhu1R" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#a2izy2SnT7" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#a25CPUvXmM" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#a25CPUvXmM" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#f119ebPdv5" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#b48Oe97t6" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g></g></g></svg>`
 
-const rollIcon = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-viewBox="0 0 512.004 512.004" style="enable-background:new 0 0 512.004 512.004;" xml:space="preserve">
-<g><g><g>
-<path d="M468.975,0.002H341.7c-23.771,0-43.029,19.258-43.029,43.029v127.275c0,23.771,19.258,43.029,43.029,43.029h127.275c23.771,0,43.029-19.258,43.029-43.029V43.031C512.004,19.26,492.746,0.002,468.975,0.002z M469.338,170.306c0,0.207-0.155,0.363-0.363,0.363H341.7c-0.207,0-0.363-0.155-0.363-0.363V43.031c0-0.207,0.155-0.363,0.363-0.363h127.275c0.207,0,0.363,0.155,0.363,0.363V170.306z"/>
-<path d="M405.333,85.335c-11.776,0-21.333,9.557-21.333,21.333s9.557,21.333,21.333,21.333s21.333-9.557,21.333-21.333S417.109,85.335,405.333,85.335z"/>
-<path d="M399.032,265.921l-54.092,54.073h-28.602c2.373-6.678,3.666-13.859,3.666-21.333c0-35.249-28.751-64-64-64H152.796L128,226.403v-34.401c0-11.782-9.551-21.333-21.333-21.333H21.333C9.551,170.669,0,180.22,0,192.002v298.667c0,11.782,9.551,21.333,21.333,21.333h85.333c11.782,0,21.333-9.551,21.333-21.333v-21.342h127.066c60.397,0,119.538-17.22,170.512-49.648l3.637-2.917l60.331-60.352c24.927-24.895,24.927-65.568-0.003-90.498C464.612,240.981,423.94,240.981,399.032,265.921z M85.333,469.336H42.667v-256h42.667V469.336z M459.382,326.232l-58.654,58.674c-43.686,27.281-94.146,41.754-145.663,41.754H128.004V271.375l14.593,4.86c2.173,0.724,4.449,1.093,6.74,1.093h106.667c11.685,0,21.333,9.649,21.333,21.333c0,11.685-9.649,21.333-21.333,21.333c-28.444,0-28.444,42.667,0,42.667h97.771c5.657,0,11.082-2.247,15.082-6.246l60.352-60.331c8.257-8.267,21.899-8.267,30.163-0.003S467.637,317.988,459.382,326.232z"/>
-</g></g></g>
-</svg>`
-
-const num_to_str_dict = {
-  1: 'one',
-  2: 'two',
-  3: 'three',
-  4: 'four',
-  5: 'five',
-  6: 'six'
-}
-
+// <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+// <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+// <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" viewBox="0 0 65 65" width="65" height="65"><defs><path d="M19.19 49.15L32.11 18.7" id="b2ppkTWgqu"></path><path d="M17.27 12.86C18.28 10.46 19.99 9.77 22.39 10.79C30.68 14.31 35.29 16.27 36.21 16.66C38.6 17.68 39.29 19.38 38.28 21.78C30.54 40 26.25 50.12 25.39 52.14C24.37 54.54 22.67 55.23 20.27 54.21C11.98 50.69 7.37 48.73 6.45 48.34C4.05 47.32 3.36 45.62 4.38 43.22C12.11 25 16.41 14.88 17.27 12.86Z" id="a1S96GLwMR"></path><path d="M36.92 15.32C38.97 13.71 40.8 13.94 42.4 15.99C47.95 23.09 51.03 27.03 51.65 27.82C53.25 29.87 53.02 31.7 50.97 33.3C35.38 45.49 26.71 52.25 24.98 53.61C22.93 55.21 21.1 54.99 19.5 52.94C13.95 45.84 10.87 41.89 10.26 41.1C8.65 39.05 8.88 37.22 10.93 35.62C26.52 23.44 35.19 16.67 36.92 15.32Z" id="m77QZZ1sfB"></path><path d="M21.01 47.99L47.07 27.63" id="d183X3cOVJ"></path><path d="M57.17 31.84C59.77 31.84 61.08 33.14 61.08 35.74C61.08 44.75 61.08 49.76 61.08 50.76C61.08 53.36 59.77 54.66 57.17 54.66C37.38 54.66 26.39 54.66 24.19 54.66C21.59 54.66 20.28 53.36 20.28 50.76C20.28 41.75 20.28 36.74 20.28 35.74C20.28 33.14 21.59 31.84 24.19 31.84C43.98 31.84 54.97 31.84 57.17 31.84Z" id="b3f2zhu1R"></path><path d="M56.92 38.28C56.92 39.95 55.56 41.31 53.89 41.31C52.22 41.31 50.86 39.95 50.86 38.28C50.86 36.6 52.22 35.24 53.89 35.24C55.56 35.24 56.92 36.6 56.92 38.28Z" id="a2izy2SnT7"></path><path d="M24.52 47.79L57.59 47.79" id="a25CPUvXmM"></path><path d="M40.69 20.54C41.72 21.86 41.48 23.77 40.16 24.8C38.84 25.83 36.94 25.6 35.91 24.28C34.88 22.96 35.11 21.05 36.43 20.02C37.75 18.99 39.66 19.22 40.69 20.54Z" id="f119ebPdv5"></path><path d="M23.1 15.61C24.64 16.26 25.36 18.04 24.7 19.58C24.05 21.12 22.27 21.84 20.73 21.19C19.18 20.53 18.46 18.75 19.12 17.21C19.77 15.67 21.55 14.95 23.1 15.61Z" id="b48Oe97t6"></path></defs><g><g><g><use xlink:href="#b2ppkTWgqu" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#b2ppkTWgqu" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#a1S96GLwMR" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#a1S96GLwMR" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#m77QZZ1sfB" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#m77QZZ1sfB" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#d183X3cOVJ" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#d183X3cOVJ" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#b3f2zhu1R" opacity="1" fill="#ffffff" fill-opacity="1"></use><g><use xlink:href="#b3f2zhu1R" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#a2izy2SnT7" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><use xlink:href="#a25CPUvXmM" opacity="1" fill="#000000" fill-opacity="0"></use><g><use xlink:href="#a25CPUvXmM" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#f119ebPdv5" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g><g><g><use xlink:href="#b48Oe97t6" opacity="1" fill-opacity="0" stroke="#050038" stroke-width="2" stroke-opacity="1"></use></g></g></g></g></svg>
 
 miro.onReady(async () => {
 	miro.currentUser.getId().then(user_id =>
@@ -25,24 +10,13 @@ miro.onReady(async () => {
 	miro.initialize({
 		extensionPoints: {
       toolbar: {
-        title: 'Dice',
-        toolbarSvgIcon: pasteIcon,
-        librarySvgIcon: rollIcon,
+        title: 'Cards',
+        toolbarSvgIcon: toolbarIcon,
+        librarySvgIcon: toolbarIcon,
         onClick: () => {
-          miro.board.ui.openBottomPanel('/static/web-plugin/dice_lib', {width: 100, height: 130});
+          miro.board.ui.openLibrary('/static/web-plugin/cards_lib', {title: 'Cards library'});
         }
-      },
-			getWidgetMenuItems: (widgets) => {
-        clientId = miro.getClientId()
-				if (widgets.some((widget) => widget.type.toLowerCase() != 'image' && (!(clientId in widget.metadata) || !(isDice in widget.metadata.clientId) || widget.metadata.clientId.isDice == false)) == false){
-					return Promise.resolve([{
-						tooltip: 'Roll',
-						svgIcon: rollIcon,
-						onClick: rollDice
-          }])
-				}
-				return Promise.resolve([{}])
-			}
+      }
 		}
 	})
   Object.defineProperty(window, 'team_id', {
@@ -67,23 +41,6 @@ miro.onReady(async () => {
       }
   })
 })
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-async function rollDice() {
-  let new_widgets = []
-  (await miro.board.selection.get()).forEach((widget) => {
-    new_widgets.push({
-      id: widget['id'],
-      url: widget['url'].substr(0, widget['url'].lastIndexOf('/')) + `/${num_to_str_dict[getRandomInt(1,6)]}_dot.svg`
-    })
-  })
-  miro.board.widgets.update(new_widgets)
-}
 
 window.addEventListener("beforeunload", async function (e) {
   await $.ajax({

@@ -1,7 +1,7 @@
 {
 	"api_base": "https://api.miro.com/v1",
-	"base_url": "https://9acf04182013.ngrok.io",
-	"db_user": "postgres",
-	"db_pass": "raexedae4j",
-	"plugin_name": "smart-layout-dev"
+	"base_url": "https://be00f2c3bcff.ngrok.io",
+	"db_user": "plugin",
+	"db_pass": "123456",
+	"plugin_name": "dev_plugin"
 }
