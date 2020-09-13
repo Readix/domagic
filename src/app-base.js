@@ -23,18 +23,20 @@ app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
-//Будет не нужно
+/*
+Либо переделать (подгружать свойства всех активных плагинов)
+либо убрать
 var pluginProps = []
 db.getPluginProps(config.PLUGIN_NAME).then((props) => {
 	console.log(props)
 	pluginProps = props
-})
+})*/
 // Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое) 
 app.get('/', (req, res) => {
 	res.render('index', {
 		baseUrl: config.BASE_URL,
-		oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
-			&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
+		//oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
+		//	&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
 	})
 })
 
