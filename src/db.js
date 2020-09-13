@@ -8,6 +8,7 @@ let dbErrorFormat = (func, query, message) =>
 let dbPool = undefined
 
 function initDB() {
+	if(dbPool != undefined) return;
 	dbPool = new Pool({
 		user: config.DB_USER,
 		host: 'localhost',
@@ -59,14 +60,12 @@ module.exports = {
 			.then(res => res.rows[0])
 			.catch(err => log.error(dbErrorFormat('getPluginProps', query, err.stack)))
 	},
-	//Not tested
 	pluginExists: async (pluginName) => {
 		let query = `SELECT * FROM Plugins WHERE name = '${pluginName}'`
 		return dbPool.query(query)
-			.then(res => res.length != 0)
+			.then(res => res.rows.length != 0)
 			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
 	},
-	//Not tested
 	getSecret: async (pluginName) => {
 		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
 		return dbPool.query(query)
