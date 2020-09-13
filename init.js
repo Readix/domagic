@@ -3,41 +3,55 @@ const db = require('./src/db')
 
 let config = JSON.parse(fs.readFileSync('./src/config.json'))
 
+const setPluginStatus = (pluginName, enable) => {
+    switch (enable) {
+        case 'false':
+            let index = config['plugins'].indexOf(pluginName)
+            if (index > -1)
+                config['plugins'].splice(index, 1)
+            console.log(`Plugin ${pluginName} is disabled`)
+            break;
+        case 'true':
+            db.init()
+            return db.pluginExists(pluginName).then(exists => {
+                if (!exists) {
+                    console.error(`\x1b[31mPlugin ${pluginName} ` + 
+                        `does not exists in database\x1b[0m`)
+                    return
+                }
+                let filenames = fs.readdirSync('./static/')
+                if (!filenames.some(name => name == pluginName)) {
+                    console.error(`\x1b[31mFolder for plugin ${pluginName} ` + 
+                        `does not exists in static/\x1b[0m`)
+                    return
+                }
+                if (config['plugins'].indexOf(pluginName) < 0)
+                    config['plugins'].push(pluginName)
+                console.log(`Plugin ${pluginName} is enabled`)
+            })
+            break;
+        default:
+            console.error(`\x1b[31mIncorrect value ${enable}`+
+                ' for argument enable\x1b[0m')
+            break;
+    }
+}
+
 const initPlugin = (pluginName, clientId, clientSecret, enable) => {
     if (!enable) enable = 'true'
-    if (clientId ^ clientSecret) {
+    if (!clientId ^ !clientSecret) {
         console.error(`\x1b[31mExpected argument ${clientId ? 
             'client_secret':'client_id'}\x1b[0m`)
         return
     }
-    if (clientId) {
-        db.init()
-        db.addPlugin(pluginName, clientId, clientSecret).then(()=>{
-            console.log(`Plugin ${pluginName} is added in databese`)
-        })
+    if (!clientId) {
+        return setPluginStatus(pluginName, enable)
     }
-    if (enable == 'true') {
-        if (!await db.pluginExists(pluginName)) {
-            console.error(`\x1b[31mPlugin ${pluginName} ` + 
-                `does not exists in database/\x1b[0m`)
-            return
-        }
-        let filenames = fs.readdirSync('./static/')
-        if (!filenames.some(name => name == pluginName)) {
-            console.error(`\x1b[31mFolder for plugin ${pluginName} ` + 
-                `does not exists in static/\x1b[0m`)
-            return
-        }
-        if (config['plugins'].indexOf(pluginName) < 0)
-            config['plugins'].push(pluginName)
-        console.log(`Plugin ${pluginName} is enabled`)
-    }
-    else {
-        let index = config['plugins'].indexOf(pluginName)
-        if (index > -1)
-            config['plugins'].splice(index, 1)
-        console.log(`Plugin ${pluginName} is disabled`)
-    }
+    db.init()
+    return db.addPlugin(pluginName, clientId, clientSecret).then(()=>{
+        console.log(`Plugin ${pluginName} added in databese`)
+        return setPluginStatus(pluginName, enable)
+    })
 }
 
 const initDbLogin = (dbUser, dbPass) => {
@@ -46,12 +60,10 @@ const initDbLogin = (dbUser, dbPass) => {
     console.log('Database login initialized')
 }
 
-const list = () => {
+const list = async () => {
     console.log('Enabled plugins:')
     config['plugins'].forEach(name => console.log('\t' + name))
 }
-
-let instruction = 'use: npm run init -- client_id=... client_secret=... plugin_name=...'
 
 scripts = {
     'plugin': {
@@ -95,16 +107,20 @@ process.argv.slice(2).forEach((val, idx, arr) => {
     })
 })
 
+promises = []
+
 actives.forEach(script => {
     params = scripts[script].required.map(arg => {
         if (values[arg] == undefined) {
-            console.log(`\x1b[31mMissing argument for ` + 
+            console.error(`\x1b[31mMissing argument for ` + 
                 `${script} initialize: ${arg}\x1b[0m`)
             process.exit()
         }
         return values[arg]
     }).concat(scripts[script].free.map(arg => values[arg]))
-    scripts[script].handler(...params)
+    promises.push(scripts[script].handler(...params))
 })
 
-fs.writeFileSync('./src/config.json', JSON.stringify(config, null, '\t'))
+Promise.all(promises).then(() => {
+    fs.writeFileSync('./src/config.json', JSON.stringify(config, null, '\t'))
+})
