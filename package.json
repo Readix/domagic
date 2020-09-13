@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "init": "node ./init.js",
-    "start": "node ./src/app.js -e js,html",
+    "start": "node ./src/app-main.js -e js,html",
+    "clear": "node ./clear.js",
     "ngrok": "ngrok http 3000"
   },
   "dependencies": {

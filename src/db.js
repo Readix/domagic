@@ -58,5 +58,19 @@ module.exports = {
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => log.error(dbErrorFormat('getPluginProps', query, err.stack)))
+	},
+	//Not tested
+	pluginExists: async (pluginName) => {
+		let query = `SELECT * FROM Plugins WHERE name = '${pluginName}'`
+		return dbPool.query(query)
+			.then(res => res.length != 0)
+			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
+	},
+	//Not tested
+	getSecret: async (pluginName) => {
+		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
+		return dbPool.query(query)
+			.then(res => res.rows[0])
+			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
 	}
 }
