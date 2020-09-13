@@ -9,7 +9,13 @@ const Stickerman = require('../../stickerman/stickerman')
 // Переделать логику потом, oauth на каждый плагин
 app.get('/oauth_stickerman', async (req, res) => {
 	console.log('start auth...')
-	const response = await api.oauth.getToken(req.query.code, req.query.client_id, await db.getSecret('stickerman'))
+	let secret = await db.getSecret('stickerman')
+	if (!secret) {
+		let msg = 'Not found client secret in database for stickerman'
+		log.error(msg)
+		console.error(msg)
+	}
+	const response = await api.oauth.getToken(req.query.code, req.query.client_id, secret.client_secret)
 	console.log('/oauth/ response = ', response)
 	if (response) {
 		await db.addAuthorization(response, req.query.client_id)
