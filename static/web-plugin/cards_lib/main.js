@@ -1,8 +1,9 @@
 function createCard(canvasX, canvasY, url) {
-  key = url.substring(url.lastIndexOf('/') + 1)
+  key = url.substring(url.lastIndexOf('/') + 1);
+  let shapes = [];
   switch(key){
     case 'template_picture_text_card.png':
-      let shapes = [{
+      shapes = [{
           type: "SHAPE",
           x: canvasX,
           y: canvasY,
@@ -33,7 +34,7 @@ function createCard(canvasX, canvasY, url) {
           x: canvasX, 
           y: canvasY - 30.86183472481389, 
           scale: 1.3176765802095134,
-          url: ""
+          url: location.origin + '/static/web-plugin/cards_lib/previews/picture_template.png'
         },
         {
           type:"TEXT",
