@@ -25,8 +25,8 @@ miro.onReady(async () => {
 				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify({
-				user: (await miro.account.get())['id'],
-				team: await miro.currentUser.getId(),
+				team: (await miro.account.get())['id'],
+				user: await miro.currentUser.getId(),
 				criterion: $('input[name=criterion]:checked').val(),
 				overparams: $('input[type=text]').val(),
 				composition: $('input[name=composition]:checked').val(),
