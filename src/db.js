@@ -8,7 +8,6 @@ let dbErrorFormat = (func, query, message) =>
 let dbPool = undefined
 
 function initDB() {
-	if(dbPool != undefined) return;
 	dbPool = new Pool({
 		user: config.DB_USER,
 		host: 'localhost',
@@ -20,7 +19,15 @@ function initDB() {
 module.exports = {
 	init: initDB,
 	addAuthorization: async function (auth, client_id) {
-		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) VALUES(${auth.user_id}, ${auth.team_id}, ${client_id}, '${auth.scope}', '${auth.access_token}', '${auth.token_type}')`
+		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) 
+								 VALUES('${auth.user_id}', '${auth.team_id}', '${client_id}', '${auth.scope}', '${auth.access_token}', '${auth.token_type}')
+								 ON CONFLICT ON CONSTRAINT unique_installation 
+								 DO UPDATE SET user_id='${auth.user_id}',
+															 team_id='${auth.team_id}',
+															 client_id='${client_id}',
+															 scope='${auth.scope}',
+															 access_token='${auth.access_token}',
+															 token_type='${auth.token_type}';`
 		return dbPool.query(query)
 			.catch(err => {
 				let errString = dbErrorFormat('addAuthorization', query, err.stack)
@@ -30,12 +37,13 @@ module.exports = {
 			})
 	},
 	addPlugin: async function (name, client_id, client_secret) {
-		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES('${name}', ${client_id}, '${client_secret}')`
+		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES('${name}', '${client_id}', '${client_secret}')`
 		dbPool.query(query)
 			.catch(err => log.error(dbErrorFormat('addPlugin', query, err.stack)))
 	},
 	addRequest: async (user, team, data, status) => {
 		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
+		console.log(user," ",team);
 		dbPool.query(query)
 			.catch(err => log.error(dbErrorFormat('addRequest', query, err.stack)))
 	},
@@ -59,17 +67,5 @@ module.exports = {
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => log.error(dbErrorFormat('getPluginProps', query, err.stack)))
-	},
-	pluginExists: async (pluginName) => {
-		let query = `SELECT * FROM Plugins WHERE name = '${pluginName}'`
-		return dbPool.query(query)
-			.then(res => res.rows.length != 0)
-			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
-	},
-	getSecret: async (pluginName) => {
-		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
-		return dbPool.query(query)
-			.then(res => res.rows[0])
-			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
 	}
 }

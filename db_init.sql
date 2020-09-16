@@ -42,6 +42,7 @@ CREATE TABLE Installations (
         REFERENCES Feedbacks(feedback_id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
+        ADD CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id);
 );
 CREATE INDEX i_i_user_team ON Installations(user_id, team_id);
 -- table for storing user session timestamps
@@ -103,7 +104,7 @@ BEGIN
     RETURN sess;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION insert_request(userId BIGINT, teamId BIGINT, req_data JSON, req_status VARCHAR(10)) 
+CREATE OR REPLACE FUNCTION insert_request(userId BIGINT, teamId BIGINT, req_data JSON, req_status VARCHAR(10))
 RETURNS INT AS $$
 DECLARE
     conf BIGINT;
@@ -123,7 +124,7 @@ RETURNS INT AS $$
 DECLARE
     count_equal BIGINT;
     conf BIGINT;
-BEGIN
+BEGINx
     conf := -1;
     count_equal := (SELECT COUNT(*) FROM Configs WHERE config @> data AND config <@ data);
     IF count_equal = 0 THEN
