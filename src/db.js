@@ -11,7 +11,7 @@ function initDB() {
 	dbPool = new Pool({
 		user: config.DB_USER,
 		host: 'localhost',
-		database: 'smart-layout',
+		database: 'smart-layout-dbfix',
 		password: config.DB_PASS
 	})
 }
@@ -67,5 +67,17 @@ module.exports = {
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => log.error(dbErrorFormat('getPluginProps', query, err.stack)))
+	},
+	pluginExists: async (pluginName) => {
+		let query = `SELECT * FROM Plugins WHERE name = '${pluginName}'`
+		return dbPool.query(query)
+			.then(res => res.rows.length != 0)
+			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
+	},
+	getSecret: async (pluginName) => {
+		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
+		return dbPool.query(query)
+			.then(res => res.rows[0])
+			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
 	}
 }

@@ -42,7 +42,7 @@ CREATE TABLE Installations (
         REFERENCES Feedbacks(feedback_id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
-        ADD CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id);
+    CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id);
 );
 CREATE INDEX i_i_user_team ON Installations(user_id, team_id);
 -- table for storing user session timestamps
@@ -111,13 +111,7 @@ DECLARE
     inst BIGINT;
     sess BIGINT;
     requ BIGINT;
-BEGIN
-    conf := (SELECT config_id FROM Configs ORDER BY created DESC LIMIT 1);
-    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
-    INSERT INTO Requests (install_id, config_id, session_id, data, status) VALUES(inst, conf, sess, req_data, req_status) RETURNING request_id INTO requ;
-    RETURN requ;
-END;
+
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION insert_config(config JSON)
 RETURNS INT AS $$
@@ -131,6 +125,19 @@ BEGINx
         INSERT INTO Configs(data) VALUES(config) RETURNING config_id INTO conf;
     END IF;
     RETURN conf;
+BEGIN
+    conf := (SELECT config_id FROM Configs ORDER BY created DESC LIMIT 1);
+    inst := (SELECT install_id FROM Installations WHERE user_id=userid AND team_id=teamid);
+    IF inst IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst; 
+    END IF;
+    sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
+    IF sess IS NULL THEN
+        RAISE EXCEPTION  'For installation_id is % session is %', inst, sess;
+    END IF;
+    INSERT INTO Requests (install_id, config_id, session_id, data, status) VALUES(inst, conf, sess, req_data, req_status)
+        RETURNING request_id INTO requ;
+    RETURN requ;
 END;
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, feedback JSON)

@@ -1,7 +1,7 @@
 {
 	"api_base": "https://api.miro.com/v1",
 	"base_url": "https://9acf04182013.ngrok.io",
-	"db_user": "",
-	"db_pass": "",
+	"db_user": "postgres",
+	"db_pass": "korpus2020",
 	"plugins": []
 }
