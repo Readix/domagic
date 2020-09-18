@@ -1,7 +1,7 @@
 -- cleanup database
 DROP TABLE IF EXISTS Requests;
 DROP TABLE IF EXISTS Configs;
-DROP TABLE IF EXISTS Plugins;
+DROP TABLE IF EXISTS Plugins CASCADE;
 DROP TABLE IF EXISTS UserSessions;
 DROP TABLE IF EXISTS Installations;
 DROP TABLE IF EXISTS Feedbacks;
@@ -38,11 +38,11 @@ CREATE TABLE Installations (
         REFERENCES Plugins(client_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    feedback_id     BIGINT NULL 
+    feedback_id     BIGINT NULL
         REFERENCES Feedbacks(feedback_id)
         ON DELETE RESTRICT
-        ON UPDATE CASCADE
-    CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id);
+        ON UPDATE CASCADE,
+    CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id)
 );
 CREATE INDEX i_i_user_team ON Installations(user_id, team_id);
 -- table for storing user session timestamps
@@ -50,7 +50,7 @@ CREATE TABLE UserSessions (
     session_id BIGSERIAL NOT NULL PRIMARY KEY,
     start_time TIMESTAMP DEFAULT NOW(),
     end_time   TIMESTAMP NULL,
-    install_id INT NOT NULL 
+    install_id INT NOT NULL
         REFERENCES Installations(install_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -63,12 +63,12 @@ CREATE TABLE Requests (
     status      VARCHAR(100),
     timestamp   TIMESTAMP default (NOW()),
     install_id  INT NOT NULL
-        REFERENCES Installations (install_id) 
-        ON DELETE CASCADE 
+        REFERENCES Installations (install_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
     config_id   INT NULL
-        REFERENCES Configs (config_id) 
-        ON DELETE CASCADE 
+        REFERENCES Configs (config_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
     feedback_id INT NULL
         REFERENCES Feedbacks (feedback_id)
@@ -81,25 +81,34 @@ CREATE TABLE Requests (
 );
 CREATE INDEX i_r_install ON Requests(install_id);
 -- create functions
-CREATE OR REPLACE FUNCTION start_session(userId BIGINT, teamId BIGINT) 
-RETURNS INT AS $$
-DECLARE 
-    inst BIGINT;
-    sess BIGINT;
-BEGIN
-    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    INSERT INTO UserSessions(install_id) VALUES(inst) RETURNING session_id INTO sess;
-    RETURN sess;
-END;
-$$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION end_session(userId BIGINT, teamId BIGINT) 
+CREATE OR REPLACE FUNCTION start_session(userId BIGINT, teamId BIGINT)
 RETURNS INT AS $$
 DECLARE
     inst BIGINT;
     sess BIGINT;
 BEGIN
     inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    IF inst IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    END IF;
+    INSERT INTO UserSessions(install_id) VALUES(inst) RETURNING session_id INTO sess;
+    RETURN sess;
+END;
+$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION end_session(userId BIGINT, teamId BIGINT)
+RETURNS INT AS $$
+DECLARE
+    inst BIGINT;
+    sess BIGINT;
+BEGIN
+    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    IF inst IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    END IF;
     sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
+    IF sess IS NULL THEN
+        RAISE EXCEPTION  'For installation_id is % session is %', inst, sess;
+    END IF;
     UPDATE UserSessions SET end_time = NOW() WHERE session_id = sess;
     RETURN sess;
 END;
@@ -111,33 +120,32 @@ DECLARE
     inst BIGINT;
     sess BIGINT;
     requ BIGINT;
-
+BEGIN
+    conf := (SELECT config_id FROM Configs ORDER BY created DESC LIMIT 1);
+    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    IF inst IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    END IF;
+    sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
+    IF sess IS NULL THEN
+        RAISE EXCEPTION  'For installation_id is % session is %', inst, sess;
+    END IF;
+    INSERT INTO Requests (install_id, config_id, session_id, data, status) VALUES(inst, conf, sess, req_data, req_status) RETURNING request_id INTO requ;
+    RETURN requ;
+END;
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION insert_config(config JSON)
 RETURNS INT AS $$
 DECLARE
     count_equal BIGINT;
     conf BIGINT;
-BEGINx
+BEGIN
     conf := -1;
     count_equal := (SELECT COUNT(*) FROM Configs WHERE config @> data AND config <@ data);
     IF count_equal = 0 THEN
         INSERT INTO Configs(data) VALUES(config) RETURNING config_id INTO conf;
     END IF;
     RETURN conf;
-BEGIN
-    conf := (SELECT config_id FROM Configs ORDER BY created DESC LIMIT 1);
-    inst := (SELECT install_id FROM Installations WHERE user_id=userid AND team_id=teamid);
-    IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst; 
-    END IF;
-    sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
-    IF sess IS NULL THEN
-        RAISE EXCEPTION  'For installation_id is % session is %', inst, sess;
-    END IF;
-    INSERT INTO Requests (install_id, config_id, session_id, data, status) VALUES(inst, conf, sess, req_data, req_status)
-        RETURNING request_id INTO requ;
-    RETURN requ;
 END;
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, feedback JSON)
@@ -148,7 +156,10 @@ DECLARE
     feed BIGINT;
 BEGIN
     inst = (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    requ = (SELECT requiest_id FROM Requests WHERE install_id=inst ORDER BY timestamp DESC LIMIT 1);
+    IF inst IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    END IF;
+    requ = (SELECT request_id FROM Requests WHERE install_id=inst ORDER BY timestamp DESC LIMIT 1);
     INSERT INTO Feedbacks (data) VALUES(feedback) RETURNING feedback_id INTO feed;
     UPDATE Requests SET feedback_id = feed WHERE request_id = requ;
     RETURN feed;
