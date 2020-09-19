@@ -24,5 +24,9 @@ config.plugins
 
 app.listen(port, () => {
 	db.init()
-	console.log(`App listening on port ${port}`)
+		.then(initMsg => {
+			console.log(initMsg)
+			console.log(`App listening on port ${port}`)
+		})
+		.catch(err => console.error(err))
 })

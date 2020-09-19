@@ -1,19 +1,30 @@
-const fs = require('fs')
-const log = require('./logger')
 const config = require('./config')
 const { Pool, Client } = require('pg')
 
-let dbErrorFormat = (func, query, message) => 
-	`db module error in ${func}:\nquery: ${query}\n${message}`
+let dbErrorFormat = (func, query, err) => {
+	err.src = `db func: ${func}`
+	err.query = query
+	return err
+}
+
 let dbPool = undefined
 
-function initDB() {
-	dbPool = new Pool({
-		user: config.DB_USER,
-		host: 'localhost',
-		database: 'smart-layout-dbfix',
-		password: config.DB_PASS
-	})
+const testDbPool = () => {
+	return dbPool.connect()
+		.then(() => 'success connecion')
+		.catch(err => {throw Error(err)})
+}
+
+const initDB = async () => {
+	if (!dbPool) {
+		dbPool = new Pool({
+			user: config.DB_USER,
+			host: 'localhost',
+			database: config.DB_NAME,
+			password: config.DB_PASS
+		})
+	}
+	return testDbPool()
 }
 
 module.exports = {
@@ -30,54 +41,82 @@ module.exports = {
 															 token_type='${auth.token_type}';`
 		return dbPool.query(query)
 			.catch(err => {
-				let errString = dbErrorFormat('addAuthorization', query, err.stack)
-				err.code == 23505 ?  // unique violation
-					log.trace(errString):
-					log.error(errString)
-			})
+				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
-	addPlugin: async function (name, client_id, client_secret) {
-		let query = `INSERT INTO Plugins(name, client_id, client_secret) VALUES('${name}', '${client_id}', '${client_secret}')`
-		dbPool.query(query)
-			.catch(err => log.error(dbErrorFormat('addPlugin', query, err.stack)))
+	addPlugin: async function (name, client_id, client_secret, src) {
+		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) \
+			VALUES('${name}', '${client_id}', '${client_secret}', '${src}')`
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('addPlugin', query, Error(err))})
 	},
 	addRequest: async (user, team, data, status) => {
 		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
 		console.log(user," ",team);
-		dbPool.query(query)
-			.catch(err => log.error(dbErrorFormat('addRequest', query, err.stack)))
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('addRequest', query, Error(err))})
 	},
 	addConfig: async (data) => {
 		let query = `SELECT insert_config('${data}')`
-		dbPool.query(query)
-			.catch(err => log.error(dbErrorFormat('addConfig', query, err.stack)))
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('addConfig', query, Error(err))})
 	},
 	startSession: async (user, team) => {
 		let query = `SELECT start_session(${user}, ${team})`
-		dbPool.query(query)
-			.catch(err => log.error(dbErrorFormat('startSession', query, err.stack)))
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('startSession', query, Error(err))})
 	},
 	endSession: async (user, team) => {
 		let query = `SELECT end_session(${user}, ${team})`
-		dbPool.query(query)
-			.catch(err => log.error(dbErrorFormat('endSession', query, err.stack)))
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('endSession', query, Error(err))})
 	},
 	getPluginProps: async function(name) {
 		let query = `SELECT * FROM Plugins WHERE name = '${name}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
-			.catch(err => log.error(dbErrorFormat('getPluginProps', query, err.stack)))
+			.catch(err => {
+				throw dbErrorFormat('getPluginProps', query, Error(err))})
 	},
-	pluginExists: async (pluginName) => {
-		let query = `SELECT * FROM Plugins WHERE name = '${pluginName}'`
+	pluginExists: async (pluginName, src) => {
+		let query = `SELECT * FROM Plugins \
+			WHERE name = '${pluginName}' and src = '${src}'`
 		return dbPool.query(query)
 			.then(res => res.rows.length != 0)
-			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
+			.catch(err => {
+				throw dbErrorFormat('pluginExists', query, Error(err))})
 	},
 	getSecret: async (pluginName) => {
 		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
-			.catch(err => log.error(dbErrorFormat('pluginExists', query, err.stack)))
+			.catch(err => {
+				throw dbErrorFormat('getSecret', query, Error(err))})
+	},
+	deletePlugin: async (pluginName, src) => {
+		let query = `delete FROM Plugins WHERE name = '${pluginName}' and src = '${src}'`
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('deletePlugin', query, Error(err))})
+	},
+	changePluginProps: async (pluginName, client_id, client_secret, src) => {
+		let query = `update Plugins set client_id = ${client_id}, client_secret = ${client_secret}\
+			WHERE name = '${pluginName}' and src = '${src}'`
+		return dbPool.query(query)
+			.then(res => res.rows[0])
+			.catch(err => {
+				throw dbErrorFormat('changePluginProps', query, Error(err))})
+	},
+	getPluginsList: async (src) => {
+		let query = `select name, client_id, client_secret from Plugins\
+			where src = '${src}'`
+		return dbPool.query(query)
+			.then(res => res.rows)
+			.catch(err => {
+				throw dbErrorFormat('getPluginsList', query, Error(err))})	
 	}
 }
