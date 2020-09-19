@@ -56,10 +56,10 @@ const enablePlugin = async (pluginName) => {
     return db.pluginExists(pluginName, srcDir).then(exists => {
         let config = require('../src/config.json')
         if (!exists) {
-            throw Error(`Plugin '${pluginName}' does not exists in database ${config.db_name}`)
+            throw Error(`plugin '${pluginName}' does not exists in database ${config.db_name}`)
         }
         if (!pluginFrontendExists(pluginName)) {
-            throw Error(`Folder for plugin '${pluginName}' does not exists in static/`)
+            throw Error(`folder for plugin '${pluginName}' does not exists in static/`)
         }
         if (config['plugins'].indexOf(pluginName) < 0) {
             config['plugins'].push(pluginName)
@@ -85,8 +85,8 @@ const addDbLogin = async (dbName, dbUser, dbPass) => {
     config['db_name'] = dbName
     config['db_user'] = dbUser
     config['db_pass'] = dbPass
-    await db.init()
     fs.writeFileSync(srcDir + '/src/config.json', JSON.stringify(config, null, '\t'))
+    return db.init()
 }
 
 const getPluginsList = async () => {
@@ -94,7 +94,7 @@ const getPluginsList = async () => {
     return db.getPluginsList(srcDir)
 }
 
-const writeConfigField = async (keyName, value) => {
+const writeConfigField = async (key, value) => {
     let config = require('../src/config.json')
     config[key] = value
     fs.writeFileSync(srcDir + '/src/config.json', JSON.stringify(config, null, '\t'))
