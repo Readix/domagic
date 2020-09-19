@@ -2,6 +2,15 @@ const errh = require('./_errhandler')
 const { disablePlugin } = require('./_functions')
 
 const args = ['plugin_name']
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'disable',
+        arguments: args
+    }
+    return
+}
+
 const values = args.reduce((acc, val) => {
     acc[val] = undefined; return acc}, {})
 

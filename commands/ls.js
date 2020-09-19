@@ -1,6 +1,14 @@
 const config = require('../src/config.json')
 const {getPluginsList} = require('./_functions')
 
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'ls'
+    }
+    return
+}
+
 const printWithTabs = (msg, tabsCount) => 
     console.log('\t'.repeat(tabsCount) + msg)
 

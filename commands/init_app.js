@@ -3,6 +3,15 @@ const config = require('../src/config.json')
 const { addPlugin, enablePlugin } = require('./_functions')
 
 const args = ['plugin_name', 'client_id', 'client_secret']
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'init_app',
+        arguments: args
+    }
+    return
+}
+
 const values = args.reduce((acc, val) => {
     acc[val] = undefined; return acc}, {})
 
@@ -22,7 +31,7 @@ addPlugin(values.plugin_name, values.client_id, values.client_secret)
         enablePlugin(values.plugin_name)
             .then(() => {
                 console.log(`plugin '${values.plugin_name}' is enabled`)
-                exit()
+                process.exit()
             })
             .catch(err => errh.printError(err.message))
     })

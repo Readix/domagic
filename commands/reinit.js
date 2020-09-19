@@ -2,6 +2,15 @@ const errh = require('./_errhandler')
 const { changePluginProps } = require('./_functions')
 
 const args = ['plugin_name', 'client_id', 'client_secret']
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'reinit',
+        arguments: args
+    }
+    return
+}
+
 const values = args.reduce((acc, val) => {
     acc[val] = undefined; return acc}, {})
 

@@ -2,6 +2,15 @@ const errh = require('./_errhandler')
 const { addDbLogin } = require('./_functions')
 
 const args = ['db_name', 'db_user', 'db_pass']
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'init_db',
+        arguments: args
+    }
+    return
+}
+
 const values = args.reduce((acc, val) => {
     acc[val] = undefined; return acc}, {})
 
@@ -21,4 +30,3 @@ addDbLogin(values.db_name, values.db_user, values.db_pass)
         process.exit()
     })
     .catch(err => errh.printError(err.message))
-

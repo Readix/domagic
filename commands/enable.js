@@ -1,7 +1,17 @@
+const { isMainThread } = require('worker_threads');
 const errh = require('./_errhandler')
 const { enablePlugin } = require('./_functions')
 
 const args = ['plugin_name']
+
+if (require.main !== module) {
+    module.exports = {
+        name: 'enable',
+        arguments: args
+    }
+    return
+}
+
 const values = args.reduce((acc, val) => {
     acc[val] = undefined; return acc}, {})
 
