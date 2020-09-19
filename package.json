@@ -3,10 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "init": "node ./init.js",
+    "ngrok": "ngrok http 3000",
+    "init_app": "node ./commands/init_app.js",
+    "reinit": "node ./commands/reinit.js",
+    "init_db": "node ./commands/init_db.js",
+    "enable": "node ./commands/enable.js",
+    "disable": "node ./commands/disable.js",
+    "remove": "node ./commands/remove.js",
+    "ls": "node ./commands/ls.js",
     "start": "node ./src/app-main.js -e js,html",
-    "clear": "node ./clear.js",
-    "ngrok": "ngrok http 3000"
+    "clear": "node ./clear.js"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
