@@ -94,6 +94,12 @@ const getPluginsList = async () => {
     return db.getPluginsList(srcDir)
 }
 
+const writeConfigField = async (keyName, value) => {
+    let config = require('../src/config.json')
+    config[key] = value
+    fs.writeFileSync(srcDir + '/src/config.json', JSON.stringify(config, null, '\t'))
+}
+
 module.exports = {
     addPlugin: addPlugin,
     removePlugin: removePlugin,
@@ -101,5 +107,6 @@ module.exports = {
     enablePlugin: enablePlugin,
     disablePlugin: disablePlugin,
     addDbLogin: addDbLogin,
-    getPluginsList: getPluginsList
+    getPluginsList: getPluginsList,
+    writeConfigField: writeConfigField
 }

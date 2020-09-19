@@ -11,6 +11,7 @@
     "disable": "node ./commands/disable.js",
     "remove": "node ./commands/remove.js",
     "ls": "node ./commands/ls.js",
+    "set": "node ./commands/set.js",
     "start": "node ./src/app-main.js -e js,html",
     "clear": "node ./clear.js"
   },
