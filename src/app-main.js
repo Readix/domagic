@@ -4,16 +4,14 @@ var { app, send } = require('./app-base');
 var db = require('./db');
 
 let port_arg = process.argv.slice(-1)[0]
-if (!port_arg) port_arg = 3000
+if (port_arg.split('=')[0] != 'port') {
+	port_arg = 3000
+}
 else {
-	if (port_arg.split('=')[0] != 'port') {
-		console.error('Unknown argument')
-		process.exit()
-	}
 	port_arg = port_arg.split('=')[1]
 }
 const port = port_arg
-
+console.log(port)
 if (!config.plugins.length)
     throw new Error('Empty plugins list')
 
