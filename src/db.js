@@ -1,5 +1,6 @@
-const config = require('./config')
+let config = require('./config.json')
 const { Pool, Client } = require('pg')
+const srcDir = __dirname.split('/').slice(0, -1).join('/')
 
 let dbErrorFormat = (func, query, err) => {
 	err.src = `db func: ${func}`
@@ -16,12 +17,13 @@ const testDbPool = () => {
 }
 
 const initDB = async () => {
+	config = require('./config.json')
 	if (!dbPool) {
 		dbPool = new Pool({
-			user: config.DB_USER,
+			user: config.db_user,
 			host: 'localhost',
-			database: config.DB_NAME,
-			password: config.DB_PASS
+			database: config.db_name,
+			password: config.db_pass
 		})
 	}
 	return testDbPool()
@@ -51,6 +53,7 @@ module.exports = {
 				throw dbErrorFormat('addPlugin', query, Error(err))})
 	},
 	addRequest: async (user, team, data, status) => {
+		data = data.replace("'", "")
 		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
 		console.log(user," ",team);
 		return dbPool.query(query)
@@ -58,6 +61,7 @@ module.exports = {
 				throw dbErrorFormat('addRequest', query, Error(err))})
 	},
 	addConfig: async (data) => {
+		data = data.replace("'", "")
 		let query = `SELECT insert_config('${data}')`
 		return dbPool.query(query)
 			.catch(err => {
@@ -76,7 +80,7 @@ module.exports = {
 				throw dbErrorFormat('endSession', query, Error(err))})
 	},
 	getPluginProps: async function(name) {
-		let query = `SELECT * FROM Plugins WHERE name = '${name}'`
+		let query = `SELECT * FROM Plugins WHERE name = '${name}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => {
@@ -91,7 +95,8 @@ module.exports = {
 				throw dbErrorFormat('pluginExists', query, Error(err))})
 	},
 	getSecret: async (pluginName) => {
-		let query = `SELECT client_secret FROM Plugins WHERE name = '${pluginName}'`
+		let query = `SELECT client_secret FROM Plugins \
+			WHERE name = '${pluginName}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => {

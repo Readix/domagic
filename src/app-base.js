@@ -14,6 +14,7 @@ const Stickerman = require('../stickerman/stickerman')
 const app = express()
 
 const log = require('./logger')
+const { enablePlugin } = require('../commands/_functions')
 
 app.engine('html', mustacheExpress())
 app.use(cors())
@@ -31,13 +32,26 @@ db.getPluginProps(config.PLUGIN_NAME).then((props) => {
 	console.log(props)
 	pluginProps = props
 })*/
-// Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое) 
+// Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое)
 app.get('/', (req, res) => {
-	res.render('index', {
-		baseUrl: config.BASE_URL,
-		//oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
-		//	&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
+	const config = require('./config.js')
+	let getLinks = []
+	config.PLUGINS.map(pluginName => {
+		let getLink = db.getPluginProps(pluginName).then(props => {
+			let href = 'https://miro.com/oauth/authorize?response_type=code' +
+				`&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
+			return `${pluginName}: <a href="${href}">install</a>`
+		})
+		getLinks.push(getLink)
 	})
+	Promise.all(getLinks).then(links => {
+		res.send(links.join('\n'))
+	})
+	/*res.render('index', {
+		baseUrl: config.BASE_URL,
+		oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
+			&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
+	})*/
 })
 
 app.get('/startSession', async (req, res) => {
@@ -50,14 +64,11 @@ app.get('/endSession', async (req, res) => {
 	res.send('Session ended successfully')
 })
 
-// app.listen(port, () => {
-// 	db.init()
-// 	console.log(`App listening on port ${port}`)
-// })
-
 // Шаблонизировать, если понадобится
 send = (user, team, response, info, sendData, reqData) => {
 	db.addRequest(user, team, JSON.stringify(reqData), info.code)
+		.catch(err => 
+			console.log(err.message))
 	response.send(Object.assign(sendData, info))
 }
 

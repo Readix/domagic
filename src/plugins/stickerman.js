@@ -1,6 +1,7 @@
 const { app, send } = require('../app-base')
 const log = require('../logger')
 const db = require('../db')
+const api = require('../api')
 
 const MiroWidget = require('../../stickerman/miroWidget')
 const CustomWidget = require('../../stickerman/customWidget')
@@ -15,7 +16,7 @@ app.get('/oauth_stickerman', async (req, res) => {
 		log.error(msg)
 		console.error(msg)
 	}
-	const response = await api.oauth.getToken(req.query.code, req.query.client_id, secret.client_secret)
+	const response = await api.oauth.getToken('stickerman', req.query.code, req.query.client_id, secret.client_secret)
 	console.log('/oauth/ response = ', response)
 	if (response) {
 		await db.addAuthorization(response, req.query.client_id)
