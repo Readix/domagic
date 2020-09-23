@@ -46,8 +46,8 @@ module.exports = {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
 	addPlugin: async function (name, client_id, client_secret, src) {
-		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) \
-			VALUES('${name}', '${client_id}', '${client_secret}', '${src}')`
+		console.log(client_id)
+		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${src}')`
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addPlugin', query, Error(err))})
@@ -55,7 +55,6 @@ module.exports = {
 	addRequest: async (user, team, data, status) => {
 		data = data.replace("'", "")
 		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
-		console.log(user," ",team);
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addRequest', query, Error(err))})

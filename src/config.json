@@ -1,8 +1,10 @@
 {
 	"api_base": "https://api.miro.com/v1",
 	"base_url": "",
-	"db_name": "",
-	"db_user": "",
-	"db_pass": "",
-	"plugins": []
+	"db_user": "postgres",
+	"db_pass": "qwerty96",
+	"plugins": [
+		"stickerman"
+	],
+	"db_name": "smart-layout"
 }
