@@ -17,7 +17,8 @@ CREATE TABLE Plugins (
     client_id       BIGINT NOT NULL PRIMARY KEY,
     client_secret   VARCHAR(32) NOT NULL,
     name            VARCHAR(100) NOT NULL,
-    src             VARCHAR(200) NOT NULL
+    src             VARCHAR(200) NOT NULL,
+    CONSTRAINT unique_plugin UNIQUE (name, src)
 );
 -- table for storing alghoritm configs
 CREATE TABLE Configs (
