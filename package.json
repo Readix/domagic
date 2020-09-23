@@ -13,6 +13,7 @@
     "ls": "node ./commands/ls.js",
     "set": "node ./commands/set.js",
     "help": "node ./commands/help.js",
+    "status": "node ./commands/status.js",
     "start": "node ./src/app-main.js -e js,html",
     "clear": "node ./clear.js"
   },
