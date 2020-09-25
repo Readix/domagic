@@ -46,7 +46,6 @@ module.exports = {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
 	addPlugin: async function (name, client_id, client_secret, src) {
-		console.log(client_id)
 		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${src}')`
 		return dbPool.query(query)
 			.catch(err => {
