@@ -1,6 +1,6 @@
 {
 	"api_base": "https://api.miro.com/v1",
-	"base_url": "",
+	"base_url": "https://dda0caf132a3.ngrok.io",
 	"db_user": "postgres",
 	"db_pass": "qwerty96",
 	"plugins": [

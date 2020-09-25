@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-165865332-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-165865332-1');
+	</script>
+	<link rel="stylesheet" type="text/css" href="https://miro.com/app/static/styles.1.0.css"/>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script type="text/javascript" src="https://miro.com/app/static/sdk.1.1.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<object> <svg viewBox="0 0 24 24" id="img__close-24"><path fill="currentColor" d="M10.586 12l-6.293 6.293a1 1 0 0 0 1.414 1.414L12 13.414l6.293 6.293a1 1 0 0 0 1.414-1.414L13.414 12l6.293-6.293a1 1 0 1 0-1.414-1.414L12 10.586 5.707 4.293a1 1 0 0 0-1.414 1.414L10.586 12z"></path></svg>
+	</object>
+</head>
+<body>
+<div class="board-panel--hidden-bottom ratings use-ng-animate" id="board-ratings-placeholder" bottom-panel-positioner="" ng-if="panels.RATES" style="visibility: visible;">
+	<!----><div class="rate-wrapper" ng-repeat="rateWrapper in ctrl.ratesWrappers track by rateWrapper.id">
+	<div class="rate-float rate" ng-class="{'rate-float--gratitude': showGratitude}" header="Rate your experience with Stickerman" rate="rateWrapper.rate" options="ctrl.options" submitted="ctrl.rateSubmit(rateWrapper)" closed="ctrl.rateClosed(rateWrapper)" show-gratitude="rateWrapper.showGratitude">
+		<div class="rate-value">
+			<div class="rate-head">
+				<h1 class="rate-caption" ng-switch="showGratitude">Rate your experience with Grids</h1>
+				<button class="closeForm" ng-show="closed"  hm-tap="closed($event)">
+					<svg><use xlink:href="#img__close-24"></use></svg>
+				</button>
+			</div>
+			<div class="rates" ng-show="!showGratitude">
+				<!----><label class="rate-option rate-option--awfull" ng-class="{'rate-option--checked': option.value === $parent.rating.value}" ng-repeat="option in ctrl.options track by $index" title="Awfull">
+				<span class="rate-option-ico"></span>
+				<input type="radio" ng-value="option" ng-model="$parent.rating" class="ng-pristine ng-untouched ng-valid ng-empty" name="866" value="[object Object]">
+			</label><!----><label class="rate-option rate-option--bad" ng-class="{'rate-option--checked': option.value === $parent.rating.value}" ng-repeat="option in ctrl.options track by $index" title="Bad">
+				<span class="rate-option-ico"></span>
+				<input type="radio" ng-value="option" ng-model="$parent.rating" class="ng-pristine ng-untouched ng-valid ng-empty" name="868" value="[object Object]">
+			</label><!----><label class="rate-option rate-option--neutral" ng-class="{'rate-option--checked': option.value === $parent.rating.value}" ng-repeat="option in ctrl.options track by $index" title="Neutral">
+				<span class="rate-option-ico"></span>
+				<input type="radio" ng-value="option" ng-model="$parent.rating" class="ng-pristine ng-untouched ng-valid ng-empty" name="870" value="[object Object]">
+			</label><!----><label class="rate-option rate-option--good" ng-class="{'rate-option--checked': option.value === $parent.rating.value}" ng-repeat="option in ctrl.options track by $index" title="Good">
+				<span class="rate-option-ico"></span>
+				<input type="radio" ng-value="option" ng-model="$parent.rating" class="ng-pristine ng-untouched ng-valid ng-empty" name="872" value="[object Object]">
+			</label><!----><label class="rate-option rate-option--awesome" ng-class="{'rate-option--checked': option.value === $parent.rating.value}" ng-repeat="option in ctrl.options track by $index" title="Awesome">
+				<span class="rate-option-ico"></span>
+				<input type="radio" ng-value="option" ng-model="$parent.rating" class="ng-pristine ng-untouched ng-valid ng-empty" name="874" value="[object Object]">
+			</label><!---->
+			</div>
+			</div>
+		<form name="rate-form" class="rate-comment-form ng-pristine ng-valid ng-hide" ng-show="ctrl.showMore &amp;&amp; !showGratitude" ng-submit="ctrl.submit($event)" enctype="application/x-www-form-urlencoded">
+			<div class="rate-input-wrapper" no-prevent-default="true">
+				<textarea ng-model="rate.comment" rows="1" placeholder="Tell us more..." class="ng-pristine ng-untouched ng-valid ng-empty"></textarea>
+			</div>
+			<div>
+				<button name="template-rate-submit-button" class="rtb-btn rtb-btn--primary rtb-btn--mini" type="submit" no-prevent-ios-touchstart="true">
+					Send
+				</button>
+			</div>
+		</form>
+		<div class="use-ng-animate rate-closebar rate-closebar--countdown ng-hide" ng-show="showGratitude" style=""></div>
+	</div>
+</div><!---->
+</div>
+</body>
+</html>
+
