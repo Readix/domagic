@@ -65,11 +65,12 @@ app.get('/endSession', async (req, res) => {
 })
 
 // Шаблонизировать, если понадобится
-send = (user, team, response, info, sendData, reqData) => {
-	db.addRequest(user, team, JSON.stringify(reqData), info.code)
-		.catch(err => 
+send =async (user, team, response, info, sendData, reqData) => {
+	let queryResult= await db.addRequest(user, team, JSON.stringify(reqData), info.code)
+		.catch(err =>
 			console.log(err.message))
-	response.send(Object.assign(sendData, info))
+	console.log(queryResult);
+	response.send(Object.assign(sendData, info, queryResult))
 }
 
 module.exports = { app, send }

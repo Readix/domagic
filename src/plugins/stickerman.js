@@ -106,12 +106,32 @@ app.post('/widgetComposer', async (req, res) => {
 			)
 		console.log(setts);
 		await sm.run(skins, setts)
-		send(req.body.user, req.body.team, res, {
+		 send(req.body.user, req.body.team, res, {
 			code: 0,
 			message: 'success',
 		},{
 			widgets: req.body.widgets,
 		}, req.body)
+	}
+	catch (error) {
+		log.error(error.stack)
+		console.error(error.message)
+		send(req.body.user, req.body.team, res, {
+			code: 1,
+			message: error.stack
+		}, {}, req.body)
+	}
+})
+
+
+app.post('/rate', async (req, res) => {
+	try{
+		if (typeof  req.body.comment === 'undefined') {
+			req.body.comment="undefined";
+		}
+			await db.addFeedback(req.body.user_id,req.body.team_id,req.body.request_id, req.body.grade, req.body.comment);
+		res.sendStatus(200);
+
 	}
 	catch (error) {
 		log.error(error.stack)

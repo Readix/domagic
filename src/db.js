@@ -46,6 +46,7 @@ module.exports = {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
 	addPlugin: async function (name, client_id, client_secret, src) {
+		console.log(src);
 		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${src}')`
 		return dbPool.query(query)
 			.catch(err => {
@@ -55,6 +56,7 @@ module.exports = {
 		data = data.replace("'", "")
 		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
 		return dbPool.query(query)
+			.then(res => res.rows[0])
 			.catch(err => {
 				throw dbErrorFormat('addRequest', query, Error(err))})
 	},
@@ -68,6 +70,7 @@ module.exports = {
 	startSession: async (user, team) => {
 		let query = `SELECT start_session(${user}, ${team})`
 		return dbPool.query(query)
+			.then(res => query)
 			.catch(err => {
 				throw dbErrorFormat('startSession', query, Error(err))})
 	},
@@ -78,6 +81,7 @@ module.exports = {
 				throw dbErrorFormat('endSession', query, Error(err))})
 	},
 	getPluginProps: async function(name) {
+		console.log(srcDir)
 		let query = `SELECT * FROM Plugins WHERE name = '${name}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
@@ -121,5 +125,13 @@ module.exports = {
 			.then(res => res.rows)
 			.catch(err => {
 				throw dbErrorFormat('getPluginsList', query, Error(err))})	
+	},
+
+	addFeedback: async (user_id, team_id, request_id, grade, comment) => {
+		let query = `INSERT INTO Feedbacks (user_id, team_id, request_id, grade, comment)
+		VALUES('${user_id}','${team_id}','${request_id}','${grade}','${comment}')`
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('addFeedback', query, Error(err))})
 	}
 }

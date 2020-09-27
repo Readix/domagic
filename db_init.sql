@@ -9,7 +9,11 @@ DROP TABLE IF EXISTS Feedbacks;
 -- table for storing all user`s feedback
 CREATE TABLE Feedbacks (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
-    data        JSON NOT NULL,
+    user_id BIGINT NULL,
+    team_id  BIGINT NULL,
+    request_id BIGSERIAL NOT NULL,
+    grade SMALLINT NOT NULL,
+    comment VARCHAR(200) NOT NULL,
     created     TIMESTAMP DEFAULT NOW()
 );
 -- table for storing plugin api keys
@@ -81,6 +85,15 @@ CREATE TABLE Requests (
         ON UPDATE CASCADE
 );
 CREATE INDEX i_r_install ON Requests(install_id);
+-- binder table Feedback <-> Installations
+CREATE TABLE FandI (
+    FOREIGN KEY (CustomerId) REFERENCES Customers (Id) ON DELETE SET NULL    start_time TIMESTAMP DEFAULT NOW(),
+    end_time   TIMESTAMP NULL,
+    install_id INT NOT NULL
+        REFERENCES Installations(install_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 -- create functions
 CREATE OR REPLACE FUNCTION start_session(userId BIGINT, teamId BIGINT)
 RETURNS INT AS $$

@@ -29,6 +29,7 @@ const addPlugin = async (pluginName, clientId, clientSecret) => {
         throw Error(`Folder for plugin '${pluginName}' does not exists in static/`)
     }
     await db.init()
+    console.log(srcDir);
     return db.addPlugin(pluginName, clientId, clientSecret, srcDir)
 }
 
