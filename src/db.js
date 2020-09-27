@@ -133,5 +133,8 @@ module.exports = {
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addFeedback', query, Error(err))})
+			.then(dbPool.query(`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`))
+			.catch(err => {
+				throw dbErrorFormat('addFeedback', query, Error(err))})
 	}
 }

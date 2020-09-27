@@ -11,7 +11,7 @@ CREATE TABLE Feedbacks (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
     user_id BIGINT NULL,
     team_id  BIGINT NULL,
-    request_id BIGSERIAL NOT NULL,
+    request_id BIGINT  NOT NULL,
     grade SMALLINT NOT NULL,
     comment VARCHAR(200) NOT NULL,
     created     TIMESTAMP DEFAULT NOW()
@@ -85,15 +85,6 @@ CREATE TABLE Requests (
         ON UPDATE CASCADE
 );
 CREATE INDEX i_r_install ON Requests(install_id);
--- binder table Feedback <-> Installations
-CREATE TABLE FandI (
-    FOREIGN KEY (CustomerId) REFERENCES Customers (Id) ON DELETE SET NULL    start_time TIMESTAMP DEFAULT NOW(),
-    end_time   TIMESTAMP NULL,
-    install_id INT NOT NULL
-        REFERENCES Installations(install_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
 -- create functions
 CREATE OR REPLACE FUNCTION start_session(userId BIGINT, teamId BIGINT)
 RETURNS INT AS $$
@@ -162,20 +153,17 @@ BEGIN
     RETURN conf;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, feedback JSON)
+
+CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, requestId BIGINT)
 RETURNS INT AS $$
 DECLARE
-    inst BIGINT;
-    requ BIGINT;
-    feed BIGINT;
+    feedbackId BIGINT;
 BEGIN
-    inst = (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    feedbackId = (SELECT feedback_id FROM Feedbacks WHERE user_id=userId AND team_id=teamId AND request_id=requestId);
+    IF feedbackId IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % and request_id % thre is no feedbacks', userid,teamid,requestId;
     END IF;
-    requ = (SELECT request_id FROM Requests WHERE install_id=inst ORDER BY timestamp DESC LIMIT 1);
-    INSERT INTO Feedbacks (data) VALUES(feedback) RETURNING feedback_id INTO feed;
-    UPDATE Requests SET feedback_id = feed WHERE request_id = requ;
-    RETURN feed;
+    UPDATE Requests SET feedback_id = feedbackId WHERE request_id = requestId;
+    RETURN feedbackId;
 END;
 $$ LANGUAGE plpgsql;
