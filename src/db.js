@@ -1,6 +1,8 @@
 let config = require('./config.json')
 const { Pool, Client } = require('pg')
-const srcDir = __dirname + '/..'
+const path = require('path');
+const srcDir = path.join(__dirname, '..')
+
 
 let dbErrorFormat = (func, query, err) => {
 	err.src = `db func: ${func}`
@@ -46,7 +48,6 @@ module.exports = {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
 	addPlugin: async function (name, client_id, client_secret, src) {
-		console.log(src);
 		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${src}')`
 		return dbPool.query(query)
 			.catch(err => {
@@ -81,7 +82,6 @@ module.exports = {
 				throw dbErrorFormat('endSession', query, Error(err))})
 	},
 	getPluginProps: async function(name) {
-		console.log(srcDir)
 		let query = `SELECT * FROM Plugins WHERE name = '${name}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
@@ -118,9 +118,9 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('changePluginProps', query, Error(err))})
 	},
-	getPluginsList: async (src) => {
+	getPluginsList: async () => {
 		let query = `select name, client_id, client_secret from Plugins\
-			where src = '${src}'`
+			where src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows)
 			.catch(err => {

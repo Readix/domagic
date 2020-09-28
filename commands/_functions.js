@@ -1,6 +1,7 @@
 const db = require('../src/db')
 const fs = require('fs')
-const srcDir = __dirname + '/..'
+const path = require('path');
+const srcDir = path.join(__dirname, '..')
 
 /*Inside functions*/
 
@@ -29,7 +30,6 @@ const addPlugin = async (pluginName, clientId, clientSecret) => {
         throw Error(`Folder for plugin '${pluginName}' does not exists in static/`)
     }
     await db.init()
-    console.log(srcDir);
     return db.addPlugin(pluginName, clientId, clientSecret, srcDir)
 }
 
@@ -90,11 +90,6 @@ const addDbLogin = async (dbName, dbUser, dbPass) => {
     return db.init()
 }
 
-const getPluginsList = async () => {
-    await db.init()
-    return db.getPluginsList(srcDir)
-}
-
 const writeConfigField = async (key, value) => {
     let config = require('../src/config.json')
     config[key] = value
@@ -108,6 +103,5 @@ module.exports = {
     enablePlugin: enablePlugin,
     disablePlugin: disablePlugin,
     addDbLogin: addDbLogin,
-    getPluginsList: getPluginsList,
     writeConfigField: writeConfigField
 }
