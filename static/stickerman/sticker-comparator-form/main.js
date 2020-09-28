@@ -62,7 +62,9 @@ miro.onReady(async () => {
 					})
 					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
 				})
-				miro.board.ui.closeModal()
+				miro.board.ui.closeModal();
+				window.sessionStorage.setItem('thisRequestId', res.insert_request);
+				miro.board.ui.openBottomPanel('/static/stickerman/feedback-form', {'width':324, 'height':108	})
 			},
 			error: () => {
 				$('.loader').fadeOut()

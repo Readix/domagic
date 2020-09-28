@@ -9,7 +9,11 @@ DROP TABLE IF EXISTS Feedbacks;
 -- table for storing all user`s feedback
 CREATE TABLE Feedbacks (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
-    data        JSON NOT NULL,
+    user_id BIGINT NULL,
+    team_id  BIGINT NULL,
+    request_id BIGINT  NOT NULL,
+    grade SMALLINT NOT NULL,
+    comment VARCHAR(200) NOT NULL,
     created     TIMESTAMP DEFAULT NOW()
 );
 -- table for storing plugin api keys
@@ -150,20 +154,17 @@ BEGIN
     RETURN conf;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, feedback JSON)
+
+CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, requestId BIGINT)
 RETURNS INT AS $$
 DECLARE
-    inst BIGINT;
-    requ BIGINT;
-    feed BIGINT;
+    feedbackId BIGINT;
 BEGIN
-    inst = (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
-    IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+    feedbackId = (SELECT feedback_id FROM Feedbacks WHERE user_id=userId AND team_id=teamId AND request_id=requestId);
+    IF feedbackId IS NULL THEN
+        RAISE EXCEPTION  'For user_id % and team_id % and request_id % thre is no feedbacks', userid,teamid,requestId;
     END IF;
-    requ = (SELECT request_id FROM Requests WHERE install_id=inst ORDER BY timestamp DESC LIMIT 1);
-    INSERT INTO Feedbacks (data) VALUES(feedback) RETURNING feedback_id INTO feed;
-    UPDATE Requests SET feedback_id = feed WHERE request_id = requ;
-    RETURN feed;
+    UPDATE Requests SET feedback_id = feedbackId WHERE request_id = requestId;
+    RETURN feedbackId;
 END;
 $$ LANGUAGE plpgsql;
