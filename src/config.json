@@ -1,8 +1,8 @@
 {
 	"api_base": "https://api.miro.com/v1",
-	"base_url": "",
+	"plugins": [],
 	"db_name": "",
 	"db_user": "",
 	"db_pass": "",
-	"plugins": []
+	"port": ""
 }
