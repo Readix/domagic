@@ -12,8 +12,7 @@ if (require.main !== module) {
 }
 
 let notAccess = ['api_base', 'plugins']
-const values = args.reduce((acc, val) => {
-    acc[val] = undefined; return acc}, {})
+let values = {}
 
 process.argv.slice(2).forEach((val, idx, arr) => {
     let name = val.split('=')[0]
