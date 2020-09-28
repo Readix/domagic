@@ -17,6 +17,7 @@ const printWithTabs = (msg, tabsCount) =>
 const colon = (key, val) => key + ': ' + val
 
 console.log('base_url: ' + config['base_url'])
+console.log('port: ' + config['port'])
 console.log('database:')
 printWithTabs(colon('db_name', config['db_name']), 1)
 printWithTabs(colon('db_user', config['db_user']), 1)

@@ -21,9 +21,13 @@ let dbConn = async () => {
 }
 
 let dbSync = async (pluginName) => {
-    return (await getPluginsList())
-        .map(props => props.name)
-        .indexOf(pluginName) > -1
+    return db.init()
+        .then(initMsg => 
+            getPluginsList()
+                .map(props => props.name)
+                .indexOf(pluginName) > -1
+        )
+        .catch(err => false)
 }
 
 let frontExists = async (pluginName) => {
