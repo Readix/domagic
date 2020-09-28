@@ -88,6 +88,14 @@ let validOverparams = paramsString => {
 	sectors[1].length == sectors[2].length
 }
 
+let buildSaveData = widgets => {
+	let saveData = {}
+	widgets.forEach(widget => {
+		saveData[widget.type] = (saveData[widget.type] + 1) || 1
+	})
+	return saveData
+}
+
 app.post('/widgetComposer', async (req, res) => {
 	try {
 		console.log('compose')
@@ -106,7 +114,7 @@ app.post('/widgetComposer', async (req, res) => {
 			)
 		console.log(setts);
 		await sm.run(skins, setts)
-		send(req.body.user, req.body.team, res, {
+		send(req.body.user, req.body.team, buildSaveData(res.widgets), {
 			code: 0,
 			message: 'success',
 		},{
