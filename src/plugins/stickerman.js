@@ -114,12 +114,12 @@ app.post('/widgetComposer', async (req, res) => {
 			)
 		console.log(setts);
 		await sm.run(skins, setts)
-		send(req.body.user, req.body.team, buildSaveData(res.widgets), {
+		send(req.body.user, req.body.team, res, {
 			code: 0,
 			message: 'success',
 		},{
 			widgets: req.body.widgets,
-		}, req.body)
+		}, buildSaveData(req.body.widgets))
 	}
 	catch (error) {
 		log.error(error.stack)
