@@ -9,7 +9,7 @@ const error = {
 }
 
 const pluginFrontendExists = (pluginName) => {
-    let filenames = fs.readdirSync(srcDir + './static/')
+    let filenames = fs.readdirSync(srcDir + '/static/')
     if (filenames.some(name => name == pluginName)) {
         return true 
     }
@@ -64,7 +64,7 @@ const enablePlugin = async (pluginName) => {
         }
         if (config['plugins'].indexOf(pluginName) < 0) {
             config['plugins'].push(pluginName)
-            fs.writeFileSync(srcDir + './src/config.json', JSON.stringify(config, null, '\t'))
+            fs.writeFileSync(srcDir + '/src/config.json', JSON.stringify(config, null, '\t'))
         }
     })
 }
@@ -86,7 +86,7 @@ const addDbLogin = async (dbName, dbUser, dbPass) => {
     config['db_name'] = dbName
     config['db_user'] = dbUser
     config['db_pass'] = dbPass
-    fs.writeFileSync(srcDir + './src/config.json', JSON.stringify(config, null, '\t'))
+    fs.writeFileSync(srcDir + '/src/config.json', JSON.stringify(config, null, '\t'))
     return db.init()
 }
 
