@@ -1,7 +1,6 @@
 const errh = require('./_errhandler')
 const db = require('../src/db')
 const config = require('../src/config.json')
-const {getPluginsList} = require('./_functions')
 
 
 if (require.main !== module) {
@@ -26,7 +25,7 @@ printWithTabs(colon('db_pass', config['db_pass']), 1)
 db.init()
     .then(initMsg => {
         console.log(initMsg)
-        getPluginsList()
+        db.getPluginsList()
             .then(list => {
                 list.forEach(props => {
                     console.log(props.name + ':')
