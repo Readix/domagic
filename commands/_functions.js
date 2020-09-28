@@ -1,6 +1,6 @@
 const db = require('../src/db')
 const fs = require('fs')
-const srcDir = __dirname.split('/').slice(0, -1).join('/')
+const srcDir = __dirname + '/..'
 
 /*Inside functions*/
 

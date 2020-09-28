@@ -88,6 +88,14 @@ let validOverparams = paramsString => {
 	sectors[1].length == sectors[2].length
 }
 
+let buildSaveData = widgets => {
+	let saveData = {}
+	widgets.forEach(widget => {
+		saveData[widget.type] = (saveData[widget.type] + 1) || 1
+	})
+	return saveData
+}
+
 app.post('/widgetComposer', async (req, res) => {
 	try {
 		console.log('compose')
@@ -111,7 +119,7 @@ app.post('/widgetComposer', async (req, res) => {
 			message: 'success',
 		},{
 			widgets: req.body.widgets,
-		}, req.body)
+		}, buildSaveData(req.body.widgets))
 	}
 	catch (error) {
 		log.error(error.stack)

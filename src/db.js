@@ -1,6 +1,6 @@
 let config = require('./config.json')
 const { Pool, Client } = require('pg')
-const srcDir = __dirname.split('/').slice(0, -1).join('/')
+const srcDir = __dirname + '/..'
 
 let dbErrorFormat = (func, query, err) => {
 	err.src = `db func: ${func}`

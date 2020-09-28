@@ -45,7 +45,8 @@
   },
   "_moduleAliases": {
     "@root": "./",
-    "@libs": "./segmentor-js/",
-    "@src": "./src/"
+    "@src": "./src/",
+    "@config": "./src/config.json",
+    "@db": "./src/db.js"
   }
 }

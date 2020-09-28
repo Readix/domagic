@@ -1,8 +1,7 @@
 const errh = require('./_errhandler')
-const config = require('../src/config.json')
 const { writeConfigField } = require('./_functions')
 
-const args = ['base_url']
+const args = ['base_url', 'port']
 
 if (require.main !== module) {
     module.exports = {

@@ -2,16 +2,9 @@ var fs = require('fs');
 var config = require('./config.json');
 var { app, send } = require('./app-base');
 var db = require('./db');
+const port = config.port
 
-let port_arg = process.argv.slice(-1)[0]
-if (port_arg.split('=')[0] != 'port') {
-	port_arg = 3000
-}
-else {
-	port_arg = port_arg.split('=')[1]
-}
-const port = port_arg
-console.log(port)
+
 if (!config.plugins.length)
     throw new Error('Empty plugins list')
 
