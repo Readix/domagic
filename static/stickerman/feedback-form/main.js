@@ -49,7 +49,7 @@ $(document).ready(() => {
 				user_id: await miro.currentUser.getId(),
 				request_id: window.sessionStorage.getItem('thisRequestId'),
 				grade: grade,
-				comment: $('.textarea').val()
+				comment: $('textarea').val()
 			}),
 			success: (res) => {
 				$('.board-panel--hidden-bottom').fadeOut(100);

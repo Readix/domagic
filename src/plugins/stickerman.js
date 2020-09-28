@@ -129,8 +129,8 @@ app.post('/rate', async (req, res) => {
 		if (typeof  req.body.comment === 'undefined') {
 			req.body.comment="undefined";
 		}
-			await db.addFeedback(req.body.user_id,req.body.team_id,req.body.request_id, req.body.grade, req.body.comment)
-				//.then( db.feedbackToRequest(req.body.user_id,req.body.team_id,req.body.request_id))
+			await db.addFeedback(req.body.user_id,req.body.team_id,req.body.request_id, req.body.grade, req.body.comment);
+			await db.feedbackToRequest(req.body.user_id,req.body.team_id,req.body.request_id);
 		res.sendStatus(200);
 	}
 	catch (error) {

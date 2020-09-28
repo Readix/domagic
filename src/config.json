@@ -1,10 +1,10 @@
 {
 	"api_base": "https://api.miro.com/v1",
-	"base_url": "https://91bd73d3fe3a.ngrok.io",
-	"db_user": "postgres",
-	"db_pass": "qwerty96",
+	"db_user": "sliderman",
+	"db_pass": "korpus2020",
 	"plugins": [
 		"stickerman"
 	],
-	"db_name": "smart-layout"
+	"db_name": "smart-layout-dbfix",
+	"base_url": "https://17dc5931ec37.ngrok.io"
 }

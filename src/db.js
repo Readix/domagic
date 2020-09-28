@@ -133,8 +133,14 @@ module.exports = {
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addFeedback', query, Error(err))})
-			.then(dbPool.query(`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`))
-			.catch(err => {
-				throw dbErrorFormat('addFeedback', query, Error(err))})
-	}
+	},
+ 
+       feedbackToRequest: async (user_id, team_id, request_id) => {
+                let query =`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`
+                return dbPool.query(query)
+			.then(res=> res.rows[0])
+                        .catch(err => {
+                                throw dbErrorFormat('feedbackToRequest', query, Error(err))})
+        }
 }
+
