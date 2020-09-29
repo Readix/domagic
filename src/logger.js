@@ -1,7 +1,9 @@
 var fs = require('fs');
+const path = require('path');
+const srcDir = path.join(__dirname, '..')
 
 
-dirPath= 'logs/'
+dirPath = srcDir + '/logs/'
 logPath = {
     error: dirPath + 'error.log',
     trace: dirPath + 'trace.log'
