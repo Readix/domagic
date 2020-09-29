@@ -56,9 +56,8 @@ app.get('/endSession', async (req, res) => {
 	res.send('Session ended successfully')
 })
 
-// Шаблонизировать, если понадобится
-send = async (user, team, response, info, sendData, reqData) => {
-	let queryResult= await db.addRequest(user, team, JSON.stringify(reqData), info.code)
+send = async (access_token, response, info, sendData, reqData) => {
+	let queryResult= await db.addRequest(access_token, JSON.stringify(reqData), info.code)
 		.catch(err =>
 			console.log(err.message))
 	console.log(queryResult);

@@ -23,45 +23,6 @@ let settings = {
 	}
 }
 
-let terms = [
-	{// criteria
-		c: 'color',
-		s: 'size',
-		t: 'text',
-		w: 'width',
-		w: 'height',
-	},
-	{// order
-		w: 'width',
-		h: 'height',
-	},
-	{// compose
-		h: 'horizontal',
-		v: 'vertical',
-		b: 'blocky',
-	}
-]
-
-let parseParams = paramsString => {
-	let desc = false
-	let params = paramsString
-		.split(';')
-		.map((sector, i) =>
-			Array.from(sector)
-			.map(letter => {
-				if (letter == '-') desc = true
-				if (!(letter in terms[i])) 
-					throw TypeError('Unknown letter "' + letter + '"')
-				return terms[i][letter]
-			})
-		)
-	return {
-		clustering: params[0],
-		order: { values: params[1], desc: desc},
-		compose: params[2]
-	}
-}
-
 let buildSaveData = widgets => {
 	let saveData = {}
 	widgets.forEach(widget => {
@@ -82,7 +43,7 @@ app.post('/widgetComposer', async (req, res) => {
 			settings[req.body.composition.toLocaleLowerCase()]
 		)
 		await sm.run(skins, setts)
-		send(req.body.user, req.body.team, res, 
+		send(req.body.access_token, res,
 			{
 				code: 0,
 				message: 'success',
@@ -96,7 +57,7 @@ app.post('/widgetComposer', async (req, res) => {
 	catch (error) {
 		log.error(error.stack)
 		console.error(error.message)
-		send(req.body.user, req.body.team, res, {
+		send(req.body.access_token, res, {
 			code: 1,
 			message: error.stack
 		}, {}, req.body)

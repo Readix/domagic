@@ -53,9 +53,9 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('addPlugin', query, Error(err))})
 	},
-	addRequest: async (user, team, data, status) => {
+	addRequest: async (access_token, data, status) => {
 		data = data.replace("'", "")
-		let query = `SELECT insert_request(${user}, ${team}, '${data}', '${status}')`
+		let query = `SELECT insert_request('${access_token}', '${data}', '${status}')`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => {
