@@ -14,7 +14,6 @@ const Stickerman = require('../stickerman/stickerman')
 const app = express()
 
 const log = require('./logger')
-const { enablePlugin } = require('../commands/_functions')
 
 app.engine('html', mustacheExpress())
 app.use(cors())
@@ -24,14 +23,7 @@ app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
-/*
-Либо переделать (подгружать свойства всех активных плагинов)
-либо убрать
-var pluginProps = []
-db.getPluginProps(config.PLUGIN_NAME).then((props) => {
-	console.log(props)
-	pluginProps = props
-})*/
+
 // Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое)
 app.get('/', (req, res) => {
 	const config = require('./config.js')
@@ -65,12 +57,40 @@ app.get('/endSession', async (req, res) => {
 })
 
 // Шаблонизировать, если понадобится
-send =async (user, team, response, info, sendData, reqData) => {
+send = async (user, team, response, info, sendData, reqData) => {
 	let queryResult= await db.addRequest(user, team, JSON.stringify(reqData), info.code)
 		.catch(err =>
 			console.log(err.message))
 	console.log(queryResult);
 	response.send(Object.assign(sendData, info, queryResult))
 }
+
+/*
+app.use(, async (req, res, next) => {
+	try {
+
+	}
+	catch(error) {
+		log.error(error.stack)
+		console.error(error.message)
+		send(req.body.user, req.body.team, res, {
+			code: 1,
+			message: error.stack
+		}, {}, req.body)
+	}
+})
+// /\/((?!oauth).)*/
+/*
+app.use(, async (req, res, next) => {
+	db.authorized(req.body.access_token)
+		.then(auth => {
+			if (auth) {
+				next()
+			}
+			else {
+				throw Error('Not authorized query')
+			}
+		})
+})*/
 
 module.exports = { app, send }

@@ -7,22 +7,6 @@ const MiroWidget = require('../../stickerman/miroWidget')
 const CustomWidget = require('../../stickerman/customWidget')
 const Stickerman = require('../../stickerman/stickerman')
 
-// Переделать логику потом, oauth на каждый плагин
-app.get('/oauth_stickerman', async (req, res) => {
-	console.log('start auth...')
-	let secret = await db.getSecret('stickerman')
-	if (!secret) {
-		let msg = 'Not found client secret in database for stickerman'
-		log.error(msg)
-		console.error(msg)
-	}
-	const response = await api.oauth.getToken('stickerman', req.query.code, req.query.client_id, secret.client_secret)
-	console.log('/oauth/ response = ', response)
-	if (response) {
-		await db.addAuthorization(response, req.query.client_id)
-	}
-	res.send('App has been installed, open <br>response: ' + JSON.stringify(response))
-})
 
 let settings = {
 	horizontal: {
