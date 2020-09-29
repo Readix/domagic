@@ -39,7 +39,8 @@ miro.onReady(async () => {
 						left: widget.bounds.left,
 						top: widget.bounds.top,
 						color: widget.type.toLowerCase() == 'sticker' ? widget.style.stickerBackgroundColor : widget.style.backgroundColor,
-						text: widget.plainText
+						text: widget.plainText,
+						type: widget.type.toLowerCase()
 					}
 				})
 			}),

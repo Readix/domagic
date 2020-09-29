@@ -119,7 +119,7 @@ BEGIN
     RETURN sess;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION insert_request(userId BIGINT, teamId BIGINT, req_data JSON, req_status VARCHAR(10))
+CREATE OR REPLACE FUNCTION insert_request(token CHAR(36), req_data JSON, req_status VARCHAR(10))
 RETURNS INT AS $$
 DECLARE
     conf BIGINT;
@@ -128,9 +128,9 @@ DECLARE
     requ BIGINT;
 BEGIN
     conf := (SELECT config_id FROM Configs ORDER BY created DESC LIMIT 1);
-    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    inst := (SELECT install_id FROM Installations WHERE access_token = token);
     IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+        RAISE EXCEPTION  'For access_token % installation_id is %', token, inst;
     END IF;
     sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
     IF sess IS NULL THEN
