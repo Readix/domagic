@@ -47,8 +47,8 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
-	addPlugin: async function (name, client_id, client_secret, src) {
-		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${src}')`
+	addPlugin: async function (name, client_id, client_secret) {
+		let query = `INSERT INTO Plugins(name, client_id, client_secret, src) VALUES('${name}','${client_id}', '${client_secret}','${srcDir}')`
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addPlugin', query, Error(err))})
@@ -88,9 +88,9 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('getPluginProps', query, Error(err))})
 	},
-	pluginExists: async (pluginName, src) => {
+	pluginExists: async (pluginName) => {
 		let query = `SELECT * FROM Plugins \
-			WHERE name = '${pluginName}' and src = '${src}'`
+			WHERE name = '${pluginName}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows.length != 0)
 			.catch(err => {
@@ -104,15 +104,15 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('getSecret', query, Error(err))})
 	},
-	deletePlugin: async (pluginName, src) => {
-		let query = `delete FROM Plugins WHERE name = '${pluginName}' and src = '${src}'`
+	deletePlugin: async (pluginName) => {
+		let query = `delete FROM Plugins WHERE name = '${pluginName}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('deletePlugin', query, Error(err))})
 	},
-	changePluginProps: async (pluginName, client_id, client_secret, src) => {
+	changePluginProps: async (pluginName, client_id, client_secret) => {
 		let query = `update Plugins set client_id = ${client_id}, client_secret = ${client_secret}\
-			WHERE name = '${pluginName}' and src = '${src}'`
+			WHERE name = '${pluginName}' and src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows[0])
 			.catch(err => {

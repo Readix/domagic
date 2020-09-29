@@ -30,7 +30,7 @@ const addPlugin = async (pluginName, clientId, clientSecret) => {
         throw Error(`Folder for plugin '${pluginName}' does not exists in static/`)
     }
     await db.init()
-    return db.addPlugin(pluginName, clientId, clientSecret, srcDir)
+    return db.addPlugin(pluginName, clientId, clientSecret)
 }
 
 const removePlugin = async (pluginName) => {
@@ -38,7 +38,7 @@ const removePlugin = async (pluginName) => {
         error.expectedArg('plugin_name')
     }
     await db.init()
-    return db.deletePlugin(pluginName, srcDir)
+    return db.deletePlugin(pluginName)
 }
 
 const changePluginProps = async (pluginName, clientId, clientSecret) => {
@@ -46,7 +46,7 @@ const changePluginProps = async (pluginName, clientId, clientSecret) => {
         error.expectedArg('plugin_name')
     }
     await db.init()
-    return db.changePluginProps(pluginName, clientId, clientSecret, srcDir)
+    return db.changePluginProps(pluginName, clientId, clientSecret)
 }
 
 const enablePlugin = async (pluginName) => {
@@ -54,7 +54,7 @@ const enablePlugin = async (pluginName) => {
         error.expectedArg('plugin_name')
     }
     await db.init()
-    return db.pluginExists(pluginName, srcDir).then(exists => {
+    return db.pluginExists(pluginName).then(exists => {
         let config = require('../src/config.json')
         if (!exists) {
             throw Error(`plugin '${pluginName}' does not exists in database ${config.db_name}`)
