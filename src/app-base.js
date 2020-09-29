@@ -79,17 +79,59 @@ app.use(, async (req, res, next) => {
 	}
 })
 // /\/((?!oauth).)*/
-/*
-app.use(, async (req, res, next) => {
-	db.authorized(req.body.access_token)
-		.then(auth => {
-			if (auth) {
-				next()
-			}
-			else {
-				throw Error('Not authorized query')
-			}
+
+saveRequest = async (access_token, res, err, data, saveData) => {
+	db.addRequest(access_token, JSON.stringify(reqData), err.code)
+		.then(res => console.log(queryResult))
+		.catch(err => {
+			log.error(err.stack)
+			console.log(err.message)
 		})
-})*/
+	res.send(Object.assign(data, err.message))
+}
+
+saveRequest = async (access_token, data, error_code) => {
+	return db.addRequest(access_token, JSON.stringify(data), error_code)
+		.then(res => {
+			console.log(res)
+			return true
+		})
+		.catch(err => {
+			log.error(err.stack)
+			console.log(err.message)
+			return false
+		})
+}
+
+app.use(/\/plugin\/.*/, async (req, res, next) => {
+	auth = await db.authorized((req.body || req.query).access_token, req.baseUrl.split('/')[2])
+	if (!auth) {
+		msg = 'not authorized query, access_token: ' + (req.body || req.query).access_token
+		log.trace(msg)
+		console.log(msg)
+		res.send({code: 1, message: 'not authorized'})
+		return
+	}
+	res.return = result => {
+		try {
+			result.save = result.save || {}
+			errInfo = result.error ?
+				{code: 1, message: result.error.message} :
+				{code: 0, message: 'success'}
+			saveRequest((req.body || req.query).access_token, result.save, errInfo.code)
+			if (errInfo.code) {
+				log.error(result.error.stack)
+				console.error(result.error.message)
+				res.send(errInfo)
+				return
+			}
+			res.send(Object.assign(errInfo, result.response))
+		} catch (error) {
+			console.error(error.message)
+			res.send({code: 1, message: error.message})
+		}
+	}
+	next()
+})
 
 module.exports = { app, send }

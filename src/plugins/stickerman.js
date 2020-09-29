@@ -31,36 +31,29 @@ let buildSaveData = widgets => {
 	return saveData
 }
 
-app.post('/widgetComposer', async (req, res) => {
-	try {
+app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
+	try{
 		console.log('compose')
+		saveData = buildSaveData(req.body.widgets)
 		req.body.widgets = Object.values(req.body.widgets)
 		let skins = req.body.widgets.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
-
 		let setts = Object.assign(
 			{ clustering: [req.body.criterion.toLowerCase()] },
 			settings[req.body.composition.toLocaleLowerCase()]
 		)
+
 		await sm.run(skins, setts)
-		send(req.body.access_token, res,
-			{
-				code: 0,
-				message: 'success',
-			},
-			{
-				widgets: req.body.widgets
-			}, 
-			buildSaveData(req.body.widgets)
-		)
+		res.return({
+			save: saveData,
+			response: {widgets: req.body.widgets}
+		})
 	}
 	catch (error) {
-		log.error(error.stack)
-		console.error(error.message)
-		send(req.body.access_token, res, {
-			code: 1,
-			message: error.stack
-		}, {}, req.body)
+		res.return({
+			save: saveData,
+			error: error
+		})
 	}
 })
 

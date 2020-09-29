@@ -19,7 +19,7 @@ miro.onReady(async () => {
 		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
 		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
 		$.ajax({
-			url: '/widgetComposer',
+			url: '/plugin/stickerman/widgetComposer',
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
