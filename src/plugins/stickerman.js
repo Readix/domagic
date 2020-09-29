@@ -62,16 +62,6 @@ let parseParams = paramsString => {
 	}
 }
 
-let validOverparams = paramsString => {
-	if(typeof paramsString == 'undefined') return false
-	paramsString = paramsString.replace(' ', '')
-	let sectors = paramsString.split(';')
-		.map(sector => sector.replace('-', ''))
-	return sectors.length == 3 &&
-	sectors[1].length == sectors[0].length + 1 && 
-	sectors[1].length == sectors[2].length
-}
-
 let buildSaveData = widgets => {
 	let saveData = {}
 	widgets.forEach(widget => {
@@ -83,27 +73,25 @@ let buildSaveData = widgets => {
 app.post('/widgetComposer', async (req, res) => {
 	try {
 		console.log('compose')
-		console.log('overparams: ', req.body.overparams)
 		req.body.widgets = Object.values(req.body.widgets)
 		let skins = req.body.widgets.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
-		
-		let isValid = validOverparams(req.body.overparams)
-		console.log(isValid)
-		let setts = isValid ?
-			parseParams(req.body.overparams) :
-			Object.assign(
-				{ clustering: [req.body.criterion.toLowerCase()] },
-				settings[req.body.composition.toLocaleLowerCase()]
-			)
-		console.log(setts);
+
+		let setts = Object.assign(
+			{ clustering: [req.body.criterion.toLowerCase()] },
+			settings[req.body.composition.toLocaleLowerCase()]
+		)
 		await sm.run(skins, setts)
-		 send(req.body.user, req.body.team, res, {
-			code: 0,
-			message: 'success',
-		},{
-			widgets: req.body.widgets,
-		}, buildSaveData(req.body.widgets))
+		send(req.body.user, req.body.team, res, 
+			{
+				code: 0,
+				message: 'success',
+			},
+			{
+				widgets: req.body.widgets
+			}, 
+			buildSaveData(req.body.widgets)
+		)
 	}
 	catch (error) {
 		log.error(error.stack)
