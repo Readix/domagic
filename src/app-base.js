@@ -80,16 +80,6 @@ app.use(, async (req, res, next) => {
 })
 // /\/((?!oauth).)*/
 
-saveRequest = async (access_token, res, err, data, saveData) => {
-	db.addRequest(access_token, JSON.stringify(reqData), err.code)
-		.then(res => console.log(queryResult))
-		.catch(err => {
-			log.error(err.stack)
-			console.log(err.message)
-		})
-	res.send(Object.assign(data, err.message))
-}
-
 saveRequest = async (access_token, data, error_code) => {
 	return db.addRequest(access_token, JSON.stringify(data), error_code)
 		.then(res => {
