@@ -68,15 +68,15 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('addConfig', query, Error(err))})
 	},
-	startSession: async (user, team) => {
-		let query = `SELECT start_session(${user}, ${team})`
+	startSession: async (access_token) => {
+		let query = `SELECT start_session('${access_token}')`
 		return dbPool.query(query)
 			.then(res => query)
 			.catch(err => {
 				throw dbErrorFormat('startSession', query, Error(err))})
 	},
-	endSession: async (user, team) => {
-		let query = `SELECT end_session(${user}, ${team})`
+	endSession: async (access_token) => {
+		let query = `SELECT end_session('${access_token}')`
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('endSession', query, Error(err))})

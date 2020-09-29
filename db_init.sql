@@ -87,29 +87,29 @@ CREATE TABLE Requests (
 );
 CREATE INDEX i_r_install ON Requests(install_id);
 -- create functions
-CREATE OR REPLACE FUNCTION start_session(userId BIGINT, teamId BIGINT)
+CREATE OR REPLACE FUNCTION start_session(token CHAR(36))
 RETURNS INT AS $$
 DECLARE
     inst BIGINT;
     sess BIGINT;
 BEGIN
-    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    inst := (SELECT install_id FROM Installations WHERE access_token = token);
     IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+        RAISE EXCEPTION  'For access_token % installation_id is %', token, inst;
     END IF;
     INSERT INTO UserSessions(install_id) VALUES(inst) RETURNING session_id INTO sess;
     RETURN sess;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION end_session(userId BIGINT, teamId BIGINT)
+CREATE OR REPLACE FUNCTION end_session(token CHAR(36))
 RETURNS INT AS $$
 DECLARE
     inst BIGINT;
     sess BIGINT;
 BEGIN
-    inst := (SELECT install_id FROM Installations WHERE user_id=userId AND team_id=teamId);
+    inst := (SELECT install_id FROM Installations WHERE access_token = token);
     IF inst IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % installation_id is %', userid,teamid,inst;
+        RAISE EXCEPTION  'For access_token % installation_id is %', access_token, inst;
     END IF;
     sess := (SELECT session_id FROM UserSessions WHERE install_id=inst AND end_time IS NULL ORDER BY start_time DESC LIMIT 1);
     IF sess IS NULL THEN

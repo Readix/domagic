@@ -47,12 +47,12 @@ app.get('/', (req, res) => {
 })
 
 app.get('/startSession', async (req, res) => {
-	await db.startSession(req.query.user_id, req.query.team_id)
+	await db.startSession(req.query.access_token)
 	res.send('Session started successfully')
 })
 
 app.get('/endSession', async (req, res) => {
-	await db.endSession(req.query.user_id, req.query.team_id)
+	await db.endSession(req.query.access_token)
 	res.send('Session ended successfully')
 })
 

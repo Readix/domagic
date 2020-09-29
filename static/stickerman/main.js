@@ -39,8 +39,7 @@ miro.onReady(async () => {
             'Content-Type': 'application/json'
         },
         data: {
-            user_id: user_id,
-            team_id: team_id
+            access_token: await miro.getToken()
         }
   	})
 })
@@ -53,8 +52,7 @@ window.addEventListener("beforeunload", async function (e) {
         'Content-Type': 'application/json'
     },
     data: {
-      user_id: user_id,
-      team_id: team_id
+      access_token: await miro.getToken()
     }
   })
 });
