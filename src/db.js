@@ -134,23 +134,25 @@ module.exports = {
 				throw dbErrorFormat('addFeedback', query, Error(err))})
 	},
 	feedbackToRequest: async (user_id, team_id, request_id) => {
-    let query =`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`
-    return dbPool.query(query)
-		.then(res=> res.rows[0])
-		.catch(err => {
-			throw dbErrorFormat('feedbackToRequest', query, Error(err))})
+		let query =`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`
+		return dbPool.query(query)
+			.then(res=> res.rows[0])
+			.catch(err => {
+				throw dbErrorFormat('feedbackToRequest', query, Error(err))})
 	},
 	authorized: async (access_token, pluginName) => {
 		let query =`select * from installations as i, plugins as p
 			where
 			i.client_id = p.client_id and
 			p.src = '${srcDir}' and
-			p.name = '${pluginName}' and
 			i.access_token = '${access_token}'`
+		if (pluginName) {
+			query += ` and p.name = '${pluginName}'`
+		}
 		return dbPool.query(query)
 			.then(res=> res.rows.length > 0)
 			.catch(err => {
-				throw dbErrorFormat('feedbackToRequest', query, Error(err))})
+				throw dbErrorFormat('authorized', query, Error(err))})
 	}
 }
 

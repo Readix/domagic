@@ -33,26 +33,26 @@ miro.onReady(async () => {
         writable: false
   	})
   	$.ajax({
-        url: '/startSession',
-        method: 'GET',
+        url: '/user/startSession',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        data: {
+        data: JSON.stringify({
             access_token: await miro.getToken()
-        }
+        })
   	})
 })
 
 window.addEventListener("beforeunload", async function (e) {
   await $.ajax({
-    url: '/endSession',
-    method: 'GET',
+    url: '/user/endSession',
+    method: 'POST',
     headers: {
         'Content-Type': 'application/json'
     },
-    data: {
+    data: JSON.stringify({
       access_token: await miro.getToken()
-    }
+    })
   })
 });

@@ -46,16 +46,47 @@ app.get('/', (req, res) => {
 	})*/
 })
 
-app.get('/startSession', async (req, res) => {
-	await db.startSession(req.query.access_token)
-	res.send('Session started successfully')
+app.post('/user/startSession', async (req, res) => {
+	try {
+		auth = await db.authorized(req.body.access_token)
+		if (!auth) {
+			msg = req.originalUrl + ': not authorized query, access_token: ' +
+				req.body.access_token
+			log.trace(msg)
+			console.log(msg)
+			res.send({code: 1, message: 'not authorized'})
+			return
+		}
+		await db.startSession(req.body.access_token)
+		res.send({code: 0, message: 'Session started successfully'})
+	} catch (error) {
+		log.error(err.stack)
+		console.error(error.message)
+		res.send({code: 1, message: error.message})
+	}
 })
 
-app.get('/endSession', async (req, res) => {
-	await db.endSession(req.query.access_token)
-	res.send('Session ended successfully')
+app.post('/user/endSession', async (req, res) => {
+	try {
+		auth = await db.authorized(req.body.access_token)
+		if (!auth) {
+			msg = req.originalUrl + ': not authorized query, access_token: ' +
+				req.body.access_token
+			log.trace(msg)
+			console.log(msg)
+			res.send({code: 1, message: 'not authorized'})
+			return
+		}
+		await db.endSession(req.body.access_token)
+		res.send({code: 0, message: 'Session ended successfully'})
+	} catch (error) {
+		log.error(err.stack)
+		console.error(error.message)
+		res.send({code: 1, message: error.message})
+	}
 })
 
+// Функция устаревшая, но пока что используется в /rate
 send = async (access_token, response, info, sendData, reqData) => {
 	let queryResult= await db.addRequest(access_token, JSON.stringify(reqData), info.code)
 		.catch(err =>
@@ -63,22 +94,6 @@ send = async (access_token, response, info, sendData, reqData) => {
 	console.log(queryResult);
 	response.send(Object.assign(sendData, info, queryResult))
 }
-
-/*
-app.use(, async (req, res, next) => {
-	try {
-
-	}
-	catch(error) {
-		log.error(error.stack)
-		console.error(error.message)
-		send(req.body.user, req.body.team, res, {
-			code: 1,
-			message: error.stack
-		}, {}, req.body)
-	}
-})
-// /\/((?!oauth).)*/
 
 saveRequest = async (access_token, data, error_code) => {
 	return db.addRequest(access_token, JSON.stringify(data), error_code)
@@ -94,9 +109,10 @@ saveRequest = async (access_token, data, error_code) => {
 }
 
 app.use(/\/plugin\/.*/, async (req, res, next) => {
-	auth = await db.authorized((req.body || req.query).access_token, req.baseUrl.split('/')[2])
+	auth = await db.authorized((req.body || req.query).access_token, req.originalUrl.split('/')[2])
 	if (!auth) {
-		msg = 'not authorized query, access_token: ' + (req.body || req.query).access_token
+		msg = req.originalUrl + ': not authorized query, access_token: ' +
+			(req.body || req.query).access_token
 		log.trace(msg)
 		console.log(msg)
 		res.send({code: 1, message: 'not authorized'})
