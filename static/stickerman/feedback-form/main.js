@@ -13,7 +13,6 @@ $(document).ready(() => {
 		$('.closeBtn').click(function() {
 			$('.board-panel--hidden-bottom').fadeOut(100)
 			miro.board.ui.closeBottomPanel()
-			return
 		})
 
 		$('.rtb-btn').click(async function() {
@@ -53,13 +52,11 @@ $(document).ready(() => {
 					$('.board-panel--hidden-bottom').fadeOut(100);
 					miro.showNotification('Thanks for your feedback');
 					miro.board.ui.closeBottomPanel();
-					return res
 				},
 				error: () => {
 					$('.board-panel--hidden-bottom').fadeOut(100);
 					miro.showNotification('Server error, please, try again later');
 					miro.board.ui.closeBottomPanel();
-					return
 				}
 			})
 		})
