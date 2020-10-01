@@ -126,19 +126,19 @@ module.exports = {
 			.catch(err => {
 				throw dbErrorFormat('getPluginsList', query, Error(err))})	
 	},
-	addFeedback: async (user_id, team_id, request_id, grade, comment) => {
-		let query = `INSERT INTO Feedbacks (user_id, team_id, request_id, grade, comment)
-		VALUES('${user_id}','${team_id}','${request_id}','${grade}','${comment}')`
+	addFeedback: async (access_token, rated, grade, comment) => {
+		let query = `INSERT INTO Feedbacks (access_token, rated, grade, comment)
+		VALUES('${access_token}','${rated}','${grade}','${comment}')`
 		return dbPool.query(query)
 			.catch(err => {
 				throw dbErrorFormat('addFeedback', query, Error(err))})
 	},
-	feedbackToRequest: async (user_id, team_id, request_id) => {
-		let query =`SELECT insert_feedback_to_request('${user_id}', '${team_id}', '${request_id}')`
+	isRated: async (access_token) => {
+		let query = `SELECT rated FROM Feedbacks WHERE access_token='${access_token}'`;
 		return dbPool.query(query)
-			.then(res=> res.rows[0])
+			.then(res => res.rows[0])
 			.catch(err => {
-				throw dbErrorFormat('feedbackToRequest', query, Error(err))})
+				throw dbErrorFormat('isRated', query, Error(err))})
 	},
 	authorized: async (access_token, pluginName) => {
 		let query =`select * from installations as i, plugins as p

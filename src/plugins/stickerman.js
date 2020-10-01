@@ -42,11 +42,11 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 			{ clustering: [req.body.criterion.toLowerCase()] },
 			settings[req.body.composition.toLocaleLowerCase()]
 		)
-
+		let isRated = await db.isRated(req.body.access_token)
 		await sm.run(skins, setts)
 		res.return({
 			save: saveData,
-			response: {widgets: req.body.widgets}
+			response: {widgets: req.body.widgets, isRated: isRated}
 		})
 	}
 	catch (error) {
@@ -57,22 +57,22 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 	}
 })
 
-
 app.post('/rate', async (req, res) => {
 	try{
-		if (typeof  req.body.comment === 'undefined') {
-			req.body.comment="undefined";
+		if ((typeof  req.body.grade === 'undefined') && (typeof  req.body.comment === 'undefined')) {
+			await db.addFeedback(req.body.access_token, false, null, null);
 		}
-			await db.addFeedback(req.body.user_id,req.body.team_id,req.body.request_id, req.body.grade, req.body.comment);
-			await db.feedbackToRequest(req.body.user_id,req.body.team_id,req.body.request_id);
-		res.sendStatus(200);
+		else if (typeof  req.body.comment === 'undefined') {
+			await db.addFeedback(req.body.access_token, true, req.body.grade, null);
+		}
+		else {
+			await db.addFeedback(req.body.access_token, true, req.body.grade, req.body.comment);
+		}
+		res.sendStatus(202);
 	}
 	catch (error) {
 		log.error(error.stack)
 		console.error(error.message)
-		send(req.body.user, req.body.team, res, {
-			code: 1,
-			message: error.stack
-		}, {}, req.body)
+		res.sendStatus(500);
 	}
 })

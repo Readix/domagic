@@ -9,11 +9,10 @@ DROP TABLE IF EXISTS Feedbacks;
 -- table for storing all user`s feedback
 CREATE TABLE Feedbacks (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
-    user_id BIGINT NULL,
-    team_id  BIGINT NULL,
-    request_id BIGINT  NOT NULL,
-    grade SMALLINT NOT NULL,
-    comment VARCHAR(200) NOT NULL,
+    access_token  VARCHAR(36) NOT NULL,
+    rated BOOL NOT NULL,
+    grade SMALLINT NULL,
+    comment VARCHAR(200)  NULL,
     created     TIMESTAMP DEFAULT NOW()
 );
 -- table for storing plugin api keys
@@ -155,16 +154,3 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_feedback_to_request(userId BIGINT, teamId BIGINT, requestId BIGINT)
-RETURNS INT AS $$
-DECLARE
-    feedbackId BIGINT;
-BEGIN
-    feedbackId = (SELECT feedback_id FROM Feedbacks WHERE user_id=userId AND team_id=teamId AND request_id=requestId);
-    IF feedbackId IS NULL THEN
-        RAISE EXCEPTION  'For user_id % and team_id % and request_id % thre is no feedbacks', userid,teamid,requestId;
-    END IF;
-    UPDATE Requests SET feedback_id = feedbackId WHERE request_id = requestId;
-    RETURN feedbackId;
-END;
-$$ LANGUAGE plpgsql;
