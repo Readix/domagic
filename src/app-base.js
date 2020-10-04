@@ -80,7 +80,7 @@ app.post('/user/endSession', async (req, res) => {
 		await db.endSession(req.body.access_token)
 		res.send({code: 0, message: 'Session ended successfully'})
 	} catch (error) {
-		log.error(err.stack)
+		log.error(error.stack)
 		console.error(error.message)
 		res.send({code: 1, message: error.message})
 	}

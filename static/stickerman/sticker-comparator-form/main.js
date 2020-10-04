@@ -1,23 +1,26 @@
+let markTag = (cat, event, label, val = 10) => {
+	gtag('event', event, {
+		'event_category': cat,
+		'event_label': label,
+		'value': val
+	})
+	console.log('MARK')
+}
 $(document).ready(()=>{
 miro.onReady(async () => {
     miro.currentUser.getId().then(user_id =>
         gtag('set', {'user_id': user_id}))
-	let markTag = (cat, event, label, val = 10) => {
-		gtag('event', event, {
-			'event_category': cat,
-			'event_label': label,
-			'value': val
-		});
-	}
+	let widgets = await miro.board.selection.get()
+	markTag('StickerMan', 'use', widgets.length, 50)
+	let timeStart = Date.now()
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
 
-		let widgets = await miro.board.selection.get()
-		markTag('Компановка', 'Кол-во виджетов', widgets.length)
-		markTag('Компановка', 'Критерий', $('input[name=criterion]:checked').val())
-		markTag('Компановка', 'Вид', $('input[name=composition]:checked').val())
+		markTag('StickerMan', 'group_by', $('input[name=criterion]:checked').val(), 50)
+		markTag('StickerMan', 'composition', $('input[name=composition]:checked').val(), 50)
+		markTag('StickerMan', 'do_magic', (Date.now() - timeStart) / 1000, 50)
 		$.ajax({
 			url: '/plugin/stickerman/widgetComposer',
 			method: 'POST',
