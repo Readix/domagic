@@ -120,20 +120,23 @@ app.use(/\/plugin\/.*/, async (req, res, next) => {
 	}
 	res.return = result => {
 		try {
-			result.save = result.save || {}
 			errInfo = result.error ?
 				{code: 1, message: result.error.message} :
 				{code: 0, message: 'success'}
-			saveRequest((req.body || req.query).access_token, result.save, errInfo.code)
+			if (result.save) {
+				saveRequest((req.body || req.query).access_token, result.save, errInfo.code)
+			}
 			if (errInfo.code) {
 				log.error(result.error.stack)
 				console.error(result.error.message)
 				res.send(errInfo)
 				return
 			}
+			if (!result.response) throw Error('Missing data for response key')
 			res.send(Object.assign(errInfo, result.response))
 		} catch (error) {
 			console.error(error.message)
+			log.error(error.stack)
 			res.send({code: 1, message: error.message})
 		}
 	}
