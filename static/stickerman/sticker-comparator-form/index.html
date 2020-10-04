@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-165865332-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-165865332-1');
+	</script>
+	<link rel="stylesheet" type="text/css" href="https://miro.com/app/static/styles.1.0.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="https://miro.com/app/static/sdk.1.1.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+</head>
+<body>
+	<div>
+		<div class="row jc-c m-v-3">
+			<div class="col m-h-2">
+				<div class="miro-h4">Group by</div>
+				<label class="miro-radiobutton m-v-5">
+					<input type="radio" value="color" name="criterion" checked>
+					<span>Color</span>
+				</label>
+				<label class="miro-radiobutton m-v-5">
+					<input type="radio" value="size" name="criterion">
+					<span>Size</span>
+				</label>
+			</div>
+		</div>
+		<div class="row jc-c m-v-3">
+			<div class="col m-h-2">
+				<div class="miro-h4">Composition</div>
+				<label class="miro-radiobutton m-v-5">
+					<input type="radio" value="horizontal" name="composition" checked>
+					<span>Horizontal</span>
+				</label>
+				<label class="miro-radiobutton m-v-5">
+					<input type="radio" value="vertical" name="composition">
+					<span>Vertical</span>
+				</label>
+				<label class="miro-radiobutton m-v-5">
+					<input type="radio" value="blocky" name="composition">
+					<span>Blocky</span>
+				</label>
+			</div>
+		</div>
+		<div class="row jc-c">
+			<button id="send" class="miro-btn miro-btn--primary miro-btn--medium hiding-elem">
+				Apply
+			</button>
+		</div>
+		<div class="loader" style="display: none;"></div>
+	</div>
+</body>
+</html>

@@ -1,7 +1,11 @@
 {
 	"api_base": "https://api.miro.com/v1",
-	"base_url": "https://9acf04182013.ngrok.io",
+	"plugins": [
+		"stickerman"
+	],
+	"db_name": "smart-layout",
 	"db_user": "postgres",
-	"db_pass": "raexedae4j",
-	"plugin_name": "smart-layout-dev"
+	"db_pass": "qwerty96",
+	"port": "3000",
+	"base_url": "https://3362e43821dc.ngrok.io"
 }
