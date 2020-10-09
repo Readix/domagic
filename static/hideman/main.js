@@ -15,6 +15,7 @@ miro.onReady(async () => {
 		extensionPoints: {
 			getWidgetMenuItems: async (widgets) => {
         widgets = await miro.board.selection.get();
+        
         if (widgets.length > 1) {
           let standaloneWidgets = widgets.filter((widget) => !('groupId' in widget) || !widget.groupId);
           let groupedWidgets = widgets.filter((widget) => !standaloneWidgets.includes(widget));
@@ -26,35 +27,45 @@ miro.onReady(async () => {
 
           let groupIds = groupedWidgets.map((widget) => widget.groupId).reduce((acc, curr) => acc.includes(curr) ? acc : [...acc, curr], []);
           
-          let backgroundGroupWidgets = groupIds.map(async (groupId) => {
+          let backgroundGroupWidgets = await Promise.all(groupIds.map(async (groupId) => {
             let groupWidgets = await miro.board.widgets.get({groupId: groupId});
             let maxSquareWidget = groupWidgets.reduce((prev, curr) => widgetSquare(prev) < widgetSquare(curr) ? curr : prev);
+
             if (['shape', 'sticker'].indexOf(maxSquareWidget.type.toLowerCase()) < 0)
               return null;
             else{
-              let unionBounds = miro.board.utils.unionWidgetBounds(groupWidgets.map((widget) => ({bounds: widget.bounds})));
-              if (JSON.stringify(maxSquareWidget.bounds) !== JSON.stringify(unionBounds))
+              let maxLeftWidget = groupWidgets.reduce((prev, curr) => curr.bounds.left < prev.bounds.left ? curr : prev);
+              if (maxLeftWidget.id != maxSquareWidget.id && maxLeftWidget.bounds.left < maxSquareWidget.bounds.left)
                 return null;
+              let maxRightWidget = groupWidgets.reduce((prev, curr) => curr.bounds.right > prev.bounds.right ? curr : prev);
+              if (maxRightWidget.id != maxSquareWidget.id && maxRightWidget.bounds.right > maxSquareWidget.bounds.right)
+                return null;
+              let maxTopWidget = groupWidgets.reduce((prev, curr) => curr.bounds.top < prev.bounds.top ? curr : prev);
+              if (maxTopWidget.id != maxSquareWidget.id && maxTopWidget.bounds.top < maxSquareWidget.bounds.top)
+                return null;
+              let maxBottomWidget = groupWidgets.reduce((prev, curr) => curr.bounds.bottom > prev.bounds.bottom ? curr : prev);
+              if (maxBottomWidget.id != maxSquareWidget.id && maxBottomWidget.bounds.bottom > maxSquareWidget.bounds.bottom)
+                return null;
+
               return maxSquareWidget;
             }
-          })
+          }));
 
-          if (backgroundGroupWidgets.some((widget) => !widget))
-            return Promise.resolve([{}]);
+          backgroundGroupWidgets = backgroundGroupWidgets.filter((widget) => widget);
           
           let widgetsToProcess = [...standaloneWidgets, ...backgroundGroupWidgets];
 
           return Promise.resolve([{
-            tooltip: 'Flip',
+            tooltip: 'Flip (test)',
             svgIcon: icon,
-            onClick: async () => await flipWidgets(widgetsToProcess)
+            onClick: async () => await flipWidgets(widgetsToProcess.map(widget => widget.id))
           }]);
         }
         if (widgets.length == 1 && standaloneWidgetTypeIsCorrect(widgets[0].type.toLowerCase())){
           return Promise.resolve([{
-						tooltip: 'Flip',
+						tooltip: 'Flip (test)',
 						svgIcon: icon,
-						onClick: async () => await flipWidgets(widgets)
+						onClick: async () => await flipWidgets(widgets.map(widget => widget.id))
           }]);
         }
 				return Promise.resolve([{}]);
@@ -88,19 +99,30 @@ async function flipWidgets(widgets){
   let clientId = await miro.getClientId();
   let sendBackward = [];
   let bringForward = [];
-  
-  let updatedWidgets = widgets.map((widget) => {
+  let accessErrorWidgets = [];
+
+  let updatedWidgets = await Promise.all(widgets.map( async (widget) => {
+    widget = (await miro.board.widgets.get({id: widget}))[0];
+    for (key in widget.metadata){
+      if (key == clientId)
+        continue;
+      delete widget.metadata[key];
+    }
     if (clientId in widget.metadata && widget.metadata[clientId]){
-      widget.style = widget.metadata[clientId].style;
-      widget.text = widget.metadata[clientId].text;
-      widget.metadata[clientId] = null;
-      if ('groupId' in widget)
-        sendBackward.push(widget.id);
+      if (widget.metadata[clientId].hidden_by != window.user_id)
+        accessErrorWidgets.push(widget);
+      else{
+        widget.style = widget.metadata[clientId].style;
+        widget.text = widget.metadata[clientId].text;
+        widget.metadata[clientId] = null;
+        if ('groupId' in widget)
+          sendBackward.push(widget.id);
+      }
     }else{
       widget.metadata[clientId] = {
-        style: widget.style,
-        // tags: widget.tags, не уверен что сработает
-        text: widget.text
+        style: Object.assign({}, widget.style),
+        text: widget.text == "" ? " " : widget.text,
+        hidden_by: window.user_id
       }
       if (widget.type.toLowerCase() === 'shape'){
         widget.style.backgroundColor = '#6AC3FD';
@@ -127,11 +149,19 @@ async function flipWidgets(widgets){
         bringForward.push(widget.id);
     }
     return widget;
-  });
+  }));
+
+  if (updatedWidgets.length > 0)
+    await miro.board.widgets.update(updatedWidgets);
+  if (sendBackward.length > 0)
+    await miro.board.widgets.sendBackward(sendBackward);
+  if (bringForward.length > 0)
+    await miro.board.widgets.bringForward(bringForward);
   
-  await miro.board.widgets.update(updatedWidgets);
-  await miro.board.widgets.sendBackward(sendBackward);
-  await miro.board.widgets.bringForward(bringForward);
+  if (accessErrorWidgets.length > 0){
+    miro.showErrorNotification("Some widgets can`t be flipped because they was being hidden by another user");
+    await miro.board.widgets.__blinkWidget(accessErrorWidgets);
+  }
 }
 
 window.addEventListener("beforeunload", async function (e) {
