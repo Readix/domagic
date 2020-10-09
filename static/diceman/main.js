@@ -42,12 +42,12 @@ miro.onReady(async () => {
 		gtag('set', {'user_id': user_id}));
 	miro.initialize({
 		extensionPoints: {
-      toolbar: {
+			toolbar: {
         title: 'Dice',
         toolbarSvgIcon: pasteIcon,
         librarySvgIcon: pasteIcon,
         onClick: () => {
-          miro.board.ui.openBottomPanel('/static/web-plugin/dice_lib', {width: 100, height: 130});
+          miro.board.ui.openBottomPanel('/static/diceman/dice_lib', {width: 100, height: 130});
         }
       },
 			getWidgetMenuItems: (widgets) => {
@@ -73,17 +73,16 @@ miro.onReady(async () => {
       configurable: false,
       writable: false
   });
-  $.ajax({
-      url: '/startSession',
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      data: {
-          user_id: user_id,
-          team_id: team_id
-      }
-  });
+	$.ajax({
+		url: '/user/startSession',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: JSON.stringify({
+			access_token: await miro.getToken()
+		})
+	});
 });
 
 function getRandomInt(min, max) {
@@ -104,15 +103,14 @@ async function rollDice() {
 };
 
 window.addEventListener("beforeunload", async function (e) {
-  await $.ajax({
-    url: '/endSession',
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    data: {
-      user_id: user_id,
-      team_id: team_id
-    }
-  });
+	await $.ajax({
+		url: '/user/endSession',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: JSON.stringify({
+			access_token: await miro.getToken()
+		})
+	})
 });

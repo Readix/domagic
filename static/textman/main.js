@@ -35,11 +35,11 @@ miro.onReady(async () => {
 			getWidgetMenuItems: (widgets) => {
 				if (widgets.length > 1 && widgets.some((widget) => widget.type.toLowerCase() != 'sticker' && widget.type.toLowerCase() != 'shape') == false){
 					return Promise.resolve([{
-						tooltip: 'Textman',
+						tooltip: 'Textman (united)',
 						svgIcon: icon,
 						onClick: () => {
 							monitor()
-							miro.board.ui.openModal('/static/textman/sticker-comparator-form', {'width':200, 'height':306})
+							miro.board.ui.openModal('/static/stickerman/sticker-comparator-form', {'width':200, 'height':306})
 						}
 					}])
 				}
