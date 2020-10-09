@@ -56,14 +56,14 @@ miro.onReady(async () => {
           let widgetsToProcess = [...standaloneWidgets, ...backgroundGroupWidgets];
 
           return Promise.resolve([{
-            tooltip: 'Flip (test)',
+            tooltip: 'Flip',
             svgIcon: icon,
             onClick: async () => await flipWidgets(widgetsToProcess.map(widget => widget.id))
           }]);
         }
         if (widgets.length == 1 && standaloneWidgetTypeIsCorrect(widgets[0].type.toLowerCase())){
           return Promise.resolve([{
-						tooltip: 'Flip (test)',
+						tooltip: 'Flip',
 						svgIcon: icon,
 						onClick: async () => await flipWidgets(widgets.map(widget => widget.id))
           }]);
