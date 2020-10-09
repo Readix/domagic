@@ -21,7 +21,7 @@ const testDbPool = () => {
 }
 
 const initDB = async () => {
-	config = require('./config.json')
+	let config = require('./config.json')
 	if (!dbPool) {
 		dbPool = new Pool({
 			user: config.db_user,
