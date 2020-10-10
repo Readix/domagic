@@ -64,6 +64,17 @@ miro.onReady(async () => {
 						return elem.id == widget.id
 					})
 					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
+					if (crit == 'tonality'){
+						data_to_update = {
+							id: widget.id,
+							style: {}
+						}
+						if (curState.type.toLowerCase() == 'sticker')
+							data_to_update.style.stickerBackgroundColor = widget.color
+						else
+							data_to_update.style.backgroundColor = widget.color
+						miro.board.widgets.update(data_to_update)
+					}
 				})
 				miro.board.ui.closeModal()
 				if (!res.isRated) {
