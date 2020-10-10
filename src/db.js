@@ -1,4 +1,6 @@
-let config = require('./config.json')
+const fs = require('fs')
+const log = require('./logger')
+const config = require('./config')
 const { Pool, Client } = require('pg')
 const path = require('path');
 const srcDir = path.join(__dirname, '..')
