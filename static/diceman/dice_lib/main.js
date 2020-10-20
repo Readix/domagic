@@ -1,4 +1,5 @@
 function createEmoji(canvasX, canvasY) {
+  gah.event('DiceMan', 'drag to board', '', 50)
   let appId = miro.getClientId();
   let emojiWidget = {
     type: 'EMOJI',
@@ -18,7 +19,8 @@ function createEmoji(canvasX, canvasY) {
 
 $(document).ready(() => {
   miro.onReady(async () => {
-    miro.currentUser.getId().then(user_id => gtag('set', {'user_id': user_id}));
+    miro.currentUser.getId().then(user_id => 
+      gah.setUser(user_id));
     const imageOptions = {
       draggableItemSelector: 'img',
       onClick: async () => {

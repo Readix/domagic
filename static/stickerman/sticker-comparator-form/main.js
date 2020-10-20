@@ -1,26 +1,18 @@
-let markTag = (cat, event, label, val = 10) => {
-	gtag('event', event, {
-		'event_category': cat,
-		'event_label': label,
-		'value': val
-	})
-	console.log('MARK')
-}
 $(document).ready(()=>{
 miro.onReady(async () => {
     miro.currentUser.getId().then(user_id =>
-        gtag('set', {'user_id': user_id}))
+        gah.setUser(user_id))
 	let widgets = await miro.board.selection.get()
-	markTag('StickerMan', 'use', widgets.length, 50)
+	gah.event('StickerMan', 'use', widgets.length, 50)
 	let timeStart = Date.now()
 	$('#send').click(async () => {
 		$('input[type=radio]').prop('disabled', true);
 		$('#send').fadeOut()
 		$('.loader').fadeIn()
 
-		markTag('StickerMan', 'group_by', $('input[name=criterion]:checked').val(), 50)
-		markTag('StickerMan', 'composition', $('input[name=composition]:checked').val(), 50)
-		markTag('StickerMan', 'do_magic', (Date.now() - timeStart) / 1000, 50)
+		gah.event('StickerMan', 'group_by', $('input[name=criterion]:checked').val(), 50)
+		gah.event('StickerMan', 'composition', $('input[name=composition]:checked').val(), 50)
+		gah.event('StickerMan', 'do_magic', (Date.now() - timeStart) / 1000, 50)
 		$.ajax({
 			url: '/plugin/stickerman/widgetComposer',
 			method: 'POST',
@@ -48,7 +40,6 @@ miro.onReady(async () => {
 			}),
 			success: (res) => {
 				console.log(res)
-				//markTag('Компановка', 'Кол-во групп', ...)
 				if (Number(res.code) == 1) {
 					miro.showErrorNotification('server error')
 					console.log(res.message)
@@ -64,7 +55,7 @@ miro.onReady(async () => {
 						return elem.id == widget.id
 					})
 					miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
-					if (crit == 'tonality'){
+					if ($('input[name=criterion]:checked').val() == 'tonality'){
 						data_to_update = {
 							id: widget.id,
 							style: {}
