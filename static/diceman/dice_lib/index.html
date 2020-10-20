@@ -9,7 +9,6 @@
 		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 		let gaid = 'UA-165865332-1'
 		ga('create', gaid, {
-			// 'cookieFlags': 'samesite=none;secure',
 			'cookieName': '_ga_' + gaid.replaceAll('-', '_')
 		});
 		window.gah={setUser:function(v){ga("set","userId",v)},event:function(v,n,t,w)
@@ -21,8 +20,18 @@
 	<!-- End Google Analytics -->
     <script type="text/javascript" src="https://miro.com/app/static/sdk.1.1.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="https://miro.com/app/static/styles.1.0.css"/>
 </head>
 <body>
+	<div class="col" id="root">
+		<div class="row jc-c">
+			<div class="miro-h4">Drag it!</div>
+		</div>
+		<div class="row jc-c">
+			<img width="100px" height="100px" src='/static/diceman/preview/dice.svg'>
+		</div>
+	</div>
 </body>
 </html>

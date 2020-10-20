@@ -1,4 +1,6 @@
-let config = require('./config.json')
+const fs = require('fs')
+const log = require('./logger')
+const config = require('./config')
 const { Pool, Client } = require('pg')
 const path = require('path');
 const srcDir = path.join(__dirname, '..')
@@ -19,7 +21,7 @@ const testDbPool = () => {
 }
 
 const initDB = async () => {
-	config = require('./config.json')
+	let config = require('./config.json')
 	if (!dbPool) {
 		dbPool = new Pool({
 			user: config.db_user,
@@ -33,6 +35,15 @@ const initDB = async () => {
 
 module.exports = {
 	init: initDB,
+	request: async function (query){
+		return dbPool.query(query)
+			.catch(err => log.error(dbErrorFormat('request', query, err.stack)))
+	},
+	getInstallation: async function (user_id, team_id, client_id) {
+		let query = `SELECT * FROM Installations WHERE user_id=${user_id} and team_id=${team_id} client_id=${client_id}`
+		return dbPool.query(query)
+			.catch(err => log.error(dbErrorFormat('addPlugin', query, err.stack)))
+	},
 	addAuthorization: async function (auth, client_id) {
 		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) 
 								 VALUES('${auth.user_id}', '${auth.team_id}', '${client_id}', '${auth.scope}', '${auth.access_token}', '${auth.token_type}')
@@ -124,7 +135,7 @@ module.exports = {
 		return dbPool.query(query)
 			.then(res => res.rows)
 			.catch(err => {
-				throw dbErrorFormat('getPluginsList', query, Error(err))})	
+				throw dbErrorFormat('getPluginsList', query, Error(err))})
 	},
 	addFeedback: async (access_token, rated, grade, comment) => {
 		let query = `INSERT INTO Feedbacks (access_token, rated, grade, comment)
@@ -155,4 +166,3 @@ module.exports = {
 				throw dbErrorFormat('authorized', query, Error(err))})
 	}
 }
-
