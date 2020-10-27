@@ -15,6 +15,7 @@ config.plugins
 	.forEach(name => require('./plugins/' + name))
 
 config.plugins.forEach(pluginName => {
+	// Registration
 	app.get('/oauth_' + pluginName, async (req, res) => {
 		console.log(pluginName + ': start auth...')
 		let secret = await db.getSecret(pluginName)
@@ -29,6 +30,11 @@ config.plugins.forEach(pluginName => {
 			await db.addAuthorization(response, req.query.client_id)
 		}
 		res.send(pluginName + ' has been installed, open <br>response: ' + JSON.stringify(response))
+	})
+	// Check install for each plugin (use decorator)
+	app.get('/plugin/' + pluginName + '/auth', async (req, res) => {
+		res.send({code: 0, message: 'Success'})
+		// res.sendStatus(500)
 	})
 })
 app.listen(port, () => {

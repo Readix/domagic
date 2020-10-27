@@ -40,11 +40,14 @@ miro.onReady(async () => {
 			}),
 			success: (res) => {
 				console.log(res)
-				if (Number(res.code) == 1) {
-					miro.showErrorNotification('server error')
-					console.log(res.message)
-					miro.board.ui.closeModal()
-					return
+				switch (parseInt(res.code / 100)) {
+					case 2:
+						miro.showErrorNotification(res.message)
+						miro.board.ui.closeModal()
+						return;
+					case 1:
+						miro.showNotification(res.message)
+						break;
 				}
 				let left = Math.min(...widgets.map(s => s.x))
 				let top = Math.min(...widgets.map(s => s.y))

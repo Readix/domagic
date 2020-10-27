@@ -99,7 +99,32 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-async function rollDice() {
+async function rollDice() {  
+  auth = await $.ajax({
+    url: '/plugin/hideman/auth',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: {
+      access_token: await miro.getToken()
+    }
+  }).then(res => {
+    switch(parseInt(res.code / 100)){
+      case 2: 
+          miro.showErrorNotification(res.message);
+          return false;
+      case 1:     
+          miro.showNotification(res.message);
+          return true;
+      default: return true;
+    }
+  }, () => {
+    miro.showErrorNotification('Server error, please, try again later');
+    return false;
+  })
+  if (!auth) return;
+
   let new_widgets = [];
   let gahSizes = [];
   (await miro.board.selection.get()).forEach((widget) => {

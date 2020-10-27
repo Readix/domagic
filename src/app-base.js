@@ -14,6 +14,7 @@ const Stickerman = require('../stickerman/stickerman')
 const app = express()
 
 const log = require('./logger')
+const { response } = require('express')
 
 app.engine('html', mustacheExpress())
 app.use(cors())
@@ -109,38 +110,53 @@ saveRequest = async (access_token, data, error_code) => {
 }
 
 app.use(/\/plugin\/.*/, async (req, res, next) => {
-	auth = await db.authorized((req.body || req.query).access_token, req.originalUrl.split('/')[2])
-	if (!auth) {
-		msg = req.originalUrl + ': not authorized query, access_token: ' +
-			(req.body || req.query).access_token
-		log.trace(msg)
-		console.log(msg)
-		res.send({code: 1, message: 'not authorized'})
-		return
-	}
-	res.return = result => {
-		try {
-			errInfo = result.error ?
-				{code: 1, message: result.error.message} :
-				{code: 0, message: 'success'}
-			if (result.save) {
-				saveRequest((req.body || req.query).access_token, result.save, errInfo.code)
-			}
-			if (errInfo.code) {
-				log.error(result.error.stack)
-				console.error(result.error.message)
-				res.send(errInfo)
-				return
-			}
-			if (!result.response) throw Error('Missing data for response key')
-			res.send(Object.assign(errInfo, result.response))
-		} catch (error) {
-			console.error(error.message)
-			log.error(error.stack)
-			res.send({code: 1, message: error.message})
+	try {
+		switch (req.method.toLowerCase()) {
+			case 'get': 
+				body = req.query; 
+				break;
+			case 'post': 
+				body = req.body; 
+				break;
+			default: throw new Error('Unknown query method type')
 		}
+		auth = await db.authorized(body.access_token, req.originalUrl.split('/')[2])
+		if (!auth) {
+			msg = req.originalUrl + ': not authorized query, access_token: ' +
+				body.access_token
+			log.trace(msg)
+			console.log(msg)
+			res.send({code: 201, message: 'Not authorized'})
+			return
+		}
+		res.return = result => {
+			try {
+				code = result.error ? 500 : result.response.code
+				if (result.save) {
+					saveRequest(body.access_token, result.save, code)
+				}
+				if (code == 500) {
+					log.error(result.error.stack)
+					console.error(result.error.message)
+					res.sendStatus(500)
+					return
+				}
+				if (!result.response) throw Error('Missing data for response key')
+				res.send(Object.assign(result.response))
+			} catch (error) {
+				console.error(error.message)
+				log.error(error.stack)
+				// res.send({code: 1, message: error.message})
+				res.sendStatus(500)
+			}
+		}
+		next()
+	} catch (error) {
+		console.error(error.message)
+		log.error(error.stack)
+		// res.send({code: 1, message: error.message})
+		res.sendStatus(500)
 	}
-	next()
 })
 
 module.exports = { app, send }

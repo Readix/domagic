@@ -98,6 +98,32 @@ miro.onReady(async () => {
 })
 
 async function flipWidgets(widgets){
+  auth = await $.ajax({
+    url: '/plugin/hideman/auth',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: {
+      access_token: await miro.getToken()
+    }
+  }).then(res => {
+  	switch(parseInt(res.code / 100)){
+  		case 2: 
+  		    miro.showErrorNotification(res.message);
+  		    return false;
+  		case 1:     
+  		    miro.showNotification(res.message);
+  		    return true;
+  		default: return true;
+  	}
+  }, () => {
+    miro.showErrorNotification('Server error, please, try again later');
+    return false;
+  })
+  if (!auth) return;
+
+  console.log(res)
   gah.pin()
   gah.event('HideMan', 'use', widgets.length, 50)
   let clientId = await miro.getClientId();
