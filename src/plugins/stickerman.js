@@ -46,7 +46,12 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 		await sm.run(skins, setts)
 		res.return({
 			save: saveData,
-			response: {widgets: req.body.widgets, isRated: isRated}
+			response: {
+				code: 0,
+				message: 'Success',
+				widgets: req.body.widgets, 
+				isRated: isRated
+			}
 		})
 	}
 	catch (error) {

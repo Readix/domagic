@@ -5,9 +5,36 @@ let icon = `<g id="slidermanico-layer">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8771 15H1V23H16V19.4599L12.8771 15ZM8 18H9V19H8V18ZM10 19H9V20H8V21H9V20H10V21H11V20H10V19ZM10 19V18H11V19H10Z" fill="#37335F"/>
 </g>`
 let tooltipLabel = 'Align'
+let isAuth = async () => {
+  return await $.ajax({
+    url: '/plugin/stickerman/auth',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: {
+      access_token: await miro.getToken()
+    }
+  }).then(res => {
+  	switch(parseInt(res.code / 100)){
+  		case 2: 
+  		    miro.showErrorNotification(res.message);
+  		    return false;
+  		case 1:     
+  		    miro.showNotification(res.message);
+  		    return true;
+  		default: return true;
+  	}
+  }, () => {
+    miro.showErrorNotification('Server error, please, try again later');
+    return false;
+  })
+}
+let authResponse = {code: 201, message: 'Something goes wrong, try again later'}
 
 gah.wait(5, 20 * 60, () => gah.event('StickerMan', 'use_often', '', 500))
 miro.onReady(async () => {
+  isAuth().then(res => {authResponse = res})
 	miro.currentUser.getId().then(user_id =>
     gah.setUser(user_id))
   gah.event('StickerMan', 'available', 'true', 10)
@@ -20,11 +47,21 @@ miro.onReady(async () => {
 						svgIcon: icon,
 						onClick: () => {
               gah.pin()
+              switch(parseInt(authResponse.code / 100)){
+                case 5:
+                  miro.showErrorNotification(authResponse.message);
+                  return;
+                case 2: 
+                  miro.showErrorNotification(authResponse.message);
+                  return;
+                case 1:
+                  miro.showNotification(authResponse.message);
+              }
               miro.board.ui.openModal('/static/stickerman/sticker-comparator-form', {'width':200, 'height':306})
             }
           }])
 				}
-				return Promise.resolve([{}])
+				return Promise.resolve([])
 			}
 		}
 	})
