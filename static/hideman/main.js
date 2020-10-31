@@ -38,9 +38,10 @@ miro.onReady(async () => {
           .filter((widget) => !standaloneWidgets.includes(widget))
           .reduce((groups, widget) => {
               if (widget.groupId in groups)
-                groups[widget.groupId].append(widget)
+                groups[widget.groupId].push(widget);
               else
-                groups[widget.groupId] = [widget]
+                groups[widget.groupId] = [widget];
+              return groups;
             }, 
             {}
           );
@@ -67,7 +68,7 @@ miro.onReady(async () => {
           if (maxBottomWidget.id != maxSquareWidget.id && maxBottomWidget.bounds.bottom > maxSquareWidget.bounds.bottom)
             continue;
           
-          widgetsToProcess.append(maxSquareWidget);
+          widgetsToProcess.push(maxSquareWidget);
         }
         
         if (widgetsToProcess.length)
@@ -164,6 +165,7 @@ async function flipWidgets(widgets){
         widget.style.stickerBackgroundColor = '#6AC3FD';
         widget.style.textAlign = 'c';
         widget.style.textAlignVertical = 'm';
+        widget.style.fontSize = 0;
         widget.text = '<p>🙈</p>';
       }
       if ('groupId' in widget)
