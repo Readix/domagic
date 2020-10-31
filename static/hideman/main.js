@@ -23,71 +23,61 @@ miro.onReady(async () => {
   isAuth().then(res => {authResponse = res})
 	miro.currentUser.getId().then(user_id => gah.setUser(user_id));
   gah.event('HideMan', 'available', 'true', 10)
-  let allowedStandaloneWidgetTypes = ['shape', 'sticker'];
-  let allowedGroupedWidgetTypes = [...allowedStandaloneWidgetTypes, 'image', 'text'];
+  let allowedWidgetTypes = ['shape', 'sticker'];
 
-  let standaloneWidgetTypeIsCorrect = (widgetType) => allowedStandaloneWidgetTypes.indexOf(widgetType) > -1;
-  let groupedWidgetTypeIsCorrect = (widgetType) => allowedGroupedWidgetTypes.indexOf(widgetType) > -1;
+  let widgetTypeIsCorrect = (widgetType) => allowedWidgetTypes.indexOf(widgetType) > -1;
   let widgetSquare = (widget) => widget.bounds.width * widget.bounds.height;
 
 	miro.initialize({
 		extensionPoints: {
 			getWidgetMenuItems: async (widgets) => {
         widgets = await miro.board.selection.get();
+
+        let standaloneWidgets = widgets.filter((widget) => !('groupId' in widget) || !widget.groupId);
+        let groupedWidgets = widgets
+          .filter((widget) => !standaloneWidgets.includes(widget))
+          .reduce((groups, widget) => {
+              if (widget.groupId in groups)
+                groups[widget.groupId].append(widget)
+              else
+                groups[widget.groupId] = [widget]
+            }, 
+            {}
+          );
+
+        widgetsToProcess = standaloneWidgets.filter((widget) => widgetTypeIsCorrect(widget.type.toLowerCase()));
+
+        for (let groupId in groupedWidgets){
+          let groupWidgets = groupedWidgets[groupId];
+          let maxSquareWidget = groupWidgets.reduce((prev, curr) => widgetSquare(prev) < widgetSquare(curr) ? curr : prev);
+
+          if (!widgetTypeIsCorrect(maxSquareWidget.type.toLowerCase()))
+            continue;
+
+          let maxLeftWidget = groupWidgets.reduce((prev, curr) => curr.bounds.left < prev.bounds.left ? curr : prev);
+          if (maxLeftWidget.id != maxSquareWidget.id && maxLeftWidget.bounds.left < maxSquareWidget.bounds.left)
+            continue;
+          let maxRightWidget = groupWidgets.reduce((prev, curr) => curr.bounds.right > prev.bounds.right ? curr : prev);
+          if (maxRightWidget.id != maxSquareWidget.id && maxRightWidget.bounds.right > maxSquareWidget.bounds.right)
+            continue;
+          let maxTopWidget = groupWidgets.reduce((prev, curr) => curr.bounds.top < prev.bounds.top ? curr : prev);
+          if (maxTopWidget.id != maxSquareWidget.id && maxTopWidget.bounds.top < maxSquareWidget.bounds.top)
+            continue;
+          let maxBottomWidget = groupWidgets.reduce((prev, curr) => curr.bounds.bottom > prev.bounds.bottom ? curr : prev);
+          if (maxBottomWidget.id != maxSquareWidget.id && maxBottomWidget.bounds.bottom > maxSquareWidget.bounds.bottom)
+            continue;
+          
+          widgetsToProcess.append(maxSquareWidget);
+        }
         
-        if (widgets.length > 1) {
-          let standaloneWidgets = widgets.filter((widget) => !('groupId' in widget) || !widget.groupId);
-          let groupedWidgets = widgets.filter((widget) => !standaloneWidgets.includes(widget));
-
-          if (standaloneWidgets.some((widget) => !standaloneWidgetTypeIsCorrect(widget.type.toLowerCase())))
-            return Promise.resolve([]);
-          if (groupedWidgets.some((widget) => !groupedWidgetTypeIsCorrect(widget.type.toLowerCase())))
-            return Promise.resolve([]);
-
-          let groupIds = groupedWidgets.map((widget) => widget.groupId).reduce((acc, curr) => acc.includes(curr) ? acc : [...acc, curr], []);
-          
-          let backgroundGroupWidgets = await Promise.all(groupIds.map(async (groupId) => {
-            let groupWidgets = await miro.board.widgets.get({groupId: groupId});
-            let maxSquareWidget = groupWidgets.reduce((prev, curr) => widgetSquare(prev) < widgetSquare(curr) ? curr : prev);
-
-            if (['shape', 'sticker'].indexOf(maxSquareWidget.type.toLowerCase()) < 0)
-              return null;
-            else{
-              let maxLeftWidget = groupWidgets.reduce((prev, curr) => curr.bounds.left < prev.bounds.left ? curr : prev);
-              if (maxLeftWidget.id != maxSquareWidget.id && maxLeftWidget.bounds.left < maxSquareWidget.bounds.left)
-                return null;
-              let maxRightWidget = groupWidgets.reduce((prev, curr) => curr.bounds.right > prev.bounds.right ? curr : prev);
-              if (maxRightWidget.id != maxSquareWidget.id && maxRightWidget.bounds.right > maxSquareWidget.bounds.right)
-                return null;
-              let maxTopWidget = groupWidgets.reduce((prev, curr) => curr.bounds.top < prev.bounds.top ? curr : prev);
-              if (maxTopWidget.id != maxSquareWidget.id && maxTopWidget.bounds.top < maxSquareWidget.bounds.top)
-                return null;
-              let maxBottomWidget = groupWidgets.reduce((prev, curr) => curr.bounds.bottom > prev.bounds.bottom ? curr : prev);
-              if (maxBottomWidget.id != maxSquareWidget.id && maxBottomWidget.bounds.bottom > maxSquareWidget.bounds.bottom)
-                return null;
-
-              return maxSquareWidget;
-            }
-          }));
-
-          backgroundGroupWidgets = backgroundGroupWidgets.filter((widget) => widget);
-          
-          let widgetsToProcess = [...standaloneWidgets, ...backgroundGroupWidgets];
-
+        if (widgetsToProcess.length)
           return Promise.resolve([{
             tooltip: tooltipLabel,
             svgIcon: icon,
-            onClick: async () => await flipWidgets(widgetsToProcess.map(widget => widget.id))
+            onClick: async () => await flipWidgets(widgetsToProcess)
           }]);
-        }
-        if (widgets.length == 1 && standaloneWidgetTypeIsCorrect(widgets[0].type.toLowerCase())){
-          return Promise.resolve([{
-						tooltip: tooltipLabel,
-						svgIcon: icon,
-						onClick: async () => await flipWidgets(widgets.map(widget => widget.id))
-          }]);
-        }
-				return Promise.resolve([]);
+        else
+          return Promise.resolve([]);
 			}
 		}
 	});
@@ -133,7 +123,6 @@ async function flipWidgets(widgets){
   let accessErrorWidgets = [];
 
   let updatedWidgets = await Promise.all(widgets.map( async (widget) => {
-    widget = (await miro.board.widgets.get({id: widget}))[0];
     for (key in widget.metadata){
       if (key == clientId)
         continue;
@@ -169,6 +158,7 @@ async function flipWidgets(widgets){
         widget.style.italic = 0;
         widget.style.bold = 0;
         widget.style.strike = 0;
+        widget.style.fontSize = 0;
         widget.text = '<p>🙈</p>';
       }else{  //otherwise this should be sticker
         widget.style.stickerBackgroundColor = '#6AC3FD';
