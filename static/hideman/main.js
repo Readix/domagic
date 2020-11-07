@@ -160,7 +160,7 @@ async function flipWidgets(widgets){
         widget.style.italic = 0;
         widget.style.bold = 0;
         widget.style.strike = 0;
-        widget.style.fontSize = Math.min([widget.bounds.width, widget.bounds.height]) * shapeSizeToFontSizeRatio;
+        widget.style.fontSize = Math.min(widget.bounds.width, widget.bounds.height) * shapeSizeToFontSizeRatio;
         widget.text = '<p>🙈</p>';
       }else{  //otherwise this should be sticker
         widget.style.stickerBackgroundColor = '#6AC3FD';
