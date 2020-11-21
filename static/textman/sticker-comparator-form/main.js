@@ -6,12 +6,23 @@ let markTag = (cat, event, label, val = 10) => {
 	})
 	console.log('MARK')
 }
+let transformWidgetFields = widget => {
+	// Transform from server format to miro format
+	widget.style = widget.style ? widget.style : {}
+	if (widget.type.toLowerCase() == 'sticker') {
+		widget.style.stickerBackgroundColor = widget.color
+	}
+	else {
+		widget.style.backgroundColor = widget.color
+	}
+	delete widget.color
+}
 $(document).ready(()=>{
 	miro.onReady(async () => {
 		miro.currentUser.getId().then(user_id =>
 			gtag('set', {'user_id': user_id}))
 		let widgets = await miro.board.selection.get()
-		markTag('StickerMan', 'use', widgets.length, 50)
+		markTag('TextMan', 'use', widgets.length, 50)
 		let timeStart = Date.now()
 		$('#send').click(async () => {
 			$('input[type=radio]').prop('disabled', true);
@@ -25,11 +36,10 @@ $(document).ready(()=>{
 			$('#send').fadeOut()
 			$('.loader').fadeIn()
 
-			markTag('StickerMan', 'group_by', $('input[name=criterion]:checked').val(), 50)
-			markTag('StickerMan', 'composition', $('input[name=composition]:checked').val(), 50)
-			markTag('StickerMan', 'do_magic', (Date.now() - timeStart) / 1000, 50)
+			markTag('TextMan', 'group_by', $('input[name=criterion]:checked').val(), 50)
+			markTag('TextMan', 'do_magic', (Date.now() - timeStart) / 1000, 50)
 			$.ajax({
-				url: '/plugin/stickerman/widgetComposer',
+				url: '/plugin/textman/clusterize',
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -37,8 +47,6 @@ $(document).ready(()=>{
 				data: JSON.stringify({
 					access_token: await miro.getToken(),
 					criterion: $('input[name=criterion]:checked').val(),
-					overparams: $('input[type=text]').val(),
-					composition: $('input[name=composition]:checked').val(),
 					widgets: widgets
 						.map((widget) => {
 							return {
@@ -54,39 +62,44 @@ $(document).ready(()=>{
 						})
 				}),
 				success: (res) => {
-					console.log(res)
-					//markTag('Компановка', 'Кол-во групп', ...)
+					console.log('From textman:')
+					res.widgets.forEach(w => console.log(w.x))
 					if (Number(res.code) == 1) {
-						miro.showErrorNotification('server error')
+						miro.showErrorNotification('Server error, please, try again later')
 						console.log(res.message)
 						miro.board.ui.closeModal()
 						return
 					}
 					let left = Math.min(...widgets.map(s => s.x))
 					let top = Math.min(...widgets.map(s => s.y))
+					let promises = []
 					res.widgets.forEach(widget => {
+						// shift to old area on board
 						widget.x += left
 						widget.y += top
-						curState = widgets.find((elem) => {
-							return elem.id == widget.id
-						})
-						miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
-						if (crit == 'tonality'){
-							data_to_update = {
-								id: widget.id,
-								style: {}
-							}
-							if (curState.type.toLowerCase() == 'sticker')
-								data_to_update.style.stickerBackgroundColor = widget.color
-							else
-								data_to_update.style.backgroundColor = widget.color
-							miro.board.widgets.update(data_to_update)
+						// curState = widgets.find((elem) => {
+						// 	return elem.id == widget.id
+						// })
+						transformWidgetFields(widget)
+						if (widget.type == '') widget.type = 'sticker'
+						if (widget.id == '') {
+							let promise = miro.board.widgets.create({type: widget.type, text: widget.text}).then(newWidgets => {
+								widget.id = newWidgets[0].id
+								miro.board.widgets.update(widget)
+							})
+							promises.push(promise)
+						}
+						else {
+							miro.board.widgets.update(widget)
+							// miro.board.widgets.transformDelta(widget.id, widget.x - curState.bounds.x, widget.y - curState.bounds.y)
 						}
 					})
-					miro.board.ui.closeModal()
-					if (!res.isRated) {
-						miro.board.ui.openBottomPanel('/static/stickerman/feedback-form', {'width': 324, 'height': 108})
-					}
+					Promise.all(promises).then(_ => {
+						miro.board.ui.closeModal()
+					})
+					// if (!res.isRated) {
+					// 	miro.board.ui.openBottomPanel('/static/textman/feedback-form', {'width': 324, 'height': 108})
+					// }
 				},
 				error: () => {
 					$('.loader').fadeOut()
