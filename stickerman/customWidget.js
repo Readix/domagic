@@ -5,6 +5,7 @@ class CustomWidget extends BaseWidget  {
     constructor(widget) {
         super(widget)
     }
+    // Удалить дублирование getter и setter (есть в BaseWidget)
     getters() {
         this.getter['id'] = () => this.widget.id
         this.getter['text'] = () => this.widget.text
@@ -22,8 +23,8 @@ class CustomWidget extends BaseWidget  {
         this.setter['y'] = y => this.widget.y = Number(y) + this.widget.height / 2
         this.setter['width'] = w => this.widget.width = Number(w)
         this.setter['height'] = h => this.widget.height = Number(h)
-        this.getter['type'] = t => this.widget.type = t
-        this.getter['size'] = () => this.widget.size
+        this.setter['type'] = t => this.widget.type = t
+        this.setter['size'] = () => this.widget.size
     }
 }
 

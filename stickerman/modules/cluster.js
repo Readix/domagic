@@ -1,4 +1,5 @@
 const BaseComponent = require('./bases/baseComponent');
+const BaseWidget = require('./bases/baseWidget');
 const compose = require('./compose');
 const splitter = require('./splitter')
 
@@ -37,18 +38,32 @@ class Cluster extends BaseComponent {
     async split(crit) {
         // crit - пока что только свойство виджета
         let key = crit.startsWith('text') ? crit.split('-')[0] : crit
-        console.log(key)
         this.subs = (await splitter[key](this.subs, crit))
             .map(group  => new Cluster(group));
     }
     lineUp(crit, desc = false) {
         if (typeof crit === 'undefined') crit = 'x'
+        if (crit == 'none') return
         this.subs.sort((sub1, sub2) => {
             return ((-1) ** desc) * (sub1.get(crit) - sub2.get(crit))
         })
     }
     compose(crit) {
         compose[crit](this.subs)
+    }
+    getWidgets() {
+        let arrays = this.subs.map(sub => {
+            if (sub instanceof(BaseWidget)) {
+                return [sub.widget]
+            }
+            if (sub instanceof(Cluster)) {
+                return this.subs.map(sub => sub.getWidgets())
+            }
+            else {
+                throw new Exception('Inknown subs type')
+            }
+        })
+        return Array.prototype.concat(...arrays)
     }
 }
 

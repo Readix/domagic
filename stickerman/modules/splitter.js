@@ -3,16 +3,24 @@ const Cluster = require('./cluster')
 const logger = require('../../src/logger')
 const { InternalServerError } = require('http-errors')
 const { RequestError } = require('request-promise/errors')
+const BaseWidget = require('./bases/baseWidget')
+const mirolib = require('./mirolib')
 
 const textmanUrl = 'http://localhost:8001'
 
 let dist = (a, b) => Math.abs(a - b)
 
+// for keyword clustering
+let colorsFor = {
+    undefined: mirolib.sticker.colors.all[0],
+    clusters: mirolib.sticker.colors.all.slice(1, -1)
+}
+
 function score_tonality(subs, _) {
     let inners = subs.map(sub => {
         return {id: sub.get('id'), text: sub.get('text')}
     })
-    console.log(inners)
+    // console.log(inners)
     let options = {
         method: 'POST',
         uri: textmanUrl + '/binary_ton',
@@ -25,7 +33,7 @@ function score_tonality(subs, _) {
             logger.error(options.data)
             throw RequestError()
         }
-        console.log('from textTonality:', options.data)
+        // console.log('from textTonality:', options.data)
         search_sub = function(group) {
             return group.map(id =>
                 subs.find(sub => sub.get('id') == id)
@@ -48,7 +56,7 @@ function choose_text_method(meth) {
         let inners = subs.map(sub => {
             return {id: sub.get('id'), text: sub.get('text')}
         })
-        console.log(inners, 'groups:', countGroups)
+        // console.log(inners, 'groups:', countGroups)
         let options = {
             method: 'POST',
             uri: textmanUrl + meth,
@@ -64,7 +72,7 @@ function choose_text_method(meth) {
                 throw RequestError()
             }
             groupsOfId = JSON.parse(options.data)
-            console.log('from textman:', groupsOfId)
+            // console.log('from textman:', groupsOfId)
             return groupsOfId.map(group =>
                 group.map(id =>
                     subs.find(sub => sub.get('id') == id)
@@ -108,11 +116,58 @@ async function by_property(subs, crit) {
                 }, {}))
 }
 
+function keywords(subs, _) {
+    let inners = subs.map(sub => {
+        return {id: sub.get('id'), text: sub.get('text')}
+    })
+    let options = {
+        method: 'POST',
+        uri: textmanUrl + '/by_keywords',
+        body: JSON.stringify(inners)
+    }
+    return rp(options)
+        .then(options => {
+            options = JSON.parse(options)
+            if (options.error){
+                logger.error(options.data)
+                throw RequestError('Request /by_keywords failed with error')
+            }
+            // console.log('from /by_keywords:', options.data)
+            let colorCounter = 0
+            let createKeygroup = (keywordCluster, color) => {
+                if (!color) color = colorsFor.clusters[colorCounter % colorsFor.clusters.length]
+                keyWidget = new BaseWidget()
+                keyWidget.set('type', 'sticker')
+                keyWidget.set('color', color)
+                keyWidget.set('text', keywordCluster['key'])
+                cluster = keywordCluster['data'].map(id => {
+                    sub = subs.find(sub => sub.get('id') == id)
+                    sub.set('color', color)
+                    return sub
+                })
+                colorCounter++
+                res = [keyWidget, ...cluster]
+                return res
+            }
+            let clusters = options.data['clusters'].map(keywordCluster => {
+                return createKeygroup(keywordCluster)
+            })
+            if (options.data['undefined'].length != 0) {
+                clusters = [
+                    createKeygroup({key: 'undefined', data: options.data['undefined']}, colorsFor.undefined),
+                    ...clusters
+                ]
+            }
+            return clusters
+        })
+}
+
 module.exports = {
     'text1': choose_text_method('/split_dbscum'),
     'text2': choose_text_method('/split_birch'),
     'text3': choose_text_method('/split_kmeans'),
     'tonality': score_tonality,
+    'keywords': keywords,
     'size': by_property,
     'color': by_property
 }

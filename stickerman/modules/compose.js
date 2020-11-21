@@ -1,7 +1,8 @@
+const { Module } = require('module')
 const hyper = require('./config')
 
 const rectCoef = 2 / 3 // w / h
-module.exports = {
+const composers = {
     horizontal: subs => {
         let cy = Math.max(...subs.map(sub => sub.get('height'))) / 2
         subs.reduce((acc, sub, i) => {
@@ -37,5 +38,21 @@ module.exports = {
             }
             sumHeight += lineHeight * (1 + hyper.indent)
         }
+    },
+    blocky_keygroup: subs => {
+        // sub[0] - main widget
+        let keySub = subs[0]
+        let inCluster = subs.slice(1)
+        if (inCluster.length == 0) return
+        composers.blocky(inCluster)
+        let minY = Math.min(...inCluster.map(sub => sub.get('y'))) 
+        keySub.set('y', minY - keySub.get('height') * (1 + hyper.indent))
+        let minX = Math.min(...inCluster.map(sub => sub.get('x')))
+        let commonWidth = 
+            Math.min(...inCluster.map(sub => sub.get('x'))) +
+            Math.max(...inCluster.map(sub => sub.get('x') + sub.get('width')))
+        keySub.set('x', minX + (commonWidth / 2) - (keySub.get('width') / 2))
     }
 }
+
+module.exports = composers

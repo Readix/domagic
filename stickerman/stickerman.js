@@ -35,6 +35,11 @@ class Stickerman {
             })
         })
     }
+    getWidgets() {
+        let arrays = this.levels[0].map(cluster => cluster.getWidgets())
+        return Array.prototype.concat(...arrays)
+        // return this.levels[this.levels.length - 1][0].getWidgets()  // recursive from root
+    }
 }
 
 
