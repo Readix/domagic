@@ -1,7 +1,7 @@
 {
 	"api_base": "https://api.miro.com/v1",
 	"plugins": [
-		"diceman"
+		"wordman"
 	],
 	"db_name": "smart-layout-dbfix",
 	"db_user": "sliderman",
