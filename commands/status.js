@@ -1,8 +1,8 @@
-const errh = require('./_errhandler')
 const db = require('../src/db')
 const config = require('../src/config.json')
-const {getPluginsList} = require('./_functions')
 const fs = require('fs')
+const path = require('path')
+const srcDir = path.join(__dirname, '..')
 
 
 if (require.main !== module) {
@@ -30,9 +30,16 @@ let dbSync = async (pluginName) => {
 }
 
 let frontExists = async (pluginName) => {
-    let srcDir = __dirname.split('/').slice(0, -1).join('/')
     let filenames = fs.readdirSync(srcDir + '/static/')
     if (filenames.some(name => name == pluginName)) {
+        return true 
+    }
+    return false
+}
+
+let backExists = async (pluginName) => {
+    let filenames = fs.readdirSync(srcDir + '/src/plugins/')
+    if (filenames.some(name => name == (pluginName + '.js'))) {
         return true 
     }
     return false
@@ -44,7 +51,8 @@ let statuses = {
     },
     special: {
         'database sync': dbSync, 
-        'frontend': frontExists
+        'frontend': frontExists,
+        'backend': backExists
     }
 }
 
