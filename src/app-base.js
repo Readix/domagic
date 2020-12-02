@@ -47,6 +47,31 @@ app.get('/', (req, res) => {
 	})*/
 })
 
+// For pay links (dev)
+var pass = 'f4574473-6290-4aa8-b5c9-8dc39e4aaf14';
+app.get('/pay_links', (req, res) => {
+	if (req.query.pass != pass) {
+		res.send('No access'); 
+	}
+	const config = require('./config.js')
+	let getLinks = []
+	config.PLUGINS.map(pluginName => {
+		let getLink = db.getPluginProps(pluginName).then(props => {
+			let href = `${config.BASE_URL}/genlink/${pluginName}?pass=${pass}`;//
+			return {name: pluginName, link: href}//`${pluginName}: <a href="${href}">install</a>`
+		})
+		getLinks.push(getLink)
+	})
+	Promise.all(getLinks).then(plugins => {
+		plugins = plugins.map(plugin => {
+			return `<span>${plugin.name}</span>
+			<a href="${plugin.link}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Сгенерировать уникальную ссылку</a>
+			<br>`
+		}).join('');
+		res.send(plugins);
+	})
+})
+
 app.post('/user/startSession', async (req, res) => {
 	try {
 		auth = await db.authorized(req.body.access_token)

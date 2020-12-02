@@ -36,6 +36,23 @@ config.plugins.forEach(pluginName => {
 		res.send({code: 0, message: 'Success'})
 		// res.sendStatus(500)
 	})
+	// Generate ay link
+	var pass = 'f4574473-6290-4aa8-b5c9-8dc39e4aaf14'; // @tmp
+	app.get('/genlink/' + pluginName, async (req, res) => {
+		if(req.query.pass != pass) {// @tmp
+			res.send('No access');
+		}
+		console.log('Generate pay key');
+		// let payKey = db.addWindow(pluginName);
+		let samplePayKey = 'paykey123'
+		const config = require('./config.js')
+		db.getPluginProps(pluginName).then(props => {
+			let link = 'https://miro.com/oauth/authorize?response_type=code' +
+				`&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}` +
+				`&state=${samplePayKey}`;
+			res.send(`<textarea style="width: 100%;" disabled>${link}</textarea>`);		
+		})
+	})
 })
 app.listen(port, () => {
 	db.init()
