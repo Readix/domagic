@@ -31,7 +31,6 @@ let buildSaveData = widgets => {
 app.post('/plugin/textman/clusterize', async (req, res) => {
 	try{
 		console.log('compose')
-		saveData = buildSaveData(req.body.widgets)
 		req.body.widgets = Object.values(req.body.widgets)
 		let skins = req.body.widgets.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
@@ -43,7 +42,6 @@ app.post('/plugin/textman/clusterize', async (req, res) => {
 		await sm.run(skins, setts)
 		widgets = sm.getWidgets()
 		res.return({
-			save: saveData,
 			response: {
 				code: 0,
 				message: 'Success',
@@ -54,7 +52,6 @@ app.post('/plugin/textman/clusterize', async (req, res) => {
 	}
 	catch (error) {
 		res.return({
-			save: saveData,
 			error: error
 		})
 	}

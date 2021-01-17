@@ -34,7 +34,6 @@ let buildSaveData = widgets => {
 app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 	try{
 		console.log('compose')
-		saveData = buildSaveData(req.body.widgets)
 		req.body.widgets = Object.values(req.body.widgets)
 		let skins = req.body.widgets.map(widget => new CustomWidget(widget))
 		let sm = new Stickerman()
@@ -45,7 +44,6 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 		let isRated = await db.isRated(req.body.access_token)
 		await sm.run(skins, setts)
 		res.return({
-			save: saveData,
 			response: {
 				code: 0,
 				message: 'Success',
@@ -56,7 +54,6 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 	}
 	catch (error) {
 		res.return({
-			save: saveData,
 			error: error
 		})
 	}

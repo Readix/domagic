@@ -96,19 +96,6 @@ send = async (access_token, response, info, sendData, reqData) => {
 	response.send(Object.assign(sendData, info, queryResult))
 }
 
-saveRequest = async (access_token, data, error_code) => {
-	return db.addRequest(access_token, JSON.stringify(data), error_code)
-		.then(res => {
-			console.log(res)
-			return true
-		})
-		.catch(err => {
-			log.error(err.stack)
-			console.log(err.message)
-			return false
-		})
-}
-
 app.use(/\/plugin\/.*/, async (req, res, next) => {
 	try {
 		switch (req.method.toLowerCase()) {
@@ -132,9 +119,6 @@ app.use(/\/plugin\/.*/, async (req, res, next) => {
 		res.return = result => {
 			try {
 				code = result.error ? 500 : result.response.code
-				if (result.save) {
-					saveRequest(body.access_token, result.save, code)
-				}
 				if (code == 500) {
 					log.error(result.error.stack)
 					console.error(result.error.message)
