@@ -29,7 +29,13 @@ config.plugins.forEach(pluginName => {
 		if (response) {
 			await db.addAuthorization(response, req.query.client_id)
 		}
-		res.send(pluginName + ' has been installed, open <br>response: ' + JSON.stringify(response))
+		res.render('index', {
+			pluginName: pluginName
+			// baseUrl: config.BASE_URL,
+			// oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
+			// 	&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
+		})
+		// res.send(pluginName + ' has been installed, open <br>response: ' + JSON.stringify(response))
 	})
 	// Check install for each plugin (use decorator)
 	app.get('/plugin/' + pluginName + '/auth', async (req, res) => {
