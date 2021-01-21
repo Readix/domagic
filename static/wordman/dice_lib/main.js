@@ -24,7 +24,7 @@ function createShape(canvasX, canvasY) {
   let appId = miro.getClientId();
   let shapeWidget = {
     type: 'shape',
-    text: 'default',
+    text: 'furniture',
     x: canvasX,
     y: canvasY,
     style: {
