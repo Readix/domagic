@@ -55,7 +55,7 @@ async function rollDice() {
   (await miro.board.selection.get()).forEach((widget) => {
     miro.board.widgets.update({
       id: widget['id'],
-      text: textArray[getRandomInt(0,5)]
+      text: textArray[getRandomInt(0,textArray.length - 1)]
     });
   });
   gah.pin()
