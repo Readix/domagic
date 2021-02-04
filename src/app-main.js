@@ -3,6 +3,7 @@ var config = require('./config.json');
 var { app, send } = require('./app-base');
 var db = require('./db');
 var api = require('./api');
+var admin = require('./admin');
 const port = config.port
 
 
@@ -24,10 +25,25 @@ config.plugins.forEach(pluginName => {
 			log.error(msg)
 			console.error(msg)
 		}
+		let isPaid = await db.isPaid(pluginName);
+		if (isPaid) {
+			let available = req.query.state && (await db.availablePaykeyWindow(req.query.state));
+			if (!available) {
+				res.render('message_page', {
+					header: 'Not avialable installation link',
+					message: 'The installation link is incorrect or has already been used'
+				});
+				return;
+			}
+		}
 		const response = await api.oauth.getToken(pluginName, req.query.code, req.query.client_id, secret.client_secret)
 		console.log('/oauth/ response = ', response)
 		if (response) {
-			await db.addAuthorization(response, req.query.client_id)
+			let installId = await db.addAuthorization(response, req.query.client_id);
+			console.log(installId);
+			if (isPaid) {
+				await db.addPayInstallation(req.query.state, installId);
+			}
 		}
 		res.render('index', {
 			pluginName: pluginName
@@ -43,6 +59,13 @@ config.plugins.forEach(pluginName => {
 		// res.sendStatus(500)
 	})
 })
+
+try {
+	admin.initAdminPanel(app);
+} catch (error) {
+	throw new Error('Admin panel initializing error:\n' + error);
+}
+
 app.listen(port, () => {
 	db.init()
 		.then(initMsg => {

@@ -1,26 +1,23 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const mustacheExpress = require('mustache-express')
+const exphbs = require('express-handlebars');
 
 const api = require('./api')
 const db = require('./db')
 const config = require('./config')
 
-const MiroWidget = require('../stickerman/miroWidget')
-const CustomWidget = require('../stickerman/customWidget')
-const Stickerman = require('../stickerman/stickerman')
-
 const app = express()
 
 const log = require('./logger')
-const { response } = require('express')
 
-app.engine('html', mustacheExpress())
+app.engine('hbs', exphbs({extname: '.hbs', defaultLayout: false}));
+app.set('view engine', 'hbs');
+
+app.set('views', __dirname + '/../views')
+
 app.use(cors())
 app.use('/static', express.static('static'))
-app.set('view engine', 'html')
-app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
@@ -45,6 +42,31 @@ app.get('/', (req, res) => {
 		oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
 			&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
 	})*/
+})
+
+// For pay links (dev)
+var pass = 'f4574473-6290-4aa8-b5c9-8dc39e4aaf14';
+app.get('/pay_links', (req, res) => {
+	if (req.query.pass != pass) {
+		res.send('No access'); 
+	}
+	const config = require('./config.js')
+	let getLinks = []
+	config.PLUGINS.map(pluginName => {
+		let getLink = db.getPluginProps(pluginName).then(props => {
+			let href = `${config.BASE_URL}/genlink/${pluginName}?pass=${pass}`;//
+			return {name: pluginName, link: href}//`${pluginName}: <a href="${href}">install</a>`
+		})
+		getLinks.push(getLink)
+	})
+	Promise.all(getLinks).then(plugins => {
+		plugins = plugins.map(plugin => {
+			return `<span>${plugin.name}</span>
+			<a href="${plugin.link}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Сгенерировать уникальную ссылку</a>
+			<br>`
+		}).join('');
+		res.send(plugins);
+	})
 })
 
 app.post('/user/startSession', async (req, res) => {

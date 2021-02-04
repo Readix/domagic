@@ -46,15 +46,17 @@ module.exports = {
 	},
 	addAuthorization: async function (auth, client_id) {
 		let query = `INSERT INTO Installations(user_id, team_id, client_id, scope, access_token, token_type) 
-								 VALUES('${auth.user_id}', '${auth.team_id}', '${client_id}', '${auth.scope}', '${auth.access_token}', '${auth.token_type}')
-								 ON CONFLICT ON CONSTRAINT unique_installation 
-								 DO UPDATE SET user_id='${auth.user_id}',
-															 team_id='${auth.team_id}',
-															 client_id='${client_id}',
-															 scope='${auth.scope}',
-															 access_token='${auth.access_token}',
-															 token_type='${auth.token_type}';`
+								VALUES('${auth.user_id}', '${auth.team_id}', '${client_id}', '${auth.scope}', '${auth.access_token}', '${auth.token_type}')
+								ON CONFLICT ON CONSTRAINT unique_installation
+								DO UPDATE SET user_id='${auth.user_id}',
+															team_id='${auth.team_id}',
+															client_id='${client_id}',
+															scope='${auth.scope}',
+															access_token='${auth.access_token}',
+															token_type='${auth.token_type}'
+								RETURNING "install_id";`;
 		return dbPool.query(query)
+			.then(res => res.rows[0]['install_id'])
 			.catch(err => {
 				throw dbErrorFormat('addAuthorization', query, Error(err))})
 	},
@@ -130,7 +132,7 @@ module.exports = {
 				throw dbErrorFormat('changePluginProps', query, Error(err))})
 	},
 	getPluginsList: async () => {
-		let query = `select name, client_id, client_secret from Plugins\
+		let query = `select name, client_id, client_secret, is_paid from Plugins\
 			where src = '${srcDir}'`
 		return dbPool.query(query)
 			.then(res => res.rows)
@@ -164,5 +166,45 @@ module.exports = {
 			.then(res=> res.rows.length > 0)
 			.catch(err => {
 				throw dbErrorFormat('authorized', query, Error(err))})
+	},
+	addPayWindow: async function (pluginName, info) {
+		let query = `INSERT INTO Paykeys("client_id", "info") values ((
+			select "client_id" from Plugins where "name" = '${pluginName}'), '${info}')
+			returning "paykey";`;
+		return dbPool.query(query)
+			.then(res => res.rows[0]['paykey'])
+			.catch(err => {
+				throw dbErrorFormat('addPayWindow', query, Error(err))})
+	},
+	availablePaykeyWindow: async function (paykey) {
+		let query = `select "install_id" is null as "available" from Paykeys
+			where "paykey" = '${paykey}';`;
+		return dbPool.query(query)
+			.then(res => res.rows[0]['available'])
+			.catch(err => {
+				throw dbErrorFormat('addPayWindow', query, Error(err))})
+	},
+	isPaid: async function (pluginName) {
+		let query = `select "is_paid" from Plugins where "name" = '${pluginName}';`;
+		return dbPool.query(query)
+			.then(res => res.rows[0]['is_paid'])
+			.catch(err => {
+				throw dbErrorFormat('isPaid', query, Error(err))})
+	},
+	addPayInstallation: async function (paykey, installId) {
+		let query = `update Paykeys set "install_id" = ${installId} where "paykey" = '${paykey}';`;
+		return dbPool.query(query)
+			.catch(err => {
+				throw dbErrorFormat('addAuthorization', query, Error(err))})
+	},
+	// admin's functions
+	getPaysInfo: async function (pluginName) {
+		let query = `SELECT pk."paykey", pk."info", pk."install_id" FROM Paykeys as pk
+					join Plugins as pl using("client_id")
+					where pl.name = '${pluginName}'`;
+		return dbPool.query(query)
+			.then(res => res.rows)
+			.catch(err => {
+				throw dbErrorFormat('getPaysInfo', query, Error(err))})
 	}
 }
