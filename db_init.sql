@@ -1,10 +1,13 @@
 -- cleanup database
+DROP TABLE IF EXISTS Paykeys;
 DROP TABLE IF EXISTS Requests;
 DROP TABLE IF EXISTS Configs;
 DROP TABLE IF EXISTS Plugins CASCADE;
 DROP TABLE IF EXISTS UserSessions;
 DROP TABLE IF EXISTS Installations;
 DROP TABLE IF EXISTS Feedbacks;
+-- create pgcrypto extension for uuid
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 -- creating tables
 -- table for storing all user`s feedback
 CREATE TABLE Feedbacks (
@@ -50,6 +53,21 @@ CREATE TABLE Installations (
     CONSTRAINT unique_installation UNIQUE (user_id, team_id,access_token, token_type, client_id)
 );
 CREATE INDEX i_i_user_team ON Installations(user_id, team_id);
+-- table for pay kays keeping
+CREATE TABLE Paykeys (
+    paykey_id       BIGSERIAL NOT NULL PRIMARY KEY,
+    client_id       BIGINT NOT NULL
+        REFERENCES Plugins(client_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    paykey          UUID DEFAULT gen_random_uuid() NOT NULL,
+    install_id      BIGINT NULL
+        REFERENCES Installations(install_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    info           VARCHAR(100) NULL
+);
+CREATE INDEX i_paykey ON Paykeys(paykey_id);
 -- table for storing user session timestamps
 CREATE TABLE UserSessions (
     session_id BIGSERIAL NOT NULL PRIMARY KEY,

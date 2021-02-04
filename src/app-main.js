@@ -3,6 +3,7 @@ var config = require('./config.json');
 var { app, send } = require('./app-base');
 var db = require('./db');
 var api = require('./api');
+var admin = require('./admin');
 const port = config.port
 
 
@@ -24,10 +25,25 @@ config.plugins.forEach(pluginName => {
 			log.error(msg)
 			console.error(msg)
 		}
+		let isPaid = await db.isPaid(pluginName);
+		if (isPaid) {
+			let available = req.query.state && (await db.availablePaykeyWindow(req.query.state));
+			if (!available) {
+				res.render('message_page', {
+					header: 'Not avialable installation link',
+					message: 'The installation link is incorrect or has already been used'
+				});
+				return;
+			}
+		}
 		const response = await api.oauth.getToken(pluginName, req.query.code, req.query.client_id, secret.client_secret)
 		console.log('/oauth/ response = ', response)
 		if (response) {
-			await db.addAuthorization(response, req.query.client_id)
+			let installId = await db.addAuthorization(response, req.query.client_id);
+			console.log(installId);
+			if (isPaid) {
+				await db.addPayInstallation(req.query.state, installId);
+			}
 		}
 		res.send(pluginName + ' has been installed, open <br>response: ' + JSON.stringify(response))
 	})
@@ -36,24 +52,14 @@ config.plugins.forEach(pluginName => {
 		res.send({code: 0, message: 'Success'})
 		// res.sendStatus(500)
 	})
-	// Generate ay link
-	var pass = 'f4574473-6290-4aa8-b5c9-8dc39e4aaf14'; // @tmp
-	app.get('/genlink/' + pluginName, async (req, res) => {
-		if(req.query.pass != pass) {// @tmp
-			res.send('No access');
-		}
-		console.log('Generate pay key');
-		// let payKey = db.addWindow(pluginName);
-		let samplePayKey = 'paykey123'
-		const config = require('./config.js')
-		db.getPluginProps(pluginName).then(props => {
-			let link = 'https://miro.com/oauth/authorize?response_type=code' +
-				`&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}` +
-				`&state=${samplePayKey}`;
-			res.send(`<textarea style="width: 100%;" disabled>${link}</textarea>`);		
-		})
-	})
 })
+
+try {
+	admin.initAdminPanel(app);
+} catch (error) {
+	throw new Error('Admin panel initializing error:\n' + error);
+}
+
 app.listen(port, () => {
 	db.init()
 		.then(initMsg => {

@@ -1,26 +1,23 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const mustacheExpress = require('mustache-express')
+const exphbs = require('express-handlebars');
 
 const api = require('./api')
 const db = require('./db')
 const config = require('./config')
 
-const MiroWidget = require('../stickerman/miroWidget')
-const CustomWidget = require('../stickerman/customWidget')
-const Stickerman = require('../stickerman/stickerman')
-
 const app = express()
 
 const log = require('./logger')
-const { response } = require('express')
 
-app.engine('html', mustacheExpress())
+app.engine('hbs', exphbs({extname: '.hbs', defaultLayout: false}));
+app.set('view engine', 'hbs');
+
+app.set('views', __dirname + '/../views')
+
 app.use(cors())
 app.use('/static', express.static('static'))
-app.set('view engine', 'html')
-app.set('views', __dirname + '/../views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
