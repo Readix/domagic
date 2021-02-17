@@ -14,36 +14,8 @@ function createEmoji(canvasX, canvasY) {
   emojiWidget.metadata[appId] = {
     isDice: true
   };
-  console.log(emojiWidget);
   return miro.board.widgets.create(emojiWidget);
 };
-
-
-function createShape(canvasX, canvasY) {
-  gah.event('WordMan', 'drag to board', '', 50)
-  let appId = miro.getClientId();
-  let shapeWidget = {
-    type: 'shape',
-    text: '👀',
-    x: canvasX,
-    y: canvasY,
-    style: {
-      textColor: '#050038',
-      backgroundColor: '#f2f2f2' ,
-      borderColor: '#000000',
-      borderWidth: 4.0
-    },
-    capabilities: {
-      editable: false
-    },
-    metadata: {}
-  };
-  shapeWidget.metadata[appId] = {
-    isDice: true
-  };
-  console.log(shapeWidget);
-  return miro.board.widgets.create(shapeWidget);
-}
 
 $(document).ready(() => {
   miro.onReady(async () => {
@@ -63,7 +35,7 @@ $(document).ready(() => {
         };
       },
       onDrop: (canvasX, canvasY) => {
-        createShape(canvasX, canvasY);
+        createEmoji(canvasX, canvasY);
       }
     }
     miro.board.ui.initDraggableItemsContainer(document.getElementById("root"), imageOptions);

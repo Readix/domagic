@@ -10,7 +10,11 @@ miro.onReady(async () => {
   await session.start();
   await auth.initAuth();
 	miro.currentUser.getId().then(user_id => gah.setUser(user_id));
+<<<<<<< Updated upstream
   gah.event(pluginData.gaPluginName, 'available', 'true', 10)
+=======
+  gah.event('HideMan', 'available', 'true', 10)
+>>>>>>> Stashed changes
   let allowedWidgetTypes = ['shape', 'sticker'];
 
   let widgetTypeIsCorrect = (widgetType) => allowedWidgetTypes.indexOf(widgetType) > -1;
@@ -18,6 +22,7 @@ miro.onReady(async () => {
 
 	miro.initialize({
 		extensionPoints: {
+<<<<<<< Updated upstream
 			getWidgetMenuItems: async (widgets) => {
         widgets = await miro.board.selection.get();
 
@@ -57,16 +62,65 @@ miro.onReady(async () => {
             continue;
           
           widgetsToProcess.push(maxSquareWidget);
+=======
+			getWidgetMenuItems: (widgets) => {
+        let widgetsToProcess = [];
+        let groupedWidgets = {};
+        let prevGroupId = undefined;
+        let prevGroupChanged = false;
+
+        for (const [i, widget] of widgets.entries()) {
+          if ('groupId' in widget && widget.groupId)
+            (groupedWidgets[widget.groupId] = groupedWidgets[widget.groupId] || []).push(widget);
+          else if (widgetTypeIsCorrect(widget.type.toLowerCase()))
+            widgetsToProcess.push(widget.id);
+
+          if (prevGroupId != widget.groupId)
+            prevGroupChanged = true;
+          
+          if ((prevGroupChanged || i == widgets.length - 1) && prevGroupId) {
+            let groupWidgets = groupedWidgets[prevGroupId];
+            let maxSquareWidget = groupWidgets.reduce((prev, curr) => widgetSquare(prev) < widgetSquare(curr) ? curr : prev);
+
+            if (!widgetTypeIsCorrect(maxSquareWidget.type.toLowerCase()))
+              continue;
+
+            let maxLeftWidget = groupWidgets.reduce((prev, curr) => curr.bounds.left < prev.bounds.left ? curr : prev);
+            if (maxLeftWidget.id != maxSquareWidget.id && maxLeftWidget.bounds.left < maxSquareWidget.bounds.left)
+              continue;
+            let maxRightWidget = groupWidgets.reduce((prev, curr) => curr.bounds.right > prev.bounds.right ? curr : prev);
+            if (maxRightWidget.id != maxSquareWidget.id && maxRightWidget.bounds.right > maxSquareWidget.bounds.right)
+              continue;
+            let maxTopWidget = groupWidgets.reduce((prev, curr) => curr.bounds.top < prev.bounds.top ? curr : prev);
+            if (maxTopWidget.id != maxSquareWidget.id && maxTopWidget.bounds.top < maxSquareWidget.bounds.top)
+              continue;
+            let maxBottomWidget = groupWidgets.reduce((prev, curr) => curr.bounds.bottom > prev.bounds.bottom ? curr : prev);
+            if (maxBottomWidget.id != maxSquareWidget.id && maxBottomWidget.bounds.bottom > maxSquareWidget.bounds.bottom)
+              continue;
+            
+            widgetsToProcess.push(maxSquareWidget);
+          }
+          prevGroupId = widget.groupId;
+>>>>>>> Stashed changes
         }
         
         if (widgetsToProcess.length)
           return Promise.resolve([{
+<<<<<<< Updated upstream
             tooltip: pluginData.tooltip,
             svgIcon: pluginData.svgIcon,
             onClick: async () => await flipWidgets(widgetsToProcess)
           }]);
         else
           return Promise.resolve([]);
+=======
+            tooltip: tooltipLabel,
+            svgIcon: icon,
+            onClick: async () => await flipWidgets(widgetsToProcess.map(widget => widget.id))
+          }]);
+
+				return Promise.resolve([]);
+>>>>>>> Stashed changes
 			}
 		}
 	});

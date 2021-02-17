@@ -155,9 +155,9 @@ module.exports = {
 				throw dbErrorFormat('isRated', query, Error(err))})
 	},
 	authorized: async (access_token, pluginName) => {
-		let query =`select * from installations as i, plugins as p
+		let query =`select * from installations as i join plugins as p
+			on i.client_id = p.client_id
 			where
-			i.client_id = p.client_id and
 			p.src = '${srcDir}' and
 			i.access_token = '${access_token}'`
 		if (pluginName) {

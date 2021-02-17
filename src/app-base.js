@@ -21,6 +21,39 @@ app.use('/static', express.static('static'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
+// redisStorage = require('connect-redis')(express.session),
+// redis = require('redis'),
+// client = redis.createClient()
+
+// // app.use(express.cookieDecoder());
+// app.use(express.session({
+// 	store: new redisStorage({
+// 		host: "localhost",
+// 		port: 6379,
+// 		client: client,
+// 		ttl: 3600000
+// 	})
+// }));
+
+
+const redis = require('redis')
+const session = require('express-session')
+
+let RedisStore = require('connect-redis')(session)
+let redisClient = redis.createClient()
+
+app.use(
+  session({
+    store: new RedisStore({
+		client: redisClient,
+		host: "localhost",
+		port: 6379,
+		ttl: 3600000
+	}),
+	secret: "likeyourmommy",
+	cookie: {secure: false}
+  })
+)
 
 // Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое)
 app.get('/', (req, res) => {
@@ -72,16 +105,21 @@ app.get('/pay_links', (req, res) => {
 app.post('/user/startSession', async (req, res) => {
 	try {
 		auth = await db.authorized(req.body.access_token)
+		req.session.access_token = req.body.access_token
+		console.log("before")
+		console.log(req.session)
 		if (!auth) {
 			msg = req.originalUrl + ': not authorized query, access_token: ' +
 				req.body.access_token
 			log.trace(msg)
 			console.log(msg)
-			res.send({code: 1, message: 'not authorized'})
-			return
+			req.session.save(() => res.send({code: 1, message: 'not authorized'}))
+			// res.send({code: 1, message: 'not authorized'})
+			// return
+		}else{
+			await db.startSession(req.body.access_token)
+			res.send({code: 0, message: 'Session started successfully'})
 		}
-		await db.startSession(req.body.access_token)
-		res.send({code: 0, message: 'Session started successfully'})
 	} catch (error) {
 		log.error(err.stack)
 		console.error(error.message)
@@ -120,6 +158,9 @@ send = async (access_token, response, info, sendData, reqData) => {
 
 app.use(/\/plugin\/.*/, async (req, res, next) => {
 	try {
+		console.log("after")
+		console.log(req.originalUrl)
+		console.log(req.session)
 		switch (req.method.toLowerCase()) {
 			case 'get': 
 				body = req.query; 
@@ -130,14 +171,14 @@ app.use(/\/plugin\/.*/, async (req, res, next) => {
 			default: throw new Error('Unknown query method type')
 		}
 		auth = await db.authorized(body.access_token, req.originalUrl.split('/')[2])
-		if (!auth) {
-			msg = req.originalUrl + ': not authorized query, access_token: ' +
-				body.access_token
-			log.trace(msg)
-			console.log(msg)
-			res.send({code: 201, message: 'Not authorized'})
-			return
-		}
+		// if (!auth) {
+		// 	msg = req.originalUrl + ': not authorized query, access_token: ' +
+		// 		body.access_token
+		// 	log.trace(msg)
+		// 	console.log(msg)
+		// 	res.send({code: 201, message: 'Not authorized'})
+		// 	return
+		// }
 		res.return = result => {
 			try {
 				code = result.error ? 500 : result.response.code
