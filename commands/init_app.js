@@ -2,7 +2,7 @@ const errh = require('./_errhandler')
 const config = require('../src/config.json')
 const { addPlugin, enablePlugin } = require('./_functions')
 
-const args = ['plugin_name', 'client_id', 'client_secret']
+const args = ['plugin_name', 'client_id', 'client_secret', 'is_paid']
 
 if (require.main !== module) {
     module.exports = {
@@ -25,7 +25,7 @@ process.argv.slice(2).forEach((val, idx, arr) => {
     values[name] = value
 })
 
-addPlugin(values.plugin_name, values.client_id, values.client_secret)
+addPlugin(values.plugin_name, values.client_id, values.client_secret, values.is_paid)
     .then(() => {
         console.log(`plugin '${values.plugin_name}' is added in database '${config.db_name}'`)
         enablePlugin(values.plugin_name)

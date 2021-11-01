@@ -6,7 +6,10 @@ const srcDir = path.join(__dirname, '..')
 /*Inside functions*/
 
 const error = {
-    expectedArg: (argname) => {throw Error('Expected argument: ' + argname)}
+    expectedArg: (argname) => {throw Error('Expected argument: ' + argname)},
+    invalidValue: (argname, validRange) => {
+        throw Error(`Invalid value for argument "${argname}". `+
+            `Valid range: ${validRange}` )},
 }
 
 const pluginFrontendExists = (pluginName) => {
@@ -19,18 +22,25 @@ const pluginFrontendExists = (pluginName) => {
 
 /*Outside functions*/
 
-const addPlugin = async (pluginName, clientId, clientSecret) => {
+const addPlugin = async (pluginName, clientId, clientSecret, isPaid) => {
     if (!pluginName) {
         error.expectedArg('plugin_name')
     }
     if (!clientId || !clientSecret) {
         error.expectedArg(clientId ? 'client_secret':'client_id')
     }
+    if (!isPaid) {
+        error.expectedArg('is_paid')
+    }
+    if (!['true', 'false'].includes(isPaid)) {
+        error.invalidValue('is_paid', 'true or false')
+    }
+    isPaid = isPaid == 'true'
     if (!pluginFrontendExists(pluginName)) {
         throw Error(`Folder for plugin '${pluginName}' does not exists in static/`)
     }
     await db.init()
-    return db.addPlugin(pluginName, clientId, clientSecret)
+    return db.addPlugin(pluginName, clientId, clientSecret, isPaid)
 }
 
 const removePlugin = async (pluginName) => {

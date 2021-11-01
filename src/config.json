@@ -1,11 +1,11 @@
 {
 	"api_base": "https://api.miro.com/v1",
 	"plugins": [
-		"stickerman"
+		"textman"
 	],
-	"db_name": "smart-layout",
-	"db_user": "postgres",
-	"db_pass": "qwerty96",
-	"port": "3000",
-	"base_url": "https://0a9f5e3db951.ngrok.io"
+	"db_name": "dm_test",
+	"port": "3001",
+	"base_url": "https://5061debe5998.ngrok.io",
+	"db_user": "devmaster",
+	"db_pass": "korpus2020"
 }

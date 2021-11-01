@@ -1,0 +1,179 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Balsamiq Sans', cursive;
+    color: #36335E;
+}
+
+#block-main {
+    padding-right: 100px;
+    padding-left: 100px;
+}
+
+#block-1 {
+    height: fit-content;
+    padding-top: 80px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: xx-large;
+}
+
+#mainlogo {
+    width: 100%;
+}
+
+#arrow-container {
+    height: 80px;
+}
+
+#arrow {
+    width: max-content;
+    margin: 50px auto auto auto;
+    margin-left: auto;
+    margin-right: auto;
+    transition: 0.4s;
+}
+
+#arrow:hover {
+    margin-top: 40px;
+}
+
+#block-2 {
+    /* height: 800px; */
+    padding-top: 120px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#block-3 {
+    text-align: center;
+    padding-top: 120px;
+    height: 500px;
+}
+
+#block-3 {
+    text-align: center;
+}
+
+/* tab content */
+
+.list-group-item:first-child {
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+}
+.list-group-item:last-child {
+    border-bottom-left-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+    border-width: 5px 5px 5px 5px;
+}
+.list-group-item {
+    /* width: 80%; */
+
+    border-color: #36335E;
+    /* font-size: x-large; */
+    font-size: 1.3vmax;
+    border-width: 5px 5px 5px 5px;
+    margin-bottom: 20px;
+    border-radius: 1.5rem;
+
+    min-width: fit-content;
+}
+.list-group-item.active {
+    border-color: #36335E;
+    background-color: #36335E;
+    color: white;
+}
+
+.tab-content {
+    min-height: 500px;
+
+    border: 5px solid #36335E;
+    border-radius: 1.5rem;
+    padding: 50px;
+    
+    text-align: left;
+    font-size: 1vmax;
+
+    background-color: white;
+}
+
+.tab-content .plugin-preview-svg {
+    width: 10%;
+    margin-bottom: 4%;
+}
+
+.tab-content .plugin-preview-gif {
+    width: 100%;
+}
+
+.tab-content .plugin-link {
+    float: right;
+    font-size: 1.3vmax;
+}
+
+/* stars */
+
+#star-1 {
+    position: absolute;
+    margin-left: 60%;
+    animation: pulse1 5s ease-in-out alternate;
+    animation-fill-mode: forwards;
+}
+#star-2 {
+    margin-top: 60%;
+    animation: pulse2 3s ease-in-out alternate;
+    animation-fill-mode: forwards;
+}
+#star-3 {
+    margin-top: 40%;
+    margin-left: 40%;
+    /* animation-delay: 3s; */
+    animation: pulse3 4s ease-in-out alternate;
+    animation-fill-mode: forwards;
+}
+
+@keyframes pulse1 {
+    from {
+        transform: scale(0);
+    }
+    75% {
+        transform: scale(1.2);
+    }
+    to {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse2 {
+    from {
+        transform: scale(0);
+    }
+    75% {
+        transform: scale(1.2);
+    }
+    to {
+        transform: scale(.6);
+    }
+}
+
+@keyframes pulse3 {
+    from {
+        transform: scale(0);
+    }
+    75% {
+        transform: scale(1.2);
+    }
+    to {
+        transform: scale(.8);
+    }
+}
+
+/* social networks */
+
+#social-networks img {
+    width: 10%;
+    max-width: 100px;
+    margin: 50px;
+}
