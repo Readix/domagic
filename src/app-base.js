@@ -36,8 +36,8 @@ const descriptions = {
 app.get('/', (req, res) => {
 	const config = require('./config.js')
 	const pluginsInfo = config.PLUGINS.map(pluginName => {
-        try {
-            return db.getPluginProps(pluginName).then(props => {
+        return db.getPluginProps(pluginName).then(props => {
+            try {
                 let href = 'https://miro.com/oauth/authorize?response_type=code' +
                     `&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
                 const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
@@ -47,11 +47,11 @@ app.get('/', (req, res) => {
                     link: href,
                     description: descriptions[pluginName.toLowerCase()]
                 }
-            })
-        } catch (error) {
-            console.log(`Ошибка при извлечении информации о плагине из БД. Plugin name = ${pluginName}`)
-            return undefined
-        }
+            } catch (error) {
+                console.log(`Ошибка при извлечении информации о плагине из БД. Plugin name = ${pluginName}`)
+                return undefined
+            }
+        })
 	})
 
 	Promise.all(pluginsInfo).then(plugins => {
