@@ -11,7 +11,13 @@ const app = express()
 
 const log = require('./logger')
 
-app.engine('hbs', exphbs({extname: '.hbs', defaultLayout: false}));
+app.engine('hbs', exphbs({
+    extname: '.hbs', 
+    defaultLayout: false,
+    helpers: {
+        ifeq: (a, b, options) => a == b ? options.fn(this) : options.inverse(this)
+    } 
+}));
 app.set('view engine', 'hbs');
 
 app.set('views', __dirname + '/../views')
@@ -21,27 +27,31 @@ app.use('/static', express.static('static'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
+const descriptions = {
+    diceman: 'Diceman имитирует игральную кость на доске. Виджет добавляется на доску и показывает картинку с гранью игральной кости от 1 до 6 по клику на иконку, доступную через контекстное меню.',
+    hideman: 'Hideman — это плагин, который делает скрытым/видимым контент на стикерах. Управление видимостью будет доступно только создателю стикера. Когда контент на стикере будет скрыт, на нем будет отображаться emoji.',
+    stickerman: 'Stickerman кластеризует стикеры и фигуры по цвету и размеру, расставляя их по горизонтали, вертикали или в блоках.',
+}
 
-// Не нужно для плагина (можно будет лендос сюда закинуть или чтото такое)
 app.get('/', (req, res) => {
 	const config = require('./config.js')
-	let getLinks = []
-	config.PLUGINS.map(pluginName => {
-		let getLink = db.getPluginProps(pluginName).then(props => {
+	const pluginsInfo = config.PLUGINS.map(pluginName => {
+		return db.getPluginProps(pluginName).then(props => {
 			let href = 'https://miro.com/oauth/authorize?response_type=code' +
 				`&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
-			return `${pluginName}: <a href="${href}">install</a>`
+            const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
+			return {
+                name: pluginName,
+                publicName: nameWithCapitalLetter,
+                link: href,
+                description: descriptions[pluginName.toLowerCase()]
+            }
 		})
-		getLinks.push(getLink)
 	})
-	Promise.all(getLinks).then(links => {
-		res.send(links.join('\n'))
+
+	Promise.all(pluginsInfo).then(plugins => {
+        res.render('landing', { plugins })
 	})
-	/*res.render('index', {
-		baseUrl: config.BASE_URL,
-		oauthUrl: `https://miro.com/oauth/authorize?response_type=code\
-			&client_id=${pluginProps.client_id}&redirect_uri=${config.BASE_URL}/oauth` // здесь ...oauth?pay_key=<key>
-	})*/
 })
 
 // For pay links (dev)
