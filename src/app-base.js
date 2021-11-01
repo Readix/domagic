@@ -36,20 +36,26 @@ const descriptions = {
 app.get('/', (req, res) => {
 	const config = require('./config.js')
 	const pluginsInfo = config.PLUGINS.map(pluginName => {
-		return db.getPluginProps(pluginName).then(props => {
-			let href = 'https://miro.com/oauth/authorize?response_type=code' +
-				`&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
-            const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
-			return {
-                name: pluginName,
-                publicName: nameWithCapitalLetter,
-                link: href,
-                description: descriptions[pluginName.toLowerCase()]
-            }
-		})
+        try {
+            return db.getPluginProps(pluginName).then(props => {
+                let href = 'https://miro.com/oauth/authorize?response_type=code' +
+                    `&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
+                const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
+                return {
+                    name: pluginName,
+                    publicName: nameWithCapitalLetter,
+                    link: href,
+                    description: descriptions[pluginName.toLowerCase()]
+                }
+            })
+        } catch (error) {
+            console.log(`Ошибка при извлечении информации о плагине из БД. Plugin name = ${pluginName}`)
+            return undefined
+        }
 	})
 
 	Promise.all(pluginsInfo).then(plugins => {
+        plugins = plugins.filter(pluginInfo => pluginInfo != undefined)
         res.render('landing', { plugins })
 	})
 })
