@@ -79,19 +79,26 @@ app.get('/pay_links', (req, res) => {
 	})
 })
 
+/**
+ * Метод устарел
+ * TODO: JWT
+ */
 app.post('/user/startSession', async (req, res) => {
 	try {
-		auth = await db.authorized(req.body.access_token)
-		if (!auth) {
-			msg = req.originalUrl + ': not authorized query, access_token: ' +
-				req.body.access_token
-			log.trace(msg)
-			console.log(msg)
-			res.send({code: 1, message: 'not authorized'})
-			return
-		}
-		await db.startSession(req.body.access_token)
+        console.log('\x1b[33m', 'Используется устаревший метод: startSession', '\x1b[0m')
 		res.send({code: 0, message: 'Session started successfully'})
+
+		// auth = await db.authorized(req.body.access_token)
+		// if (!auth) {
+		// 	msg = req.originalUrl + ': not authorized query, access_token: ' +
+		// 		req.body.access_token
+		// 	log.trace(msg)
+		// 	console.log(msg)
+		// 	res.send({code: 1, message: 'not authorized'})
+		// 	return
+		// }
+		// await db.startSession(req.body.access_token)
+		// res.send({code: 0, message: 'Session started successfully'})
 	} catch (error) {
 		log.error(err.stack)
 		console.error(error.message)
@@ -99,19 +106,26 @@ app.post('/user/startSession', async (req, res) => {
 	}
 })
 
+/**
+ * Метод устарел
+ * TODO: JWT
+ */
 app.post('/user/endSession', async (req, res) => {
 	try {
-		auth = await db.authorized(req.body.access_token)
-		if (!auth) {
-			msg = req.originalUrl + ': not authorized query, access_token: ' +
-				req.body.access_token
-			log.trace(msg)
-			console.log(msg)
-			res.send({code: 1, message: 'not authorized'})
-			return
-		}
-		await db.endSession(req.body.access_token)
+        console.log('\x1b[33m', 'Используется устаревший метод: endSession', '\x1b[0m')
 		res.send({code: 0, message: 'Session ended successfully'})
+
+		// auth = await db.authorized(req.body.access_token)
+		// if (!auth) {
+		// 	msg = req.originalUrl + ': not authorized query, access_token: ' +
+		// 		req.body.access_token
+		// 	log.trace(msg)
+		// 	console.log(msg)
+		// 	res.send({code: 1, message: 'not authorized'})
+		// 	return
+		// }
+		// await db.endSession(req.body.access_token)
+		// res.send({code: 0, message: 'Session ended successfully'})
 	} catch (error) {
 		log.error(error.stack)
 		console.error(error.message)
@@ -130,24 +144,26 @@ send = async (access_token, response, info, sendData, reqData) => {
 
 app.use(/\/plugin\/.*/, async (req, res, next) => {
 	try {
-		switch (req.method.toLowerCase()) {
-			case 'get': 
-				body = req.query; 
-				break;
-			case 'post': 
-				body = req.body; 
-				break;
-			default: throw new Error('Unknown query method type')
-		}
-		auth = await db.authorized(body.access_token, req.originalUrl.split('/')[2])
-		if (!auth) {
-			msg = req.originalUrl + ': not authorized query, access_token: ' +
-				body.access_token
-			log.trace(msg)
-			console.log(msg)
-			res.send({code: 201, message: 'Not authorized'})
-			return
-		}
+        /** Miro изменили авторизацию, она теперь работает по JWT */
+
+		// switch (req.method.toLowerCase()) {
+		// 	case 'get': 
+		// 		body = req.query; 
+		// 		break;
+		// 	case 'post': 
+		// 		body = req.body; 
+		// 		break;
+		// 	default: throw new Error('Unknown query method type')
+		// }
+		// auth = await db.authorized(body.access_token, req.originalUrl.split('/')[2])
+		// if (!auth) {
+		// 	msg = req.originalUrl + ': not authorized query, access_token: ' +
+		// 		body.access_token
+		// 	log.trace(msg)
+		// 	console.log(msg)
+		// 	res.send({code: 201, message: 'Not authorized'})
+		// 	return
+		// }
 		res.return = result => {
 			try {
 				code = result.error ? 500 : result.response.code
