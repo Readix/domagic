@@ -20,7 +20,6 @@ miro.onReady(async () => {
 				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify({
-				access_token: await miro.getToken(),
 				criterion: $('input[name=criterion]:checked').val(),
 				overparams: $('input[type=text]').val(),
 				composition: $('input[name=composition]:checked').val(),
@@ -71,9 +70,12 @@ miro.onReady(async () => {
 					}
 				})
 				miro.board.ui.closeModal()
-				if (!res.isRated) {
-					miro.board.ui.openBottomPanel('/static/stickerman/feedback-form', {'width': 324, 'height': 108})
-				}
+                
+                /* Метод /rate устарел, раскоментить когда метод будет обновлен */
+				
+                // if (!res.isRated) {
+				// 	miro.board.ui.openBottomPanel('/static/stickerman/feedback-form', {'width': 324, 'height': 108})
+				// }
 			},
 			error: () => {
 				$('.loader').fadeOut()

@@ -1,3 +1,8 @@
+/**
+ * Не использовать этот модуль
+ * TODO: Перейти на JWT
+ */
+
 var auth = {};
 auth.token = undefined;
 auth.response = false;//{code: 201, message: 'Something goes wrong, try again later'}

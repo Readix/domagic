@@ -1,3 +1,7 @@
+/**
+ * Метод /rate устарел, обновить модуль когда функционал /rate будет восстановлен
+ */
+
 let _gradesEnum = {Awful: -2, Bad: -1, Neutral: 0, Good: 1, Awesome: 2}
 $(document).ready(() => {
 
@@ -44,7 +48,6 @@ $(document).ready(() => {
 					'Content-Type': 'application/json'
 				},
 				data: JSON.stringify({
-					access_token: (await miro.getToken()),
 					grade: grade,
 					comment: $('textarea').val()
 				}),

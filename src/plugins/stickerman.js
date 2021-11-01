@@ -59,18 +59,25 @@ app.post('/plugin/stickerman/widgetComposer', async (req, res) => {
 	}
 })
 
+/**
+ * Метод устарел (access_token уже не приходит)
+ * TODO: JWT
+ */
 app.post('/rate', async (req, res) => {
 	try{
-		if ((typeof  req.body.grade === 'undefined') && (typeof  req.body.comment === 'undefined')) {
-			await db.addFeedback(req.body.access_token, false, null, null);
-		}
-		else if (typeof  req.body.comment === 'undefined') {
-			await db.addFeedback(req.body.access_token, true, req.body.grade, null);
-		}
-		else {
-			await db.addFeedback(req.body.access_token, true, req.body.grade, req.body.comment);
-		}
-		res.sendStatus(202);
+        console.log('\x1b[33m', 'Используется устаревший метод: /rate', '\x1b[0m')
+		res.sendStatus(200);
+
+		// if ((typeof  req.body.grade === 'undefined') && (typeof  req.body.comment === 'undefined')) {
+		// 	await db.addFeedback(req.body.access_token, false, null, null);
+		// }
+		// else if (typeof  req.body.comment === 'undefined') {
+		// 	await db.addFeedback(req.body.access_token, true, req.body.grade, null);
+		// }
+		// else {
+		// 	await db.addFeedback(req.body.access_token, true, req.body.grade, req.body.comment);
+		// }
+		// res.sendStatus(202);
 	}
 	catch (error) {
 		log.error(error.stack)

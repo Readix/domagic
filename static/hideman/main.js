@@ -2,13 +2,7 @@ let shapeSizeToFontSizeRatio = 1 / 3;
 
 gah.wait(5, 20 * 60, () => gah.event(pluginData.gaPluginName, 'use_often', '', 500))
 miro.onReady(async () => {
-  await auth.initToken();
-  if (!auth.token) {
-    console.log(pluginData.gaPluginName + ': no token');
-    return;
-  }
   await session.start();
-  await auth.initAuth();
 	miro.currentUser.getId().then(user_id => gah.setUser(user_id));
   gah.event(pluginData.gaPluginName, 'available', 'true', 10)
   let allowedWidgetTypes = ['shape', 'sticker'];
@@ -73,9 +67,6 @@ miro.onReady(async () => {
 })
 
 async function flipWidgets(widgets){
-  let isAuth = await auth.checkAuth(true);
-  if (!isAuth) return;
-
   gah.pin()
   gah.event(pluginData.gaPluginName, 'use', widgets.length, 50)
   let clientId = await miro.getClientId();
