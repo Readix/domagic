@@ -31,5 +31,12 @@ viewBox="0 0 55.333 55.333" style="enable-background:new 0 0 55.333 55.333;" xml
 </g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>`;
 pluginData.librarySvgIcon = pluginData.toolbarSvgIcon;
 
-
-
+pluginData.redirect_uri = undefined
+pluginData.initRedirectUri = () => {
+    fetch('/redirect_uri?plugin_name=diceman')
+        .then(async response => {
+            if (response.error) return;
+            const parsed = await response.json()
+            pluginData.redirect_uri = parsed.redirect_uri
+        })
+}

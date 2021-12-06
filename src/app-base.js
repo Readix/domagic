@@ -27,6 +27,13 @@ app.use('/static', express.static('static'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
+const makeRedirectUri = (baseUrl, pluginName) =>
+    `${baseUrl}/oauth_${pluginName}`
+
+const makeInstallationUrl = (clientId, baseUrl, pluginName) =>
+    'https://miro.com/oauth/authorize?response_type=code' +
+    `&client_id=${clientId}&redirect_uri=${makeRedirectUri(baseUrl, pluginName)}`
+
 const descriptions = {
     diceman: 'Diceman имитирует игральную кость на доске. Виджет добавляется на доску и показывает картинку с гранью игральной кости от 1 до 6 по клику на иконку, доступную через контекстное меню.',
     hideman: 'Hideman — это плагин, который делает скрытым/видимым контент на стикерах. Управление видимостью будет доступно только создателю стикера. Когда контент на стикере будет скрыт, на нем будет отображаться emoji.',
@@ -38,9 +45,8 @@ app.get('/', (req, res) => {
 	const pluginsInfo = config.PLUGINS.map(pluginName => {
         return db.getPluginProps(pluginName).then(props => {
             try {
-                let href = 'https://miro.com/oauth/authorize?response_type=code' +
-                    `&client_id=${props.client_id}&redirect_uri=${config.BASE_URL}/oauth_${pluginName}`
-                const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
+                const href = makeInstallationUrl(props.client_id, config.BASE_URL, pluginName)
+                const nameWithCapitalLetter = pluginName.charAt(0).toUpperCase() + pluginName.slice(1)
                 return {
                     name: pluginName,
                     publicName: nameWithCapitalLetter,
@@ -147,6 +153,17 @@ send = async (access_token, response, info, sendData, reqData) => {
 	console.log(queryResult);
 	response.send(Object.assign(sendData, info, queryResult))
 }
+
+app.get('/redirect_uri', async (req, res) => {
+    const pluginName = req.query.plugin_name.toLowerCase()
+    if (config.PLUGINS.indexOf(pluginName) < 0) {
+        res.status(404)
+        res.send({ error: true, message: `Plugin ${pluginName} not found` })
+        return
+    }
+    const redirect_uri = makeRedirectUri(config.BASE_URL, pluginName)
+    res.send({ redirect_uri })
+})
 
 app.use(/\/plugin\/.*/, async (req, res, next) => {
 	try {
