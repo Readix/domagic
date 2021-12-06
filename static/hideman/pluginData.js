@@ -5,5 +5,14 @@ pluginData.svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http:
 pluginData.toolbarSvgIcon = ''
 pluginData.librarySvgIcon = '';
 
+pluginData.redirect_uri = undefined
+pluginData.initRedirectUri = () => {
+    fetch('/redirect_uri?plugin_name=hideman')
+        .then(async response => {
+            if (response.error) return;
+            const parsed = await response.json()
+            pluginData.redirect_uri = parsed.redirect_uri
+        })
+}
 
 

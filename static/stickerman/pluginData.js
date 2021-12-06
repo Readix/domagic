@@ -10,5 +10,15 @@ pluginData.svgIcon = `<g id="slidermanico-layer">
 pluginData.toolbarSvgIcon = ''
 pluginData.librarySvgIcon = '';
 
+pluginData.redirect_uri = undefined
+pluginData.initRedirectUri = () => {
+    fetch('/redirect_uri?plugin_name=stickerman')
+        .then(async response => {
+            if (response.error) return;
+            const parsed = await response.json()
+            pluginData.redirect_uri = parsed.redirect_uri
+        })
+}
+
 
 
